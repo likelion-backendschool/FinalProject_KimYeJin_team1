@@ -78,42 +78,45 @@ repository
 
 **3. 체크리스트**
 
--[ ] 회원가입 폼을 이용하여 회원가입 폼 입력 페이지를 구현한다.
-    - GET /member/join
-    - Form : username, password, passwordConfirm, email, nickname
-    - valid 조건 : username, password, passwordConfirm, email 필수
-      username, email 유니크
-      nickname 미입력시 authlevel 3, 입력시 authlevel 4
--[ ] 회원가입 시 authLevel이 지정되며, 회원가입 축하메일을 발송 후, 로그인한다.
-    - POST /member/join
--[ ] 회원정보수정 폼을 이용하여 회원정보 수정 페이지를 구현한다.
-    - GET /member/modify
-    - Form : email, nickname
-    - valid 조건 : email 필수, 유니크
-      nickname 미입력시 authlevel 3, 입력시 authlevel 4
--[ ] 회원정보 수정시 변경된 정보가 반영되며, 회원정보 페이지로 이동한다.
-    - POST /member/modify
--[ ] 비밀번호수정 폼을 이용하여 비밀번호 변경 페이지를 구현한다.
-    - GET /member/modifyPassword
-    - Form : oldPassword, password, passwordConfirm
-    - valid 조건 : oldPassword, password, passwordConfirm 필수
--[ ] 비밀번호 수정시 변경된 정보가 반영되며, 회원정보 페이지로 이동한다.
-    - POST /member/modifyPassword
--[ ] 로그인 폼을 이용하여 로그인 페이지를 구현한다.
-    - GET /member/login
-    - Form : username, password
--[ ] 로그아웃 페이지를 구현한다.
-    - GET /member/logout
--[ ] 아이디찾기 폼을 이용하여 아이디찾기 페이지를 구현한다.
-    - GET /member/findUsername
-    - Form : email
--[ ] email로 부터 가져온 아이디를 화면에 출력한다.
-    - POST /member/findUsername
--[ ] 비밀번호 찾기폼을 이용하여 비밀번호찾기 페이지를 구현한다.
-    - GET /member/findPassword
-    - Form : username, email
--[ ] 입력한 email로 임시비밀번호를 발송한다.
-    - POST /member/findPassword
+
+
+- [ ] 회원가입 폼을 이용하여 회원가입 폼 입력 페이지를 구현한다.
+  - GET /member/join
+  - Form : username, password, passwordConfirm, email, nickname
+  - valid 조건 : username, password, passwordConfirm, email 필수
+    username, email 유니크
+    nickname 미입력시 authlevel 3, 입력시 authlevel 4
+- [ ] 회원가입 시 authLevel이 지정되며, 회원가입 축하메일을 발송 후, 로그인한다.
+  - POST /member/join
+- [ ] 회원정보수정 폼을 이용하여 회원정보 수정 페이지를 구현한다.
+  - GET /member/modify
+  - Form : email, nickname
+  - valid 조건 : email 필수, 유니크
+    nickname 미입력시 authlevel 3, 입력시 authlevel 4
+- [ ] 회원정보 수정시 변경된 정보가 반영되며, 회원정보 페이지로 이동한다.
+  - POST /member/modify
+- [ ] 비밀번호수정 폼을 이용하여 비밀번호 변경 페이지를 구현한다.
+  - GET /member/modifyPassword
+  - Form : oldPassword, password, passwordConfirm
+  - valid 조건 : oldPassword, password, passwordConfirm 필수
+- [ ] 비밀번호 수정시 변경된 정보가 반영되며, 회원정보 페이지로 이동한다.
+  - POST /member/modifyPassword
+- [ ] 로그인 폼을 이용하여 로그인 페이지를 구현한다.
+  - GET /member/login
+  - Form : username, password
+- [ ] 로그아웃 페이지를 구현한다.
+  - GET /member/logout
+- [ ] 아이디찾기 폼을 이용하여 아이디찾기 페이지를 구현한다.
+  - GET /member/findUsername
+  - Form : email
+- [ ] email로 부터 가져온 아이디를 화면에 출력한다.
+  - POST /member/findUsername
+- [ ] 비밀번호 찾기폼을 이용하여 비밀번호찾기 페이지를 구현한다.
+  - GET /member/findPassword
+  - Form : username, email
+- [ ] 입력한 email로 임시비밀번호를 발송한다.
+  - POST /member/findPassword
+
 
 #### **<post 도메인>**
 
