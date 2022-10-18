@@ -15,8 +15,18 @@ public class TestInitData {
     @Bean
     CommandLineRunner initData(MemberService memberService, PasswordEncoder passwordEncoder) {
         return args -> {
-            Member member1 = memberService.join(new MemberDto("user1", "1234", "user1@test.com","author1"));
-            Member member2 = memberService.join(new MemberDto("user2", "1234", "user2@test.com","author2"));
+            Member member1 = Member.builder()
+                    .username("user1")
+                    .password("1234")
+                    .email("kyj011202@naver.com")
+                    .nickname(null)
+                    .build();
+            Member member2 = Member.builder()
+                    .username("user2")
+                    .password("1234")
+                    .email("kyj2212@gmail.com")
+                    .nickname("author2")
+                    .build();
         };
     }
 }
