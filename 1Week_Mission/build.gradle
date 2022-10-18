@@ -30,6 +30,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	// spring security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -43,6 +44,9 @@ dependencies {
 	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
 	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}"
 	implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.8.0")
+
+	// email
+	implementation 'org.springframework.boot:spring-boot-starter-mail:2.7.3'
 
 	// lombok
 	compileOnly 'org.projectlombok:lombok'
