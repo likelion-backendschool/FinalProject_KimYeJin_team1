@@ -1,0 +1,18 @@
+server:
+  port: 8080
+spring:
+  thymeleaf:
+    cache: false
+    prefix: file:src/main/resources/templates/
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
+  datasource:
+    url: jdbc:mariadb://t2.yejin.site:3306/wbook_dev?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul
+    username: yejin
+    password: yejin1234
+  jpa:
+    hibernate:
+      ddl-auto: create

@@ -1,0 +1,12 @@
+spring:
+  profiles:
+    active: dev
+    include:
+      - base-addi
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+logging:
+  level:
+    com.ll.exam.wbook.app: debug
+#custom:
+#  genFileDirPath: c:/temp/app10
