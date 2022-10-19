@@ -196,15 +196,21 @@ repository
 
 
 
-### [필수,추가 기능]
+### [필수기능]
 
-- [ ]  회원가입, 회원정보수정, 로그인, 로그아웃
-- [ ]  아이디찾기, 비밀번호 찾기
-- [ ]  글 작성, 글 수정, 글 리스트, 글 삭제
+- [x]  회원가입, 회원정보수정, 로그인, 로그아웃
+- [x]  아이디찾기, 비밀번호 찾기
+- [ ]  글 작성, 글 수정, 글 리스트, 글 삭제 --> 구현 중 (미완)
+
+
+### [추가기능]
 - [ ]  상품 등록, 상품 수정, 상품 리스트, 상품 상세페이지
 
 
 ### 1주차 미션 요약
+
+필수기능 3가지 중 회원가입 도메인에 대한 2가지는 구현 완료
+post 도메인에 대한 필수기능은 주요 기능 CRUD 까지 구현 하였으나, 해시태그, 토스트에디터는 미완입니다.
 
 ---
 
@@ -463,35 +469,120 @@ repository
 
 
 - [ ] 로그인 폼을 이용하여 로그인 페이지를 구현한다.
+    1) Spring Security를 이용하여, form 로그인을 지정
+    ```java
+    // ... 생략 ... 
+        http
+            .formLogin()
+            .loginPage("/member/login");
+    ```
+    
+    인가 필요한 path와 허용해야 하는 path를 분리하여 filter 적용
+    ``` java
+         private static final String[] AUTH_ALL_LIST = {
+                "/member/join/**",
+                "/member/login/**",
+                "/member/findUsername/**",
+                "/member/findPassword/**",
+                "/"
+        }; // 모두 허용
 
-- [ ] 로그아웃 페이지를 구현한다.
+        private static final String[] AUTH_AUTHENTICATED_LIST = {
+                "/member/**",
+                "/post/**",
+        }; // 인가 필요
+        // ... 생략 ...
+        http
+            .authorizeRequests()
+            .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+            .antMatchers(AUTH_ALL_LIST).permitAll()
+            .antMatchers(AUTH_AUTHENTICATED_LIST).authenticated();
+    ```
+    
+    2) 회원가입시 바로 로그인 가능하도록 서비스에 login 메소드 지정
+    
+    임의로 회원가입시 Spring security를 통해 로그인을 불러올 수 있도록 UsernamePasswordAuthenticationToken을 바로 생성하도록 설정
+    ```java
+        public void login(String username, String password) {
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
+        SecurityContextHolder.getContext().setAuthentication(token);
+    }
+    ```
+
+- [ ] 로그아웃 페이지를 구현한다. 
+    Spring security를 이용
 
 - [ ] 아이디찾기 폼을 이용하여 아이디찾기 페이지를 구현한다.
-
 - [ ] email로 부터 가져온 아이디를 화면에 출력한다.
+    
+    1) 아이디의 존재 여부를 ResponseEntity의 형태로 응답하여 ajax로 화면에 ID를 표출하도록 한다.
+    
+    ```java
+        @PostMapping("/findUsername")
+        public ResponseEntity<ResultResponse> findUsername(ModelAndView mav, String email){
+        Optional<Member> oMember = memberService.findByEmail(email);
+        if(oMember.isPresent()){
+            return ResponseEntity.ok(ResultResponse.of("FIND_USERNAME_OK","해당하는 ID가 존재합니다." ,oMember.get().getUsername()));
+        }
+        return ResponseEntity.ok(ResultResponse.of("FIND_USERNAME_FAIL","해당하는 ID가 없습니다.",false));
+    }
+    ```
 
 - [ ] 비밀번호 찾기폼을 이용하여 비밀번호찾기 페이지를 구현한다.
+    1) 아이디의 존재 여부를 ResponseEntity의 형태로 응답하여 ajax로 존재여부를 표출하도록 한다.
+    ```java
+        @PostMapping("/findPassword")
+        public ResponseEntity<ResultResponse> findUsername(ModelAndView mav, String username, String email){
+        Optional<Member> oMember = memberService.findByUsername(username);
+        if(!oMember.isPresent()){
+            return ResponseEntity.ok(ResultResponse.of("FIND_PWD_FAIL","해당하는 ID가 없습니다.",username));
+        }
+        memberService.setTempPassword(oMember.get());
+        return ResponseEntity.ok(ResultResponse.of("FIND_PWD_OK","%s로 임시 비밀번호를 전송하였습니다.".formatted(email),username));
+
+    }
+    ```
+    
+
 
 - [ ] 입력한 email로 임시비밀번호를 발송한다.
+    1) 임시비밀번호 전송을 위하여 tmp 비밀번호를 생성하는 로직 구현
+    
+    랜덤한 UUID를 생성하여 비밀번호 생성하여 이전에 작성한 EmailService를 이용하여 메일 전송
+    ```java
+        public void setTempPassword(Member member) {
 
+        String subject = "[wbook] %s 님의 임시 비밀번호 입니다.".formatted(member.getUsername());
+        String tempPassword = UUID.randomUUID().toString().replace("-","");
+        member.setEncryptedPassword(passwordEncoder.encode(tempPassword));
+        String text = """
+                        임시 비밀번호 : %s
+                        위의 임시 비밀번호로 로그인 후, 비밀번호를 변경해 주세요.
+                        """.formatted(tempPassword);
 
+        emailService.sendMessage(member.getEmail(),subject,text);
+    }
+    ```
+    아래와 같이 임시 비밀번호가 전송되는 것을 볼 수 있다.
+    ![img2](https://i.imgur.com/LbDOy6E.png)
 
 
 
 
 **[특이사항]**
 
-구현 과정에서 아쉬웠던 점 / 궁금했던 점을 정리합니다.
+### 아쉬운점/ 궁금한점
 
-- 추후 리팩토링 시, 어떤 부분을 추가적으로 진행하고 싶은지에 대해 구체적으로 작성해주시기 바랍니다.
+1. @Lob 에너테이션
+- Post의 content를 구성할 때, 큰 데이터를 위한 @Lob 에너테이션의 사용을 알게되었는데, 실제 @Lob 에너테이션의 장단점, 특징 등을 더 분석하여 리팩토링 하고 싶습니다.
 
-  **참고: [Refactoring]**
+2. 구현 완성도
+- 초기에 모든 코드를 백지에서 작성하려고 하다보니, 시간적으로 부족하였습니다. 기존에 작성했던 코드를 적절히 리팩토링 해보는 방법이 더 맞았던 것 같아 구현을 완성하지 못해 아쉬움이 남습니다. 
+- 다음 미션에서는 코드를 리팩토링 하는 형식으로 진행하여 더 완성도 있는 미션을 진행하겠습니다.
 
-    - Refactoring 시 주로 다루어야 할 이슈들에 대해 리스팅합니다.
-    - 1차 리팩토링은 기능 개발을 종료한 후, 스스로 코드를 다시 천천히 읽어보면서 진행합니다.
-    - 2차 리팩토링은 피어리뷰를 통해 전달받은 다양한 의견과 피드백을 조율하여 진행합니다.
 
-### 추가적으로 구현하고 싶은 부분
+
+### Refcatoring 시 추가적으로 구현하고 싶은 부분
 
 <Member 도메인>
 1. 회원가입 시 이메일 인증
