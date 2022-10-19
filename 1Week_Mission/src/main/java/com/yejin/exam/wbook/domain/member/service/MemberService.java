@@ -4,6 +4,7 @@ import com.yejin.exam.wbook.domain.member.dto.MemberDto;
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.member.entity.MemberRole;
 import com.yejin.exam.wbook.domain.member.repository.MemberRepository;
+import com.yejin.exam.wbook.domain.post.service.PostService;
 import com.yejin.exam.wbook.global.exception.EntityAlreadyExistException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +29,8 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final PostService postService;
 
-    @Transactional
     public Member join(MemberDto memberDto) {
         if (memberRepository.existsByUsername(memberDto.getUsername())) {
             throw new EntityAlreadyExistException(USERNAME_ALREADY_EXIST);
@@ -49,7 +50,7 @@ public class MemberService {
         // 축하 이메일 발송
         String subject = "[wbook] 회원가입을 축하합니다.";
         String text = "%s 님의 회원가입을 축하합니다.".formatted(member.getUsername());
-        emailService.sendMessage(member.getEmail(), subject,text);
+        //emailService.sendMessage(member.getEmail(), subject,text);
         // 로그인
        return member;
     }
@@ -116,5 +117,8 @@ public class MemberService {
     }
 
 
-
+    public void delete(Member member) {
+        postService.findByAuthor(member).forEach(p -> postService.delete(p));
+        memberRepository.delete(member);
+    }
 }

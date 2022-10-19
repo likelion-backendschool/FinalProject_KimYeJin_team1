@@ -1,15 +1,14 @@
 package com.yejin.exam.wbook.domain.member.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.yejin.exam.wbook.domain.post.entity.Post;
 import com.yejin.exam.wbook.global.base.entity.BaseEntity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.*;
 import java.io.File;
+import java.util.List;
 
 @Entity
 @Setter

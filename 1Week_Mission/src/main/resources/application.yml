@@ -5,8 +5,11 @@ spring:
       - base-addi
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
+  output:
+    ansi-enabled: always
 logging:
   level:
-    com.ll.exam.wbook.app: debug
+    com.yejin.exam.wbook: debug
+
 #custom:
 #  genFileDirPath: c:/temp/app10
