@@ -7,4 +7,6 @@ public interface PostRepositoryQuerydsl {
     List<Post> getPostsByUsername(String username);
 
     List<Post> getPostsByKeyword(String keyword);
+
+    List<Post> getPostsOrderByCreatedTime();
 }

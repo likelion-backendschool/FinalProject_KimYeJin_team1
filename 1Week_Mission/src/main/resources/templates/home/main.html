@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns:th="http://www.thymeleaf.org"
+        layout:decorate="~{layout}">
+
+<div layout:fragment="content" class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-15 mb-lg-0 mb-4">
+            <div class="card z-index-2 h-100">
+                <div class="card-header pb-0 pt-3 bg-transparent">
+                </div>
+                <div class="card-body p-3">
+                    <div class="chart" style="height: 100%;">
+                        <h2>최신 글 100개</h2>
+                        <hr/>
+
+                        <table class="table">
+                            <thead>
+                            <tr class="text-center">
+                                <th>글 작성자</th>
+                                <th> 제목 </th>
+                                <th> 생성일자 </th>
+                                <th> 수정일자 </th>
+                            </tr>
+                            </thead>
+                            <tbody class="tbody">
+                            <tr th:each="post : ${posts}" class="text-center datas">
+                                <td>
+                                    <a th:href="@{#}" th:text="${post.author.nickname}"></a>
+                                </td>
+                                <td>
+                                    <a th:text="${post.subject}"></a>
+                                </td>
+                                <td>
+                                    <a th:href="@{#}" th:text="${post.createDate}"></a>
+                                </td>
+                                <td>
+                                    <a th:href="@{#}" th:text="${post.modifyDate}"></a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

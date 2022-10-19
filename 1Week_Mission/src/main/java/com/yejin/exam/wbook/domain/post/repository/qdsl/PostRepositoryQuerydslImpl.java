@@ -45,4 +45,15 @@ public class PostRepositoryQuerydslImpl implements PostRepositoryQuerydsl {
                 .where(postHashTag.keyword.content.eq(keyword))
                 .fetch();
     }
+
+    @Override
+    public List<Post> getPostsOrderByCreatedTime() {
+
+        return jpaQueryFactory
+                .select(post)
+                .from(post)
+                .orderBy(post.createDate.desc())
+                .limit(100)
+                .fetch();
+    }
 }

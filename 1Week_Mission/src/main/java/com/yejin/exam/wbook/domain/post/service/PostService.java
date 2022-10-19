@@ -1,6 +1,7 @@
 package com.yejin.exam.wbook.domain.post.service;
 
 import com.yejin.exam.wbook.domain.member.entity.Member;
+import com.yejin.exam.wbook.domain.member.service.MemberService;
 import com.yejin.exam.wbook.domain.post.entity.Post;
 import com.yejin.exam.wbook.domain.post.entity.PostHashTag;
 import com.yejin.exam.wbook.domain.post.repository.PostRepository;
@@ -80,4 +81,16 @@ public class PostService {
     }
 
 
+    public List<Post> getPostsOrderByCreatedTime() {
+        return postRepository.getPostsOrderByCreatedTime();
+    }
+
+    public List<Post> findByAuthor(Member member) {
+        return postRepository.findByAuthor(member);
+    }
+
+    public void delete(Post post) {
+
+        postRepository.delete(post);
+    }
 }

@@ -19,7 +19,7 @@ import javax.persistence.ManyToOne;
 @ToString(callSuper = true)
 public class Post extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private Member author;
 
     @Column(nullable = false)
@@ -28,7 +28,6 @@ public class Post extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
     private String contentHTML;
 
     public Post(long id) {

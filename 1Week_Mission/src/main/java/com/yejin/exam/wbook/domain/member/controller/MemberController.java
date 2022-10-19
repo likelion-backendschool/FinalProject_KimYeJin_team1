@@ -37,7 +37,7 @@ public class MemberController {
     }
 
     @PostMapping(value = "/join")
-    public ModelAndView join(@Valid @RequestBody MemberDto memberDto, ModelAndView mav, BindingResult bindingResult) {
+    public ModelAndView join(@Valid MemberDto memberDto, ModelAndView mav, BindingResult bindingResult) {
         mav.setViewName("member/join_form");
 
         if (bindingResult.hasErrors()) {
@@ -47,14 +47,14 @@ public class MemberController {
             bindingResult.addError(new FieldError("member", "PwdConfirm","2개의 패스워드가 일치하지 않습니다."));
             return mav;
         }
-        final boolean isRegistered = memberService.join(memberDto) == null;
+        Member member = memberService.join(memberDto);
 
+        final boolean isRegistered = member != null;
         if (isRegistered) {
             memberService.login(memberDto.getUsername(), memberDto.getPassword());
             mav.addObject("msg", "회원가입을 축하합니다.");
             mav.addObject("url", "/");
             mav.setViewName("alert");
-            mav.setViewName("redirect:/");
             return mav;
         } else {
             mav.addObject("msg", "회원가입이 불가합니다.");
@@ -86,7 +86,7 @@ public class MemberController {
     }
 
     @PostMapping("/modify")
-    public ModelAndView modify(Principal principal, ModelAndView mav, @Valid @RequestBody MemberModifyDto memberModifyDto, BindingResult bindingResult) {
+    public ModelAndView modify(Principal principal, ModelAndView mav, @Valid MemberModifyDto memberModifyDto, BindingResult bindingResult) {
         Member member = memberService.findByUsername(principal.getName()).orElseThrow(()->new RuntimeException());
         if (bindingResult.hasErrors()) {
             mav.addObject("member",member);
@@ -107,7 +107,7 @@ public class MemberController {
     }
 
     @PostMapping("/modifyPassword")
-    public ModelAndView modifyPassword(Principal principal, ModelAndView mav, @Valid @RequestBody MemberModifyPasswordDto memberModifyPasswordDto, BindingResult bindingResult){
+    public ModelAndView modifyPassword(Principal principal, ModelAndView mav, @Valid MemberModifyPasswordDto memberModifyPasswordDto, BindingResult bindingResult){
         mav.setViewName("member/profile_form");
         Member member = memberService.findByUsername(principal.getName()).orElseThrow(()->new RuntimeException());
         if(memberModifyPasswordDto.getOldPassword() == memberModifyPasswordDto.getPassword()){
@@ -132,7 +132,7 @@ public class MemberController {
     public ResponseEntity<ResultResponse> findUsername(ModelAndView mav, String email){
         Optional<Member> oMember = memberService.findByEmail(email);
         if(oMember.isPresent()){
-            return ResponseEntity.ok(ResultResponse.of("FIND_USERNAME_OK","해당하는 ID가 존재합니다." ,oMember.get().getEmail()));
+            return ResponseEntity.ok(ResultResponse.of("FIND_USERNAME_OK","해당하는 ID가 존재합니다." ,oMember.get().getUsername()));
         }
         return ResponseEntity.ok(ResultResponse.of("FIND_USERNAME_FAIL","해당하는 ID가 없습니다.",false));
     }
@@ -145,12 +145,19 @@ public class MemberController {
     public ResponseEntity<ResultResponse> findUsername(ModelAndView mav, String username, String email){
         Optional<Member> oMember = memberService.findByUsername(username);
         if(!oMember.isPresent()){
-            return ResponseEntity.ok(ResultResponse.of("FIND_PWD_FAIL","해당하는 ID가 없습니다.",false));
+            return ResponseEntity.ok(ResultResponse.of("FIND_PWD_FAIL","해당하는 ID가 없습니다.",username));
         }
         memberService.setTempPassword(oMember.get());
-        return ResponseEntity.ok(ResultResponse.of("FIND_PWD_OK","임시 비밀번호를 전송하였습니다.",false));
+        return ResponseEntity.ok(ResultResponse.of("FIND_PWD_OK","%s로 임시 비밀번호를 전송하였습니다.".formatted(email),username));
 
     }
 
+
+    @GetMapping("/delete")
+    public String delete(Principal principal){
+        Member member = memberService.findByUsername(principal.getName()).orElseThrow(()->new RuntimeException());
+        memberService.delete(member);
+        return "redirect:/";
+    }
 
 }

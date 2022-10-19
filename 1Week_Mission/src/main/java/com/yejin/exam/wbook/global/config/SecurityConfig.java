@@ -47,6 +47,8 @@ public class SecurityConfig {
     private static final String[] AUTH_ALL_LIST = {
             "/member/join/**",
             "/member/login/**",
+            "/member/findUsername/**",
+            "/member/findPassword/**",
             "/"
     }; // 모두 허용
     private static final String[] AUTH_ADMIN_LIST = {
