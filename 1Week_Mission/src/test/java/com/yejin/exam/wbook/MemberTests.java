@@ -48,10 +48,10 @@ public class MemberTests {
     }
 
     @Test
-    @DisplayName("임시 비밀번호 테스트")
+    @DisplayName("임시 비밀번호 발송 테스트")
     public void test_tempPassword(){
+        System.out.println("[member] member : "+memberService.findByUsername("user1").get());
         memberService.setTempPassword(memberService.findByUsername("user1").get());
     }
-
 
 }
