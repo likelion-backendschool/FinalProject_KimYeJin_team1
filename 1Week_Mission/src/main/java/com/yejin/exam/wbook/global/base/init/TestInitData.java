@@ -19,13 +19,13 @@ public class TestInitData {
                     .username("user1")
                     .password("1234")
                     .email("kyj011202@naver.com")
-                    .nickname(null)
+                    .nickname("author1")
                     .build();
             Member member2 = Member.builder()
                     .username("user2")
                     .password("1234")
                     .email("kyj2212@gmail.com")
-                    .nickname("author2")
+                    .nickname(null)
                     .build();
         };
     }

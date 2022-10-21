@@ -3,6 +3,7 @@ spring:
     active: dev
     include:
       - base-addi
+      - email
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
   output:
