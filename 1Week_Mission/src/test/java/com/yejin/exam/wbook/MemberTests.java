@@ -54,4 +54,12 @@ public class MemberTests {
         memberService.setTempPassword(memberService.findByUsername("user1").get());
     }
 
+    @Test
+    @DisplayName("비밀번호 찾기 에서 기존 비밀번호와 다르면 fail")
+    public void test__oldPassword__failed(){
+       boolean isModifiable = memberService.modifyPassword(memberService.findByUsername("user1").get(),"4321","4321");
+
+        assertThat(isModifiable).isFalse();
+    }
+
 }
