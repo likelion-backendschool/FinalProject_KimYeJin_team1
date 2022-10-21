@@ -25,13 +25,14 @@ public class MemberSecurityService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
 
-    @Transactional
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
+        log.debug("[login] username : " + username);
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
 
+        log.debug("[login] member password : " + member.getPassword());
         List<GrantedAuthority> authorities = new ArrayList<>();
         if (member.getAuthLevel().equals(MemberRole.ROLE_MEMBER)) {
             authorities.add(new SimpleGrantedAuthority(MemberRole.ROLE_MEMBER.name()));

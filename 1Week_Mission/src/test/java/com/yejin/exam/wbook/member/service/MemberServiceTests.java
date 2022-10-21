@@ -1,7 +1,6 @@
-package com.yejin.exam.wbook;
+package com.yejin.exam.wbook.member.service;
 
 import com.yejin.exam.wbook.domain.member.dto.MemberDto;
-import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.member.entity.MemberRole;
 import com.yejin.exam.wbook.domain.member.repository.MemberRepository;
 import com.yejin.exam.wbook.domain.member.service.EmailService;
@@ -18,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
-public class MemberTests {
+public class MemberServiceTests {
 
     @Autowired
     private MemberService memberService;
