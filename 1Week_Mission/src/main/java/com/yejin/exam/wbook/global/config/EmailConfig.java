@@ -24,11 +24,9 @@ import java.util.Properties;
 public class EmailConfig {
     @NotBlank
     private String host;
-    private String protocol;
     private int port;
     private String username;
     private String password;
-    private String defaultEncoding;
 
     @Bean
     public JavaMailSender getJavaMailSender() {
@@ -40,7 +38,7 @@ public class EmailConfig {
         mailSender.setPassword(getPassword());
 
         Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", getProtocol());
+        props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.debug", "true");
