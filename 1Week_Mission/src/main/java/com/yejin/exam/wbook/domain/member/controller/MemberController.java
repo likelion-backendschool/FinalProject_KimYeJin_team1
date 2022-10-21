@@ -135,9 +135,9 @@ public class MemberController {
     public ResponseEntity<ResultResponse> findUsername(ModelAndView mav, String email){
         Optional<Member> oMember = memberService.findByEmail(email);
         if(oMember.isPresent()){
-            return ResponseEntity.ok(ResultResponse.of("FIND_USERNAME_OK","해당하는 ID가 존재합니다." ,oMember.get().getUsername()));
+            return ResponseEntity.ok(ResultResponse.successOf("FIND_USERNAME_OK","해당하는 ID가 존재합니다." ,oMember.get().getUsername()));
         }
-        return ResponseEntity.ok(ResultResponse.of("FIND_USERNAME_FAIL","해당하는 ID가 없습니다.",false));
+        return ResponseEntity.ok(ResultResponse.failOf("FIND_USERNAME_FAIL","해당하는 ID가 없습니다.",false));
     }
 
     @GetMapping("/findPassword")
