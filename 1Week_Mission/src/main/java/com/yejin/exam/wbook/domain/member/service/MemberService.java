@@ -50,7 +50,7 @@ public class MemberService {
         // 축하 이메일 발송
         String subject = "[wbook] 회원가입을 축하합니다.";
         String text = "%s 님의 회원가입을 축하합니다.".formatted(member.getUsername());
-        emailService.sendMessage(member.getEmail(), subject,text);
+       // emailService.sendMessage(member.getEmail(), subject,text);
         // 로그인
        return member;
     }
