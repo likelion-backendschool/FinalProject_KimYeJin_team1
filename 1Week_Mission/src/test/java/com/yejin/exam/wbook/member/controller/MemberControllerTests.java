@@ -93,8 +93,6 @@ public class MemberControllerTests {
     @DisplayName("")
     void test__modifyPassword() throws Exception{
 
-
-
         // When
         ResultActions resultActions = mvc
                 .perform(
