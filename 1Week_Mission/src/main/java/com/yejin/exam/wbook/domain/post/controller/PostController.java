@@ -37,8 +37,8 @@ public class PostController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/write")
-    public String showWrite() {
-        return "post/write";
+    public String showWrite(PostDto postDto) {
+        return "post/post_form";
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -46,7 +46,6 @@ public class PostController {
     public String write(Principal principal, @Valid PostDto postDto) {
         Member member = memberService.findByUsername(principal.getName()).orElseThrow();
         Post post = postService.write(member, postDto.getSubject(), postDto.getContent(),postDto.getHashTagsStr());
-
 
         String msg = "%d번 게시물이 작성되었습니다.".formatted(post.getId());
         msg = Util.url.encode(msg);
@@ -57,6 +56,7 @@ public class PostController {
     @GetMapping("/{id}")
     public String showDetail(Model model, @PathVariable Long id) {
         Post post= postService.getForPrintPostById(id);
+
 
         model.addAttribute("post", post);
 
