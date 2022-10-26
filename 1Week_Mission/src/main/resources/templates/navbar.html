@@ -26,6 +26,10 @@
                         <i class="fa fa-user me-sm-1"></i>
                         <span class="d-sm-inline d-none">글쓰기</span>
                     </a>
+                    <a sec:authorize="isAuthenticated()" th:href="@{/post/list}" class="nav-link text-black font-weight-bold px-0">
+                        <i class="fa fa-user me-sm-1"></i>
+                        <span class="d-sm-inline d-none">글목록</span>
+                    </a>
                     <a sec:authorize="isAuthenticated()" th:href="@{/member/logout}" class="nav-link text-black font-weight-bold px-0">
                         <i class="fa fa-user me-sm-1"></i>
                         <span class="d-sm-inline d-none">로그아웃</span>
