@@ -23,8 +23,8 @@ import static javax.persistence.FetchType.LAZY;
 @ToString(callSuper = true)
 public class CartItem extends BaseEntity {
     @ManyToOne(fetch = LAZY)
-    private Member member;
+    private Member buyer;
     @ManyToOne(fetch = LAZY)
-    private ProductOption productOption;
+    private Product product;
     private int quantity; // 쇼핑몰에서 보유한 물건 개수
 }
