@@ -4,6 +4,8 @@ import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.post.entity.Post;
 import com.yejin.exam.wbook.domain.post.entity.PostHashTag;
 import com.yejin.exam.wbook.domain.post.entity.PostKeyword;
+import com.yejin.exam.wbook.domain.post.service.PostHashTagService;
+import com.yejin.exam.wbook.domain.post.service.PostKeywordService;
 import com.yejin.exam.wbook.domain.product.entity.Product;
 import com.yejin.exam.wbook.domain.product.entity.ProductTag;
 import com.yejin.exam.wbook.domain.product.repository.ProductRepository;
@@ -26,7 +28,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final PostKeywordService postKeywordService;
     private final ProductTagService productTagService;
-    private final PostTagService postTagService;
+    private final PostHashTagService postTagService;
 
     @Transactional
     public Product create(Member author, String subject, int price, long postKeywordId, String productTagContents) {
