@@ -1,6 +1,7 @@
 package com.yejin.exam.wbook.domain.cart.service;
 
 import com.yejin.exam.wbook.domain.cart.entity.CartItem;
+import com.yejin.exam.wbook.domain.cart.repository.CartItemRepository;
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.product.entity.Product;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ public class CartService {
     public void addItem(Member member, Product product, int quantity) {
         CartItem cartItem = CartItem.builder()
                 .member(member)
-                .product-(product)
+                .product(product)
                 .quantity(quantity)
                 .build();
 
