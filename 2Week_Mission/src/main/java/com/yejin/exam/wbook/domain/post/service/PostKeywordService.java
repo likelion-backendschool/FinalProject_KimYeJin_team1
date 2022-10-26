@@ -1,10 +1,12 @@
 package com.yejin.exam.wbook.domain.post.service;
 
+import com.yejin.exam.wbook.domain.post.entity.Post;
 import com.yejin.exam.wbook.domain.post.entity.PostKeyword;
 import com.yejin.exam.wbook.domain.post.repository.PostKeywordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,5 +34,16 @@ public class PostKeywordService {
 
     public PostKeyword findByContent(String content) {
         return keywordRepository.findByContent(content).get();
+    }
+
+    public Optional<PostKeyword> findById(long postKeywordId) {
+        return keywordRepository.findById(postKeywordId);
+    }
+
+    public PostKeyword findByContentOrSave(String content) {
+        return save(content);
+    }
+    public List<PostKeyword> findByMemberId(Long authorId) {
+        return keywordRepository.getQslAllByAuthorId(authorId);
     }
 }

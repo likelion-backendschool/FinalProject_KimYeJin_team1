@@ -1,10 +1,13 @@
 package com.yejin.exam.wbook.global.result;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Map;
 
 @Getter
+@Setter
 public class ResultResponse<T> {
     private String resultCode;
     private String message;

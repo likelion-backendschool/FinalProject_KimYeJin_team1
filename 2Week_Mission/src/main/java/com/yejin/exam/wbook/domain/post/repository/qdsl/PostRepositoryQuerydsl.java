@@ -9,4 +9,5 @@ public interface PostRepositoryQuerydsl {
     List<Post> getPostsByKeyword(String keyword);
 
     List<Post> getPostsOrderByCreatedTime();
+
 }

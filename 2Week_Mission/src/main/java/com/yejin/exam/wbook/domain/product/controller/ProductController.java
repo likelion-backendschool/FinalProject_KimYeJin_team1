@@ -3,10 +3,16 @@ package com.yejin.exam.wbook.domain.product.controller;
 
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.post.entity.Post;
+import com.yejin.exam.wbook.domain.post.entity.PostKeyword;
 import com.yejin.exam.wbook.domain.post.service.PostKeywordService;
+import com.yejin.exam.wbook.domain.product.dto.ProductDto;
+import com.yejin.exam.wbook.domain.product.dto.ProductModifyDto;
 import com.yejin.exam.wbook.domain.product.entity.Product;
 import com.yejin.exam.wbook.domain.product.entity.ProductTag;
 import com.yejin.exam.wbook.domain.product.service.ProductService;
+import com.yejin.exam.wbook.global.exception.ActorCanNotModifyException;
+import com.yejin.exam.wbook.global.exception.ActorCanNotRemoveException;
+import com.yejin.exam.wbook.global.request.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -37,9 +43,9 @@ public class ProductController {
 
     @PreAuthorize("isAuthenticated() and hasAuthority('AUTHOR')")
     @PostMapping("/create")
-    public String create(@Valid ProductForm productForm) {
+    public String create(@Valid ProductDto productDto) {
         Member author = rq.getMember();
-        Product product = productService.create(author, productForm.getSubject(), productForm.getPrice(), productForm.getPostKeywordId(), productForm.getProductTagContents());
+        Product product = productService.create(author, productDto.getSubject(), productDto.getPrice(), productDto.getPostKeywordId(), productDto.getProductTagContents());
         return "redirect:/product/" + product.getId();
     }
 
@@ -81,7 +87,7 @@ public class ProductController {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/modify")
-    public String modify(@Valid ProductModifyForm productForm, @PathVariable long id) {
+    public String modify(@Valid ProductModifyDto productModifyDto, @PathVariable long id) {
         Product product = productService.findById(id).get();
         Member actor = rq.getMember();
 
@@ -89,7 +95,7 @@ public class ProductController {
             throw new ActorCanNotModifyException();
         }
 
-        productService.modify(product, productForm.getSubject(), productForm.getPrice(), productForm.getProductTagContents());
+        productService.modify(product, productModifyDto.getSubject(), productModifyDto.getPrice(), productModifyDto.getProductTagContents());
         return Rq.redirectWithMsg("/product/" + product.getId(), "%d번 도서 상품이 수정되었습니다.".formatted(product.getId()));
     }
 
