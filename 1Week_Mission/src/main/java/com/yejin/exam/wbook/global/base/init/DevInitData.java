@@ -20,7 +20,7 @@ public class DevInitData {
 
             Member member1=memberService.join(new MemberDto("user1","1234","1234","kyj011202@naver.com","author1"));
             for(int i =1;i<=10;i++){
-                postService.write(member1,"제목%d".formatted(i),"내용%d".formatted(i),"#태그%d #태그%d".formatted(i,i+1));
+                postService.write(member1,"제목%d".formatted(i),"내용%d".formatted(i),"내용%d".formatted(i),"#태그%d #태그%d".formatted(i,i+1));
             }
 
         };

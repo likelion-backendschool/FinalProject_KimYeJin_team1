@@ -27,16 +27,16 @@
                             <tbody class="tbody">
                             <tr th:each="post : ${posts}" class="text-center datas">
                                 <td>
-                                    <a th:href="@{#}" th:text="${post.author.nickname}"></a>
+                                    <a th:text="${post.author.nickname}"></a>
                                 </td>
                                 <td>
-                                    <a th:text="${post.subject}"></a>
+                                    <a th:href="@{|/post/${post.id}|}" th:text="${post.subject}"></a>
                                 </td>
                                 <td>
-                                    <a th:href="@{#}" th:text="${post.createDate}"></a>
+                                    <a th:text="${post.createDate}"></a>
                                 </td>
                                 <td>
-                                    <a th:href="@{#}" th:text="${post.modifyDate}"></a>
+                                    <a th:text="${post.modifyDate}"></a>
                                 </td>
                             </tr>
                             </tbody>

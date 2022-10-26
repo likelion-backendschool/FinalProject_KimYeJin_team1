@@ -1,6 +1,4 @@
-
 // 토스트 에디터 시작
-
 // 토스트 에디터 - 라이브러리 - 시작
 function ToastEditor__getUriParams(uri) {
   uri = uri.trim();

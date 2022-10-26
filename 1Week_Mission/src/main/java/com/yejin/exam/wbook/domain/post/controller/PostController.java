@@ -45,7 +45,7 @@ public class PostController {
     @PostMapping("/write")
     public String write(Principal principal, @Valid PostDto postDto) {
         Member member = memberService.findByUsername(principal.getName()).orElseThrow();
-        Post post = postService.write(member, postDto.getSubject(), postDto.getContent(),postDto.getHashTagsStr());
+        Post post = postService.write(member, postDto.getSubject(), postDto.getContent(),postDto.getContentHTML(),postDto.getHashTagsStr());
 
         String msg = "%d번 게시물이 작성되었습니다.".formatted(post.getId());
         msg = Util.url.encode(msg);
@@ -56,7 +56,6 @@ public class PostController {
     @GetMapping("/{id}")
     public String showDetail(Model model, @PathVariable Long id) {
         Post post= postService.getForPrintPostById(id);
-
 
         model.addAttribute("post", post);
 
