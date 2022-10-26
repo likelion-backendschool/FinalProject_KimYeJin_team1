@@ -1,151 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html layout:decorate="~{layout/layout.html}">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-
-    <title layout:title-pattern="$LAYOUT_TITLE | $CONTENT_TITLE" th:text="${@appConfig.siteName}"></title>
-
-    <!-- 제이쿼리 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-
-    <!-- toastr -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-
-    <!-- 폰트어썸 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
-
-    <!-- 테일윈드 -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>상품 등록</title>
 </head>
 
-<body class="min-h-screen flex flex-col pt-[35px] md:pt-[50px]">
+<body>
+<main layout:fragment="main">
+    <section class="section section-write container mx-auto">
 
-<!-- 데이지 UI -->
-<link href="https://cdn.jsdelivr.net/npm/daisyui@2.31.0/dist/full.css" rel="stylesheet" type="text/css"/>
-
-<!-- common.css -->
-<link href="/resource/common/common.css" rel="stylesheet" type="text/css"/>
-
-<header class="fixed z-40 top-0 left-0 w-full bg-white border-b-[1px] border-b-[color:#efefef] h-[35px] md:h-[50px]">
-    <div class="container mx-auto h-full flex items-center px-2">
-        <a href="/" class="logo flex font-bold mr-auto">
-            <span class="text-[#1E9EFE]">M</span>
-            <span class="ml-[2px] hidden lg:block">BOOKS</span>
-        </a>
-
-        <div class="flex gap-4">
-            <a href="/member/login" class="inline-flex" sec:authorize="isAnonymous()">
-                <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                <span class="ml-[2px] hidden lg:block">
-                    로그인
-                </span>
-            </a>
-
-            <a href="/member/join" class="inline-flex" sec:authorize="isAnonymous()">
-                <i class="fa-solid fa-user-plus"></i>
-                <span class="ml-[2px] hidden lg:block">
-                    회원가입
-                </span>
-            </a>
-
-            <a href="javascript: document.logoutForm.submit();" class="inline-flex" sec:authorize="isAuthenticated()">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                <span class="ml-[2px] hidden lg:block">
-                    로그아웃
-                </span>
-            </a>
-            <form name="logoutForm" method="POST" th:action="@{/member/logout}" hidden></form>
-
-            <a href="/member/profile" class="inline-flex" sec:authorize="isAuthenticated()">
-                <i class="fa-solid fa-user"></i>
-                <span class="ml-[2px]">
-                   <svg width="20" height="20" th:data-jdenticon-value="${@rq.member.jdenticon}"></svg>
-                </span>
-                <span class="ml-[2px] hidden lg:block">
-                    [[${@rq.member.name}]]
-                </span>
-            </a>
-
-            <a href="/post/write" class="inline-flex">
-                <i class="fa-solid fa-pen"></i>
-                <span class="ml-[2px] hidden lg:block">
-                    글 작성
-                </span>
-            </a>
-
-            <a href="/post/list" class="inline-flex">
-                <i class="fa-solid fa-rectangle-list"></i>
-                <span class="ml-[2px] hidden lg:block">
-                    글 목록
-                </span>
-            </a>
-
-            <a href="/product/create" class="inline-flex" th:if="${@rq.hasAuthority('AUTHOR')}">
+        <div class="px-2 pt-4">
+            <h1 class="font-bold text-lg">
                 <i class="fa-solid fa-book-medical"></i>
-                <span class="ml-[2px] hidden lg:block">
-                    도서 등록
-                </span>
-            </a>
+                도서 등록
+            </h1>
 
-            <a href="/product/list" class="inline-flex">
-                <i class="fa-solid fa-book"></i>
-                <span class="ml-[2px] hidden lg:block">
-                    도서 목록
-                </span>
-            </a>
+            <script>
+                let ProductCreate__submitDone = false;
+
+                function ProductCreate__submit(form) {
+                    if (ProductCreate__submitDone) {
+                        return;
+                    }
+
+                    form.subject.value = form.subject.value.trim();
+
+                    if (form.subject.value.length == 0) {
+                        warningModal("제목을 입력해주세요.");
+                        form.subject.focus();
+
+                        return;
+                    }
+
+                    form.price.value = form.price.value.trim();
+
+                    if (form.price.value.length == 0) {
+                        warningModal("가격을 입력해주세요.");
+                        form.price.focus();
+
+                        return;
+                    }
+
+                    form.postTagContents.value = form.postTagContents.value.trim();
+
+                    if (form.postTagContents.value.length == 0) {
+                        warningModal("태그를 입력해주세요.");
+                        form.postTagContents.focus();
+
+                        return;
+                    }
+
+                    form.submit();
+
+                    ProductCreate__submitDone = true;
+                }
+            </script>
+
+
+            <form th:action method="POST" class="flex flex-col gap-3"
+                  onsubmit="ProductCreate__submit(this); return false;">
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">글 태그 선택</span>
+                    </label>
+                    <select class="select select-bordered" name="postKeywordId">
+                        <option disabled="disabled" selected>- 글 태그 선택 -</option>
+                        <option th:each="postKeyword : ${postKeywords}"
+                                th:value="${postKeyword.id}"
+                                th:text="|${postKeyword.content} : 글 ${@ut.nf(postKeyword.extra_postTagsCount)}건|"></option>
+                    </select>
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">제목</span>
+                    </label>
+                    <input autofocus type="text" name="subject" placeholder="제목" class="input input-bordered"
+                           maxlength="50">
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">가격</span>
+                    </label>
+                    <input autofocus type="number" name="price" placeholder="가격" class="input input-bordered"
+                           maxlength="50">
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">태그</span>
+                    </label>
+                    <input type="text" name="productTagContents" placeholder="#태그1 #태그2 #태그3 ..."
+                           class="input input-bordered"
+                           maxlength="50">
+                </div>
+
+                <div class="grid grid-cols-2 mt-2 gap-2">
+                    <button type="button" onclick="history.back();" class="btn btn-secondary btn-outline">
+                        <i class="fa-solid fa-angle-left"></i>
+                        <span class="ml-1">취소</span>
+                    </button>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fa-solid fa-book-medical"></i>
+                        <span class="ml-1">도서 등록</span>
+                    </button>
+                </div>
+            </form>
         </div>
-    </div>
-</header>
 
-<div class="flex-grow flex flex-col py-5">
-    <main layout:fragment="main" class="flex-grow flex flex-col"></main>
-</div>
+    </section>
 
-<footer class="border-t-[1px] border-t-[color:#efefef] py-3 text-[color:#777] text-[14px] mt-5">
-    <div class="container mx-auto flex flex-col gap-1 px-2">
-        <div>
-            <a href="/">
-                <span>사업자정보확인</span>
-                <span class="inline-block scale-[.7]">▼</span>
-            </a>
-        </div>
-
-        <div class="flex gap-3">
-            <a href="/">이용약관</a>
-            <a href="/">개인정보 처리방침</a>
-            <a href="/">청소년보호정책</a>
-        </div>
-
-        <div>
-            <a href="/">©MBOOKS Corp.</a>
-        </div>
-    </div>
-</footer>
-
-<script src="/resource/common/common.js"></script>
-
-<script th:inline="javascript">
-    const params = /*[[ ${param} ]]*/ null;
-
-    if (params.msg) {
-        successModal(params.msg[0]);
-    }
-
-    if (params.errorMsg) {
-        errorModal(params.errorMsg[0]);
-    }
-</script>
-
-<!-- jdenticon -->
-<script src="https://cdn.jsdelivr.net/npm/jdenticon@3.2.0/dist/jdenticon.min.js" async
-        integrity="sha384-yBhgDqxM50qJV5JPdayci8wCfooqvhFYbIKhv0hTtLvfeeyJMJCscRfFNKIxt43M"
-        crossorigin="anonymous">
-</script>
-
+</main>
 </body>
 </html>

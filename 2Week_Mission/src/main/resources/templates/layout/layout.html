@@ -34,8 +34,8 @@
 <header class="fixed z-40 top-0 left-0 w-full bg-white border-b-[1px] border-b-[color:#efefef] h-[35px] md:h-[50px]">
     <div class="container mx-auto h-full flex items-center px-2">
         <a href="/" class="logo flex font-bold mr-auto">
-            <span class="text-[#1E9EFE]">M</span>
-            <span class="ml-[2px] hidden lg:block">BOOKS</span>
+            <span class="text-[#1E9EFE]">w</span>
+            <span class="ml-[2px] hidden lg:block">book</span>
         </a>
 
         <div class="flex gap-4">
@@ -64,10 +64,10 @@
             <a href="/member/profile" class="inline-flex" sec:authorize="isAuthenticated()">
                 <i class="fa-solid fa-user"></i>
                 <span class="ml-[2px]">
-                   <svg width="20" height="20" th:data-jdenticon-value="${@rq.member.jdenticon}"></svg>
+<!--                   <svg width="20" height="20" th:data-jdenticon-value="${@rq.member.jdenticon}"></svg>-->
                 </span>
-                <span class="ml-[2px] hidden lg:block">
-                    [[${@rq.member.name}]]
+                <span class="ml-[2px] hidden lg:block" sec:authentication="name">
+<!--                    [[${@rq.member.nickname}]]-->
                 </span>
             </a>
 
@@ -141,11 +141,7 @@
     }
 </script>
 
-<!-- jdenticon -->
-<script src="https://cdn.jsdelivr.net/npm/jdenticon@3.2.0/dist/jdenticon.min.js" async
-        integrity="sha384-yBhgDqxM50qJV5JPdayci8wCfooqvhFYbIKhv0hTtLvfeeyJMJCscRfFNKIxt43M"
-        crossorigin="anonymous">
-</script>
+
 
 </body>
 </html>

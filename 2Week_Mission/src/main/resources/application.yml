@@ -14,3 +14,8 @@ logging:
 
 #custom:
 #  genFileDirPath: c:/temp/app10
+
+custom:
+  site:
+    name: wbook
+    baseUrl: "http://localhost:8080"
