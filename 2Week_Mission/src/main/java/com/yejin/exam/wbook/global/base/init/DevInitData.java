@@ -33,6 +33,13 @@ public class DevInitData {
                 cartService.addItem(member1, productOption, i);
             }
 
+
+            memberService.addCash(member1, 10_000, "충전__무통장입금");
+            memberService.addCash(member1, 20_000, "충전__무통장입금");
+            memberService.addCash(member1, -5_000, "출금__일반");
+            memberService.addCash(member1, 1_000_000, "충전__무통장입금");
+
+
         };
     }
 }
