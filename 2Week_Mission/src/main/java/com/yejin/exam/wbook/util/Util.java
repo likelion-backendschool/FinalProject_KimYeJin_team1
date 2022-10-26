@@ -84,4 +84,8 @@ public class Util {
             return simpleDateFormat.format(new Date());
         }
     }
+
+    public String nf(long number) {
+        return String.format("%,d", (int) number);
+    }
 }

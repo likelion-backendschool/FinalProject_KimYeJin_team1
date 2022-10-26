@@ -41,7 +41,7 @@ public class PostService {
 
         postRepository.save(post);
 
-        postHashTagService.applyHashTags(post, hashTagsStr);
+        postHashTagService.applyHashTags(author, post, hashTagsStr);
         log.debug("[post][write] hashtagsStr : "+hashTagsStr);
         List<PostHashTag> postHashTags = postHashTagService.getHashTags(post);
         log.debug("[post][write] hashtags : "+postHashTags);

@@ -1,5 +1,6 @@
 package com.yejin.exam.wbook.domain.post.service;
 
+import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.post.entity.Post;
 import com.yejin.exam.wbook.domain.post.entity.PostHashTag;
 import com.yejin.exam.wbook.domain.post.entity.PostKeyword;
@@ -20,7 +21,7 @@ public class PostHashTagService {
     private final PostKeywordService postKeywordService;
     private final PostHashTagRepository postHashTagRepository;
 
-    public List<PostHashTag> applyHashTags(Post post, String keywordContentsStr) {
+    public List<PostHashTag> applyHashTags(Member member, Post post, String keywordContentsStr) {
 
         List<PostHashTag> oldHashTags = postHashTagRepository.findByPost(post);
 //        List<HashTag> needToDelTags = new ArrayList<>();
@@ -40,12 +41,12 @@ public class PostHashTagService {
         }*/
         List<PostHashTag> newHashTags = new ArrayList<>();
         keywordContents.forEach(keywordContent -> {
-            newHashTags.add(saveHashTag(post, keywordContent));
+            newHashTags.add(saveHashTag(member, post, keywordContent));
         });
         return newHashTags;
     }
 
-    private PostHashTag saveHashTag(Post post, String keywordContent) {
+    private PostHashTag saveHashTag(Member member, Post post, String keywordContent) {
         PostKeyword keyword = postKeywordService.save(keywordContent);
 
         Optional<PostHashTag> opHashTag = postHashTagRepository.findByPostIdAndKeywordId(post.getId(), keyword.getId());
@@ -56,6 +57,7 @@ public class PostHashTagService {
 
         PostHashTag postHashTag = PostHashTag.builder()
                 .post(post)
+                .member(member)
                 .keyword(keyword)
                 .build();
 

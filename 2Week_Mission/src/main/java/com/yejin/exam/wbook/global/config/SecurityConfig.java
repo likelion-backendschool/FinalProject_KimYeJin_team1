@@ -58,6 +58,7 @@ public class SecurityConfig {
     private static final String[] AUTH_AUTHENTICATED_LIST = {
             "/member/**",
             "/post/**",
+            "/product/**"
     }; // 인가 필요
 
     private final MemberSecurityService memberSecurityService;

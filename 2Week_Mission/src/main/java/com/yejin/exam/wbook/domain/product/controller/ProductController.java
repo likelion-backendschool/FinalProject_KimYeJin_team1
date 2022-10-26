@@ -2,6 +2,7 @@ package com.yejin.exam.wbook.domain.product.controller;
 
 
 import com.yejin.exam.wbook.domain.member.entity.Member;
+import com.yejin.exam.wbook.domain.member.service.MemberService;
 import com.yejin.exam.wbook.domain.post.entity.Post;
 import com.yejin.exam.wbook.domain.post.entity.PostKeyword;
 import com.yejin.exam.wbook.domain.post.service.PostKeywordService;
@@ -14,6 +15,7 @@ import com.yejin.exam.wbook.global.exception.ActorCanNotModifyException;
 import com.yejin.exam.wbook.global.exception.ActorCanNotRemoveException;
 import com.yejin.exam.wbook.global.request.Rq;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,20 +25,27 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/product")
 public class ProductController {
     private final ProductService productService;
     private final PostKeywordService postKeywordService;
+    private final MemberService memberService;
     private final Rq rq;
 
     @PreAuthorize("isAuthenticated() and hasAuthority('AUTHOR')")
     @GetMapping("/create")
-    public String showCreate(Model model) {
-        List<PostKeyword> postKeywords = postKeywordService.findByMemberId(rq.getId());
+    public String showCreate(Principal principal,Model model) {
+        Long memberId = memberService.findByUsername(principal.getName()).get().getId();
+        List<PostKeyword> postKeywords = postKeywordService.findByMemberId(memberId);
+//        log.debug("[product] rq.getId : "+rq.getMember().getNickname());
+        log.debug("[product] principal : "+principal.getName());
+        log.debug("[product] postKeywords : "+postKeywords);
         model.addAttribute("postKeywords", postKeywords);
         return "product/create";
     }

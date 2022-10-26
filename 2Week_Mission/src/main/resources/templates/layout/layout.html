@@ -64,10 +64,8 @@
             <a href="/member/profile" class="inline-flex" sec:authorize="isAuthenticated()">
                 <i class="fa-solid fa-user"></i>
                 <span class="ml-[2px]">
-<!--                   <svg width="20" height="20" th:data-jdenticon-value="${@rq.member.jdenticon}"></svg>-->
                 </span>
                 <span class="ml-[2px] hidden lg:block" sec:authentication="name">
-<!--                    [[${@rq.member.nickname}]]-->
                 </span>
             </a>
 
@@ -106,26 +104,7 @@
     <main layout:fragment="main" class="flex-grow flex flex-col"></main>
 </div>
 
-<footer class="border-t-[1px] border-t-[color:#efefef] py-3 text-[color:#777] text-[14px] mt-5">
-    <div class="container mx-auto flex flex-col gap-1 px-2">
-        <div>
-            <a href="/">
-                <span>사업자정보확인</span>
-                <span class="inline-block scale-[.7]">▼</span>
-            </a>
-        </div>
-
-        <div class="flex gap-3">
-            <a href="/">이용약관</a>
-            <a href="/">개인정보 처리방침</a>
-            <a href="/">청소년보호정책</a>
-        </div>
-
-        <div>
-            <a href="/">©MBOOKS Corp.</a>
-        </div>
-    </div>
-</footer>
+<footer th:replace="footer :: footerFragment"></footer>
 
 <script src="/resource/common/common.js"></script>
 
