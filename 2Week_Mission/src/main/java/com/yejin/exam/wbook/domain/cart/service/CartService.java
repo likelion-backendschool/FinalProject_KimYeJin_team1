@@ -12,7 +12,15 @@ import org.springframework.stereotype.Service;
 public class CartService {
     private final CartItemRepository cartItemRepository;
 
-    public void addItem(Member member, Product product, int quantity) {
+    public CartItem addItem(Member member, Product product, int quantity) {
+        CartItem oldCartItem = cartItemRepository.findByMemberIdAndProductOptionId(member.getId(), product.getId()).orElse(null);
+
+        if ( oldCartItem != null ) {
+            oldCartItem.setQuantity(oldCartItem.getQuantity() + quantity);
+            cartItemRepository.save(oldCartItem);
+
+            return oldCartItem;
+        }
         CartItem cartItem = CartItem.builder()
                 .member(member)
                 .product(product)
@@ -20,5 +28,6 @@ public class CartService {
                 .build();
 
         cartItemRepository.save(cartItem);
+        return cartItem;
     }
 }
