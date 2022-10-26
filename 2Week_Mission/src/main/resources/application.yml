@@ -1,0 +1,16 @@
+spring:
+  profiles:
+    active: dev
+    include:
+      - base-addi
+      - email
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+  output:
+    ansi-enabled: always
+logging:
+  level:
+    com.yejin.exam.wbook: debug
+
+#custom:
+#  genFileDirPath: c:/temp/app10
