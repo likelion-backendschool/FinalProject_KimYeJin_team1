@@ -1,5 +1,6 @@
 package com.yejin.exam.wbook.domain.post.entity;
 
+import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.global.base.entity.BaseEntity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -18,6 +19,10 @@ public class PostHashTag extends BaseEntity {
     @ManyToOne
     @ToString.Exclude
     private Post post;
+
+    @ManyToOne
+    @ToString.Exclude
+    private Member member;
 
     @ManyToOne
     @ToString.Exclude
