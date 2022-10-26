@@ -6,6 +6,7 @@ import com.yejin.exam.wbook.domain.post.entity.PostHashTag;
 import com.yejin.exam.wbook.domain.post.entity.PostKeyword;
 import com.yejin.exam.wbook.domain.product.entity.Product;
 import com.yejin.exam.wbook.domain.product.entity.ProductTag;
+import com.yejin.exam.wbook.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

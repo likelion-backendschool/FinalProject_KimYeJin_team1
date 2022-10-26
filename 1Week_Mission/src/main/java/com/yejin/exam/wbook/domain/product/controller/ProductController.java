@@ -1,6 +1,11 @@
 package com.yejin.exam.wbook.domain.product.controller;
 
 
+import com.yejin.exam.wbook.domain.member.entity.Member;
+import com.yejin.exam.wbook.domain.post.entity.Post;
+import com.yejin.exam.wbook.domain.product.entity.Product;
+import com.yejin.exam.wbook.domain.product.entity.ProductTag;
+import com.yejin.exam.wbook.domain.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
