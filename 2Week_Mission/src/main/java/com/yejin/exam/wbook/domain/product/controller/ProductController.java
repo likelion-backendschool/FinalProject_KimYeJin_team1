@@ -52,26 +52,31 @@ public class ProductController {
 
     @PreAuthorize("isAuthenticated() and hasAuthority('AUTHOR')")
     @PostMapping("/create")
-    public String create(@Valid ProductDto productDto) {
-        Member author = rq.getMember();
+    public String create(Principal principal,@Valid ProductDto productDto) {
+//        Member author = rq.getMember();
+        Member author = memberService.findByUsername(principal.getName()).get();
         Product product = productService.create(author, productDto.getSubject(), productDto.getPrice(), productDto.getPostKeywordId(), productDto.getProductTagContents());
         return "redirect:/product/" + product.getId();
     }
 
     @GetMapping("/{id}")
-    public String detail(@PathVariable Long id, Model model) {
+    public String detail(Principal principal, @PathVariable Long id, Model model) {
+        Member author = memberService.findByUsername(principal.getName()).get();
+
         Product product = productService.findForPrintById(id).get();
         List<Post> posts = productService.findPostsByProduct(product);
 
         model.addAttribute("product", product);
         model.addAttribute("posts", posts);
+        model.addAttribute("author", author);
 
         return "product/detail";
     }
 
     @GetMapping("/list")
-    public String list(Model model) {
-        List<Product> products = productService.findAllForPrintByOrderByIdDesc(rq.getMember());
+    public String list(Principal principal, Model model) {
+        Member author = memberService.findByUsername(principal.getName()).get();
+        List<Product> products = productService.findAllForPrintByOrderByIdDesc(author);
 
         model.addAttribute("products", products);
 
@@ -80,11 +85,12 @@ public class ProductController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}/modify")
-    public String showModify(@PathVariable long id, Model model) {
+    public String showModify(Principal principal, @PathVariable long id, Model model) {
         Product product = productService.findForPrintById(id).get();
 
-        Member actor = rq.getMember();
+//        Member actor = rq.getMember();
 
+        Member actor = memberService.findByUsername(principal.getName()).get();
         if (productService.actorCanModify(actor, product) == false) {
             throw new ActorCanNotModifyException();
         }
@@ -96,9 +102,10 @@ public class ProductController {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/modify")
-    public String modify(@Valid ProductModifyDto productModifyDto, @PathVariable long id) {
+    public String modify(Principal principal, @Valid ProductModifyDto productModifyDto, @PathVariable long id) {
         Product product = productService.findById(id).get();
-        Member actor = rq.getMember();
+//        Member actor = rq.getMember();
+        Member actor = memberService.findByUsername(principal.getName()).get();
 
         if (productService.actorCanModify(actor, product) == false) {
             throw new ActorCanNotModifyException();
@@ -110,9 +117,10 @@ public class ProductController {
 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/remove")
-    public String remove(@PathVariable long id) {
+    public String remove(Principal principal, @PathVariable long id) {
         Product post = productService.findById(id).get();
-        Member actor = rq.getMember();
+//        Member actor = rq.getMember();
+        Member actor = memberService.findByUsername(principal.getName()).get();
 
         if (productService.actorCanRemove(actor, post) == false) {
             throw new ActorCanNotRemoveException();
@@ -124,8 +132,10 @@ public class ProductController {
     }
 
     @GetMapping("/tag/{tagContent}")
-    public String tagList(Model model, @PathVariable String tagContent) {
-        List<ProductTag> productTags = productService.getProductTags(tagContent, rq.getMember());
+    public String tagList(Principal principal, Model model, @PathVariable String tagContent) {
+        Member author = memberService.findByUsername(principal.getName()).get();
+
+        List<ProductTag> productTags = productService.getProductTags(tagContent, author);
 
         model.addAttribute("productTags", productTags);
         return "product/tagList";

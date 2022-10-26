@@ -21,11 +21,12 @@
                 </div>
 
                 <div class="flex">
-                    <svg width="20" height="20" th:data-jdenticon-value="${product.author.jdenticon}"></svg>
-                    <div th:text="${product.author.name}"></div>
+<!--                    <svg width="20" height="20" th:data-jdenticon-value="${product.author.jdenticon}"></svg>-->
+                    <div th:text="${product.author.nickname}"></div>
                 </div>
 
-                <div th:text="|￦ ${@ut.nf(product.salePrice)}|"></div>
+<!--                <div th:text="|￦ ${@ut.nf(product.salePrice)}|"></div>-->
+                <div th:text="|￦ ${product.salePrice}|"></div>
 
                 <div class="flex flex-wrap gap-3">
                     <div class="flex flex-wrap gap-3">
@@ -52,14 +53,14 @@
                 <div th:utext="${product.extra_productTagLinks}"></div>
 
                 <div>
-                    <a th:if="${@productService.actorCanModify(@rq.member, product)}"
+                    <a th:if="${@productService.actorCanModify(author, product)}"
                        th:href="@{|/product/${product.id}/modify|}"
                        class="btn btn-secondary btn-sm btn-outline">
                         <i class="fa-solid fa-eraser"></i>
                         <span class="ml-1">수정</span>
                     </a>
 
-                    <a th:if="${@productService.actorCanRemove(@rq.member, product)}" href="javascript:;"
+                    <a th:if="${@productService.actorCanRemove(author, product)}" href="javascript:;"
                        onclick="if ( confirm('정말로 삭제하시겠습니까?') ) $(this).next().submit();"
                        class="btn btn-secondary btn-sm btn-outline">
                         <i class="fa-solid fa-trash"></i>
@@ -84,9 +85,9 @@
                         <li style="list-style: decimal" class="mt-1"
                             th:each="i : ${#numbers.sequence(posts.size() - 1, 0, -1)}"
                             th:with="post=${posts[i]}">
-                            <a th:if="${@postService.actorCanSee(@rq.member, post)}" class="text-link" target="_blank" th:href="@{|/post/${post.id}|}"
+                            <a th:if="${@postService.actorCanSee(author, post)}" class="text-link" target="_blank" th:href="@{|/post/${post.id}|}"
                                th:text="|${post.subject}|"></a>
-                            <span th:unless="${@postService.actorCanSee(@rq.member, post)}" th:text="|${post.subject}|"></span>
+                            <span th:unless="${@postService.actorCanSee(author, post)}" th:text="|${post.subject}|"></span>
                         </li>
                     </ol>
                 </div>
