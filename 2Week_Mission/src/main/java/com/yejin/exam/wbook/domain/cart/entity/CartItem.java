@@ -2,6 +2,7 @@ package com.yejin.exam.wbook.domain.cart.entity;
 
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.product.entity.Product;
+import com.yejin.exam.wbook.domain.product.entity.ProductOption;
 import com.yejin.exam.wbook.global.base.entity.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,6 @@ public class CartItem extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     private Member member;
     @ManyToOne(fetch = LAZY)
-    private Product product;
+    private ProductOption productOption;
     private int quantity; // 쇼핑몰에서 보유한 물건 개수
 }

@@ -29,9 +29,9 @@ public class DevInitData {
                 productService.create(member1,"도서제목%d".formatted(i),1234,(long)i,"#도서태그%d #도서태그%d".formatted(i,i+1));
             }
 
-            cartService.addItem(member1, productService.findById(0L).get(), 1);
-            cartService.addItem(member1, productService.findById(1L).get(), 4);
-            cartService.addItem(member1, productService.findById(2L).get(), 2);
+            cartService.addItem(member1, productOption1, 1);
+            cartService.addItem(member1, productOption2, 4);
+            cartService.addItem(member1, productOption3, 2);
 
         };
     }

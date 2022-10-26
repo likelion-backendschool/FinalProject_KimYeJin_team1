@@ -5,6 +5,7 @@ import com.yejin.exam.wbook.domain.cart.service.CartService;
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.order.entity.Order;
 import com.yejin.exam.wbook.domain.order.entity.OrderItem;
+import com.yejin.exam.wbook.domain.product.entity.ProductOption;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

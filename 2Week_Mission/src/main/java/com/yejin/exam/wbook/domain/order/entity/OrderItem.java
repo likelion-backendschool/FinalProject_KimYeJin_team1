@@ -1,6 +1,7 @@
 package com.yejin.exam.wbook.domain.order.entity;
 
 import com.yejin.exam.wbook.domain.product.entity.Product;
+import com.yejin.exam.wbook.domain.product.entity.ProductOption;
 import com.yejin.exam.wbook.global.base.entity.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,12 +26,12 @@ public class OrderItem extends BaseEntity {
     private Order order;
 
     @ManyToOne(fetch = LAZY)
-    private Product product;
+    private ProductOption productOption;
 
     private int quantity;
 
-    public OrderItem(Product product, int quantity) {
-        this.product = product;
+    public OrderItem(ProductOption productOption, int quantity) {
+        this.productOption = productOption;
         this.quantity = quantity;
     }
 }
