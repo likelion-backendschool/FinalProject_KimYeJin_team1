@@ -6,6 +6,8 @@ import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.member.service.MemberService;
 import com.yejin.exam.wbook.domain.post.entity.Post;
 import com.yejin.exam.wbook.domain.post.service.PostService;
+import com.yejin.exam.wbook.domain.product.entity.Product;
+import com.yejin.exam.wbook.domain.product.entity.ProductOption;
 import com.yejin.exam.wbook.domain.product.service.ProductService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -26,12 +28,10 @@ public class DevInitData {
             }
             for(int i=1;i<=5;i++){
 
-                productService.create(member1,"도서제목%d".formatted(i),1234,(long)i,"#도서태그%d #도서태그%d".formatted(i,i+1));
+                Product product = productService.create(member1,"도서제목%d".formatted(i),1234,(long)i,"#도서태그%d #도서태그%d".formatted(i,i+1));
+                ProductOption productOption = product.getProductOptions().get(i);
+                cartService.addItem(member1, productOption, i);
             }
-
-            cartService.addItem(member1, productOption1, 1);
-            cartService.addItem(member1, productOption2, 4);
-            cartService.addItem(member1, productOption3, 2);
 
         };
     }
