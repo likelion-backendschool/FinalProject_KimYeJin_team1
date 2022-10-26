@@ -1,6 +1,7 @@
 package com.yejin.exam.wbook.domain.product.service;
 
 import com.yejin.exam.wbook.domain.product.entity.ProductKeyword;
+import com.yejin.exam.wbook.domain.product.repository.ProductKeywordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
