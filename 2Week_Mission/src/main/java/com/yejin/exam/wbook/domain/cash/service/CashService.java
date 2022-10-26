@@ -1,6 +1,7 @@
 package com.yejin.exam.wbook.domain.cash.service;
 
 import com.yejin.exam.wbook.domain.cash.entity.CashLog;
+import com.yejin.exam.wbook.domain.cash.repository.CashLogRepository;
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
