@@ -39,7 +39,7 @@ public class ProductBackupJobConfig {
     @Bean
     public Job productBackupJob(Step productBackupStep1, CommandLineRunner initData) throws Exception {
         initData.run();
-
+        log.debug("[productBackupJob] start");
         return jobBuilderFactory.get("productBackupJob")
                 .start(productBackupStep1)
                 .build();
@@ -52,6 +52,7 @@ public class ProductBackupJobConfig {
             ItemProcessor productToProductBackupProcessor,
             ItemWriter productBackupWriter
     ) {
+        log.debug("[productBackupJob] step1 start");
         return stepBuilderFactory.get("productBackupStep1")
                 .<Product, ProductBackup>chunk(100)
                 .reader(productReader)
@@ -63,6 +64,7 @@ public class ProductBackupJobConfig {
     @StepScope
     @Bean
     public RepositoryItemReader<Product> productReader() {
+        log.debug("[productBackupJob] reader start");
         return new RepositoryItemReaderBuilder<Product>()
                 .name("productReader")
                 .repository(productRepository)
@@ -76,12 +78,14 @@ public class ProductBackupJobConfig {
     @StepScope
     @Bean
     public ItemProcessor<Product, ProductBackup> productToProductBackupProcessor() {
+        log.debug("[productBackupJob] processor start");
         return product -> new ProductBackup(product);
     }
 
     @StepScope
     @Bean
     public ItemWriter<ProductBackup> productBackupWriter() {
+        log.debug("[productBackupJob] writer start");
         return items -> items.forEach(item -> {
             ProductBackup oldProductBackup = productBackupRepository.findByProductId(item.getProduct().getId()).orElse(null);
 

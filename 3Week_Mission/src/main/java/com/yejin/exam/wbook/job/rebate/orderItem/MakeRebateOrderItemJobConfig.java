@@ -38,11 +38,10 @@ public class MakeRebateOrderItemJobConfig {
     private final OrderItemRepository orderItemRepository;
     private final RebateOrderItemRepository rebateOrderItemRepository;
 
-
     @Bean
     public Job makeRebateOrderItemJob(Step makeRebateOrderItemStep1, CommandLineRunner initData) throws Exception {
         initData.run();
-
+        log.debug("[rebateJob] start");
         return jobBuilderFactory.get("makeRebateOrderItemJob")
                 .start(makeRebateOrderItemStep1)
                 .build();
@@ -68,6 +67,10 @@ public class MakeRebateOrderItemJobConfig {
     public RepositoryItemReader<OrderItem> orderItemReader(
             @Value("#{jobParameters['month']}") String yearMonth
     ) {
+        if(yearMonth==null){
+            yearMonth = "2022-11";
+        }
+//        int monthEndDay = Util.date.getEndDayOf(jobParameter.getCreateDate());
         int monthEndDay = Util.date.getEndDayOf(yearMonth);
         LocalDateTime fromDate = Util.date.parse(yearMonth + "-01 00:00:00.000000");
         LocalDateTime toDate = Util.date.parse(yearMonth + "-%02d 23:59:59.999999".formatted(monthEndDay));

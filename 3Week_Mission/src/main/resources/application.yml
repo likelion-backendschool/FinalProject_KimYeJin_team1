@@ -4,8 +4,13 @@ spring:
     include:
       - base-addi
       - email
-  datasource:
-    driver-class-name: org.mariadb.jdbc.Driver
+  batch:
+    job:
+      names: ${job.name:NONE}
+    jdbc:
+      initialize-schema: ALWAYS
+  jpa:
+    show-sql: true
   output:
     ansi-enabled: always
 logging:
@@ -19,3 +24,4 @@ custom:
   site:
     name: wbook
     baseUrl: "http://localhost:8080"
+
