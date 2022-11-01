@@ -48,7 +48,7 @@ public class MakeRebateOrderItemJobConfig {
         log.debug("[rebateJob] start");
         return jobBuilderFactory.get("makeRebateOrderItemJob")
                 .start(makeRebateOrderItemStep1)
-                .start(step2(null))
+//                .start(step2(null))
                 .build();
     }
 //    @Bean
