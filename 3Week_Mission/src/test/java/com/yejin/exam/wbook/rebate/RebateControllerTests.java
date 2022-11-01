@@ -88,7 +88,7 @@ public class RebateControllerTests {
                 .andExpect(content().string(containsString("정산데이터")));
     }
     @Test
-    @DisplayName("정산 단건")
+    @DisplayName("주문 아이템 단건 정산")
     @WithUserDetails("admin")
     void t4() throws Exception {
         // GIVEN
@@ -107,4 +107,24 @@ public class RebateControllerTests {
                 .andExpect(redirectedUrlPattern("/adm/rebate/rebateOrderItemList?yearMonth=**"));
     }
 
+    @Test
+    @DisplayName("선택한 주문 아이템건에 대한 정산")
+    @WithUserDetails("admin")
+    void t5() throws Exception {
+        // GIVEN
+        String ids = "1,2,3,4,7,8";
+        // WHEN
+        ResultActions resultActions = mvc
+                .perform(post("/adm/rebate/rebate")
+                        .param("ids",ids)
+                        .header("Referer","?yearMonth=2022-11"))
+                .andDo(print());
+
+        // THEN
+        resultActions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(handler().handlerType(RebateController.class))
+                .andExpect(handler().methodName("rebate"))
+                .andExpect(redirectedUrlPattern("/adm/rebate/rebateOrderItemList?yearMonth=**&msg=**"));
+    }
 }
