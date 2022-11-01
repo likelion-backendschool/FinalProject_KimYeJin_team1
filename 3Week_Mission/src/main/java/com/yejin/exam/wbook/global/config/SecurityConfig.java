@@ -1,6 +1,7 @@
 package com.yejin.exam.wbook.global.config;
 
 
+import com.yejin.exam.wbook.domain.member.entity.MemberRole;
 import com.yejin.exam.wbook.domain.member.service.MemberSecurityService;
 import com.yejin.exam.wbook.global.security.handler.CustomSuccessHandler;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +54,7 @@ public class SecurityConfig {
             "/"
     }; // 모두 허용
     private static final String[] AUTH_ADMIN_LIST = {
-            "/admin/**"
+            "/adm/**"
     }; // admin 롤 만 허용
     private static final String[] AUTH_AUTHENTICATED_LIST = {
             "/member/**",
@@ -112,6 +113,7 @@ public class SecurityConfig {
                 .mvcMatchers("/member/login/**").permitAll()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .antMatchers(AUTH_ALL_LIST).permitAll()
+                .antMatchers(AUTH_ADMIN_LIST).hasAuthority("ROLE_ADMIN")
                 .antMatchers(AUTH_AUTHENTICATED_LIST).authenticated();
         http
                 .headers()

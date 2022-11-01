@@ -96,6 +96,12 @@
                     도서 목록
                 </span>
             </a>
+            <a href="/adm/home/main" class="inline-flex" th:if="${@rq.hasAuthority('ADMIN')}">
+                <i class="fa-solid fa-book-medical"></i>
+                <span class="ml-[2px] hidden lg:block">
+                    관리자 홈
+                </span>
+            </a>
         </div>
     </div>
 </header>
