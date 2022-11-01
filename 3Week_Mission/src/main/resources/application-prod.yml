@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://shadows.site:3326/wbook__prod?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul
+    username: yejin
+    password: yejin1234
+  jpa:
+    hibernate:
+      ddl-auto: none
+logging:
+  level:
+    com.ll.exam.wbook: info
+#custom:
+#  genFileDirPath: /gen

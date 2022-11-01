@@ -64,6 +64,54 @@ cart/  cash/  home/  member/  order/  post/  product/
 
 **[접근 방법]**
 
+### 지난주 보강
+1. rq 클래스 도입  
+
+url == null 인 상황 발생, RequestURI로 받도록 추가
+```java
+    public String redirectToBackWithMsg(String msg) {
+        String url = req.getHeader("Referer");
+        log.debug("[Rq] url : "+url);
+        if(url==null){
+            url=req.getRequestURI();
+            log.debug("[Rq] requestURI : "+url);
+        }
+        return redirectWithMsg(url, msg);
+    }
+```
+
+2. ResultCode 규칙  
+
+코드의 끝이 OK 인 경우 Success로 나타내고, FAILED 등 일경우 fail로 판단
+```java
+    public boolean isSuccess() {
+        return resultCode.endsWith("OK");
+    }
+
+    public boolean isFail() {
+        return isSuccess() == false;
+    }
+```
+
+결제 취소 시 ResultCode
+```java
+    public ResultResponse actorCanCancel(Member actor, Order order) {
+        if ( order.isPaid() ) {
+            return ResultResponse.of("IS_PAID_ORDER_CANCEL_FAIL", "이미 결제처리 되었습니다.");
+        }
+
+        if (order.isCanceled()) {
+            return ResultResponse.of("IS_CANCELED_ORDER_CANCEL_FAIL", "이미 취소되었습니다.");
+        }
+
+        if (actor.getId().equals(order.getBuyer().getId()) == false) {
+            return ResultResponse.of("NO_AUTH_ORDER_CANCEL_FAIL", "권한이 없습니다.");
+        }
+
+        return ResultResponse.of("ORDER_CANCEL_OK", "취소할 수 있습니다.");
+    }
+
+```
 
 **[특이사항]**
 
