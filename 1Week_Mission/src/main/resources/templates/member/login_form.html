@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns:th="http://www.thymeleaf.org"
+        layout:decorate="~{layout}">
+
+<div layout:fragment="content" class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-15 mb-lg-0 mb-4">
+            <div class="card z-index-2 h-100">
+                <div class="card-header pb-0 pt-3 bg-transparent">
+                </div>
+                <div class="card-body p-3">
+                    <div class="chart" style="height: 100%;">
+                        <h2>로그인</h2>
+                        <hr/>
+                        <form th:action="@{/member/login}" method="post">
+                            <div th:if="${param.error}">
+                                <div class="alert alert-danger">
+                                    ID 또는 비밀번호를 확인해 주세요.
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="username" class="form-label">ID</label>
+                                <input type="text" name="username" id="username" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">비밀번호</label>
+                                <input type="password" name="password" id="password" class="form-control">
+                            </div>
+                            <button type="submit" class="btn btn-primary">로그인</button>
+                        </form>
+                        <a class="link-secondary" th:href="@{/member/findUsername}">아이디 찾기</a>
+                        <a class="link-secondary" th:href="@{/member/findPassword}">비밀번호 찾기</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript" th:src="@{/js/signup.js}"></script>
+
+</html>
