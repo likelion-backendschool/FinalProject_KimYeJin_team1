@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns:th="http://www.thymeleaf.org"
+        layout:decorate="~{layout}">
+
+<div layout:fragment="content" class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-15 mb-lg-0 mb-4">
+            <div class="card z-index-2 h-100">
+                <div class="card-header pb-0 pt-3 bg-transparent">
+                    <!--          <h2 class="text-capitalize mt-3">Shadow's</h2>-->
+                </div>
+                <div class="card-body p-3">
+                    <div class="chart" style="height: 100%;">
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+                        <script th:inline="javascript" th:src="@{/js/signup.js}"></script>
+                        <h2>회원 가입</h2>
+                        <hr/>
+                        <form th:action="@{/member/modify}" th:object="${memberModifyDto}" method="post" onsubmit="SubmitForm(this); return false;">
+                            <div th:replace="member/form_errors :: formErrorsFragment"></div>
+                            <!--        <div id="resultDiv" th:replace="login_errors :: loginAlertFragment(${alert}, ${msg})"></div>-->
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">이메일</label>
+                                <input type="email" th:field="*{email}" class="form-control">
+                                <p class="d-none alert alert-success" id="success-email-msg" th:text="${msg}"></p>
+                                <p class="d-none alert alert-danger" id="fail-email-msg" th:text="${msg}"></p>
+                            </div>
+                            <div class="mb-3">
+                                <label for="nickname" class="form-label">작가명</label>
+                                <input type="text" th:field="*{nickname}" class="form-control">
+                            </div>
+                            <button type="submit" class="btn btn-primary">회원정보 수정</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>
