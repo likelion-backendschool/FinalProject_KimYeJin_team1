@@ -10,6 +10,7 @@ import com.yejin.exam.wbook.domain.order.service.OrderService;
 import com.yejin.exam.wbook.domain.post.service.PostService;
 import com.yejin.exam.wbook.domain.product.entity.Product;
 import com.yejin.exam.wbook.domain.product.service.ProductService;
+import com.yejin.exam.wbook.domain.rebate.service.RebateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +33,8 @@ public class TestInitData {
             ProductService productService,
             CartService cartService,
             OrderService orderService,
-            OrderRepository orderRepository
+            OrderRepository orderRepository,
+            RebateService rebateService
     ) {
         return args -> {
             Member member1=memberService.join(new MemberDto("user1","1234","1234","kyj011202@naver.com","author1"));
@@ -119,6 +121,7 @@ public class TestInitData {
                     )
             );
 
+            rebateService.makeDate("2022-11");
 
         };
     }

@@ -9,6 +9,7 @@ import com.yejin.exam.wbook.domain.rebate.repository.RebateOrderItemRepository;
 import com.yejin.exam.wbook.global.result.ResultResponse;
 import com.yejin.exam.wbook.util.Util;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -49,7 +51,7 @@ public class RebateService {
     }
 
     @Transactional
-    public void makeRebateOrderItem(RebateOrderItem item) {
+    private void makeRebateOrderItem(RebateOrderItem item) {
         RebateOrderItem oldRebateOrderItem = rebateOrderItemRepository.findByOrderItemId(item.getOrderItem().getId()).orElse(null);
 
         if (oldRebateOrderItem != null) {
@@ -59,7 +61,7 @@ public class RebateService {
         rebateOrderItemRepository.save(item);
     }
 
-    public RebateOrderItem toRebateOrderItem(OrderItem orderItem) {
+    private RebateOrderItem toRebateOrderItem(OrderItem orderItem) {
         return new RebateOrderItem(orderItem);
     }
 
@@ -70,7 +72,7 @@ public class RebateService {
         String toDateStr = yearMonth + "-%02d 23:59:59.999999".formatted(monthEndDay);
         LocalDateTime fromDate = Util.date.parse(fromDateStr);
         LocalDateTime toDate = Util.date.parse(toDateStr);
-
+        log.debug("[rebate] fromDate : "+fromDate + " toDate : "+ toDate);
         return rebateOrderItemRepository.findAllByPayDateBetweenOrderByIdAsc(fromDate, toDate);
     }
 
