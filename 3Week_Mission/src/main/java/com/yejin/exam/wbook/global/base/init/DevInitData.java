@@ -41,7 +41,10 @@ public class DevInitData {
             Member member1=memberService.join(new MemberDto("user1","1234","1234","kyj011202@naver.com","author1"));
             Member member2=memberService.join(new MemberDto("user2","1234","1234","kyj2212@gmail.com","author2"));
             Member memberAdmin = memberService.join(new MemberDto("admin","1234","1234","yejin123kim@gmail.com","admin"));
-            memberAdmin.setAuthLevel(MemberRole.ROLE_ADMIN);
+
+            memberService.setAuthLevel(memberAdmin,MemberRole.ROLE_ADMIN);
+            System.out.println("[dev init] member role : "+ memberAdmin.getAuthLevel());
+            System.out.println("[dev init] member role db : "+ memberService.findByUsername("admin").get().getAuthLevel());
 
             for(int i =1;i<=2;i++){
                 postService.write(member1,"제목%d".formatted(i),"내용%d".formatted(i),"내용%d".formatted(i),"#태그%d #태그%d".formatted(i,i+1));

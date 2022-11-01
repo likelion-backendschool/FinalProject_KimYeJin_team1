@@ -41,7 +41,7 @@ public class TestInitData {
             Member member1=memberService.join(new MemberDto("user1","1234","1234","kyj011202@naver.com","author1"));
             Member member2=memberService.join(new MemberDto("user2","1234","1234","kyj2212@gmail.com",null));
             Member memberAdmin = memberService.join(new MemberDto("admin","1234","1234","yejin123kim@gmail.com","admin"));
-            memberAdmin.setAuthLevel(MemberRole.ROLE_ADMIN);
+            memberService.setAuthLevel(memberAdmin,MemberRole.ROLE_ADMIN);
 
             postService.write(member1, "제목 1", "내용 1", "내용 1", "#IT# 프론트엔드 #HTML #CSS");
             postService.write(member1, "제목 2", "내용 2", "내용 2", "#IT #스프링부트 #자바");

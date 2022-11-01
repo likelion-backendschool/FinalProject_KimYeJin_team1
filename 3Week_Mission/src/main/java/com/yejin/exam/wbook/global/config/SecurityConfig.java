@@ -1,8 +1,8 @@
 package com.yejin.exam.wbook.global.config;
 
 
-import com.yejin.exam.wbook.domain.member.entity.MemberRole;
 import com.yejin.exam.wbook.domain.member.service.MemberSecurityService;
+import com.yejin.exam.wbook.global.security.handler.AccessDeniedHandlerImpl;
 import com.yejin.exam.wbook.global.security.handler.CustomSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
@@ -134,7 +135,8 @@ public class SecurityConfig {
                 .invalidateHttpSession(true);
         http
                 .exceptionHandling()
-                .accessDeniedPage("/restrict");
+                .accessDeniedHandler(accessDeniedHandler())
+                ;
 
         return http.build();
     }
@@ -152,4 +154,10 @@ public class SecurityConfig {
         return source;
     }
 
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler(){
+        AccessDeniedHandlerImpl accessDeniedHandler = new AccessDeniedHandlerImpl();
+        accessDeniedHandler.setErrorPage("/denied");
+        return accessDeniedHandler;
+    }
 }

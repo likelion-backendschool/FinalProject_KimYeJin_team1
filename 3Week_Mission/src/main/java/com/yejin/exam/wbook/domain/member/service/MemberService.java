@@ -142,6 +142,13 @@ public class MemberService {
         return memberRepository.findAll();
     }
 
+    @Transactional
+    public void setAuthLevel(Member member, MemberRole role) {
+        member.setAuthLevel(role);
+        log.debug("[member] role : "+ role + " member "+member.getAuthLevel());
+        memberRepository.save(member);
+    }
+
 //    @Transactional
 //    public long addCash(Member member, long price, String eventType) {
 //        CashLog cashLog = cashService.addCash(member, price, eventType);
