@@ -115,8 +115,44 @@ url == null 인 상황 발생, RequestURI로 받도록 추가
 -> 도메인이다.  
 [참고링크 : https://runa-nam.tistory.com/m/120](https://runa-nam.tistory.com/m/120)
 
+1. 정산 서비스 테스트 -> OrderItem 이 없는 케이스가 들어간 경우
 
+RebateService 의 rebate 메소드 에서 Optional 예외처리 추가
+```java
+        Optional<RebateOrderItem> oRebateOrderItem = rebateOrderItemRepository.findByOrderItemId(orderItemId);
+        if(!oRebateOrderItem.isPresent()){
+            return ResultResponse.of("REBATE_NO_ITEM_FAILED", "정산가능한 주문 품목이 없습니다.");
+        }
+        RebateOrderItem rebateOrderItem = oRebateOrderItem.get();
 
+```
+
+테스트 코드로 Oder Item이 없는 경우 체크
+```java
+    @Test
+    @DisplayName("주문 item 모두 정산하기 ")
+    void t4() {
+        String ids = "1,2,3,4,7,8";
+        String[] idsArr = ids.split(",");
+        Arrays.stream(idsArr)
+                .mapToLong(Long::parseLong)
+                .forEach(id -> {
+                    ResultResponse rebateResultResponse = rebateService.rebate(id);
+                    System.out.println(rebateResultResponse.getResultCode() + " "+ rebateResultResponse.getMessage()+" "+rebateResultResponse.getData());
+                    assertThat(rebateResultResponse.isSuccess()).isTrue();
+                });
+
+        ids = "5,6";
+        idsArr = ids.split(",");
+        Arrays.stream(idsArr)
+                .mapToLong(Long::parseLong)
+                .forEach(id -> {
+                    ResultResponse rebateResultResponse = rebateService.rebate(id);
+                    System.out.println(rebateResultResponse.getResultCode() + " "+ rebateResultResponse.getMessage()+" "+rebateResultResponse.getData());
+                    assertThat(rebateResultResponse.isFail()).isTrue();
+                });
+    }
+```
 
 **[특이사항]**
 
