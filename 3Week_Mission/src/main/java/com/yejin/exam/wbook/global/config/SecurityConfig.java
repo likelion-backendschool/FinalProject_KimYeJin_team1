@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,6 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     /* 인가 구분을 위한 url path 지정 */
@@ -59,7 +61,8 @@ public class SecurityConfig {
     private static final String[] AUTH_AUTHENTICATED_LIST = {
             "/member/**",
             "/post/**",
-            "/product/**"
+            "/product/**",
+            "/adm/**"
     }; // 인가 필요
 
     private final MemberSecurityService memberSecurityService;
@@ -113,8 +116,8 @@ public class SecurityConfig {
                 .mvcMatchers("/member/login/**").permitAll()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .antMatchers(AUTH_ALL_LIST).permitAll()
-                .antMatchers(AUTH_ADMIN_LIST).hasAuthority("ROLE_ADMIN")
-                .antMatchers(AUTH_AUTHENTICATED_LIST).authenticated();
+                .antMatchers(AUTH_AUTHENTICATED_LIST).authenticated()
+                ;
         http
                 .headers()
                 .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN));

@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/adm")
 public class AdmHomeController {
     @GetMapping("")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public String showIndex() {
         return "redirect:/adm/home/main";
     }
 
     @GetMapping("/home/main")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public String showMain() {
         return "adm/home/main";
     }

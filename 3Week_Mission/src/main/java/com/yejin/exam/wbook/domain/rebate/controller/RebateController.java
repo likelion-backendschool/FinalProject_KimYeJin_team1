@@ -26,13 +26,13 @@ public class RebateController {
     private final RebateService rebateService;
 
     @GetMapping("/makeData")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public String showMakeData() {
         return "adm/rebate/makeData";
     }
 
     @PostMapping("/makeData")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public String makeData(String yearMonth) {
         ResultResponse makeDateResultResponse = rebateService.makeDate(yearMonth);
 
@@ -42,7 +42,7 @@ public class RebateController {
     }
 
     @GetMapping("/rebateOrderItemList")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public String showRebateOrderItemList(String yearMonth, Model model) {
         if (yearMonth == null) {
             yearMonth = "2022-10";
@@ -56,7 +56,7 @@ public class RebateController {
     }
 
     @PostMapping("/rebateOne/{orderItemId}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public String rebateOne(@PathVariable long orderItemId, HttpServletRequest req) {
         ResultResponse rebateResultResponse = rebateService.rebate(orderItemId);
 
@@ -71,7 +71,7 @@ public class RebateController {
     }
 
     @PostMapping("/rebate")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public String rebate(String ids, HttpServletRequest req) {
 
         String[] idsArr = ids.split(",");
