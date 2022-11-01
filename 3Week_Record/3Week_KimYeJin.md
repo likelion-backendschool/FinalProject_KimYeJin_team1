@@ -106,9 +106,11 @@ url == null 인 상황 발생, RequestURI로 받도록 추가
 
 ### 정산 도메인
 
-'정산'도 도메인인가?
--> 도메인이다.  
+    '정산'도 도메인인가? -> 도메인이다.  
 [참고링크 : https://runa-nam.tistory.com/m/120](https://runa-nam.tistory.com/m/120)
+
+<br>
+
 
 1. 정산 서비스 테스트 -> OrderItem 이 없는 케이스가 들어간 경우
 
@@ -148,6 +150,37 @@ RebateService 의 rebate 메소드 에서 Optional 예외처리 추가
                 });
     }
 ```
+
+
+<br>
+
+2. 정산 컨트롤러 테스트
+
+컨트롤러에서 Referer를 통해 가져오는 url 쿼리 파라미터 값을 직접 지정하여 테스트코드를 작성하였다.
+
+```java
+    @Test
+    @DisplayName("선택한 주문 아이템건에 대한 정산")
+    @WithUserDetails("admin")
+    void t5() throws Exception {
+        // GIVEN
+        String ids = "1,2,3,4,7,8";
+        // WHEN
+        ResultActions resultActions = mvc
+                .perform(post("/adm/rebate/rebate")
+                        .param("ids",ids)
+                        .header("Referer","?yearMonth=2022-11"))
+                .andDo(print());
+
+        // THEN
+        resultActions
+                .andExpect(status().is3xxRedirection())
+                .andExpect(handler().handlerType(RebateController.class))
+                .andExpect(handler().methodName("rebate"))
+                .andExpect(redirectedUrlPattern("/adm/rebate/rebateOrderItemList?yearMonth=**&msg=**"));
+    }
+```
+<br>
 
 3. AccessDenied 예외처리  
 
@@ -226,11 +259,15 @@ SecurityConfig 는 아래와 같다.
 [https://velog.io/@rudwnd33/Spring-Security-AccessDeniedException](https://velog.io/@rudwnd33/Spring-Security-AccessDeniedException)  
 [https://escapefromcoding.tistory.com/489](https://escapefromcoding.tistory.com/489)  
 
-**[특이사항]**
+
+<br>
+
+## **[특이사항]**
 
 
 ### 아쉬운점/ 궁금한점
 
+<br>
 1. Admin Role 처리 ->   MemberContext.genAuthorities()
 
 처음 1주차에서 나는 MEMBER 권한, ADMIN 권한, AUTHOR 권한을 개별적으로 구현하였으나,  
@@ -252,6 +289,7 @@ AUTHOR 권한은 추가적으로 가지는 authorities.  기본적으로 MEMBER 
 ```
 [https://escapefromcoding.tistory.com/m/526](https://escapefromcoding.tistory.com/m/526)  
 
+<br>
 
 2. 정산 비율 5:5  
 
@@ -268,6 +306,6 @@ rebatePrice를 계산하는 회계적인 이론을 잘 모르겠어서 도매가
     }
 
 ```
-
+<br>
   
 ### Refcatoring 시 추가적으로 구현하고 싶은 부분  
