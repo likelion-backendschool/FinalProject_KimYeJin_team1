@@ -47,7 +47,7 @@ cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/
 - [x] 건별, 전체(선택) 정산 처리
 
 ### [추가기능]
-- [ ] 정산데이터 배치로 생성
+- [x] 정산데이터 배치로 생성
 
 ### 3주차 미션 요약
 
@@ -262,6 +262,33 @@ SecurityConfig 는 아래와 같다.
 
 <br>
 
+### batch
+
+1. 정산 Job 생성  
+
+`@Scheduled (cron=)` 을 이용하여 매월 15일 4시에 실행되도록 설정  
+
+```java
+    @Bean
+    @Scheduled(cron= "0 0 4 15 * ?"  )
+    public Job makeRebateOrderItemJob(Step makeRebateOrderItemStep1, CommandLineRunner initData) throws Exception {
+        initData.run();
+        log.debug("[rebateJob] start");
+        return jobBuilderFactory.get("makeRebateOrderItemJob")
+                .start(makeRebateOrderItemStep1)
+                .build();
+    }
+```
+![img1](https://i.imgur.com/ufK5UPM.png)  
+
+<br>
+배치 후 아래와 같이 정산데이터 생성됨.
+
+![img2](https://i.imgur.com/BfFwBlh.png)  
+
+추후 수정 필요
+--> 한번 batch가 돌아간 이후로는 parameter를 통해 job 이 다시 돌아가도록 해야함.
+
 ## **[특이사항]**
 
 
@@ -309,3 +336,8 @@ rebatePrice를 계산하는 회계적인 이론을 잘 모르겠어서 도매가
 <br>
   
 ### Refcatoring 시 추가적으로 구현하고 싶은 부분  
+
+1. yearMonth를 선택하지 않은 url에서는 정산을 할 시, Refer에서 url을 가져오는 과정에서 yearMonth가 없기 때문에 500 에러 발생
+--> default month정보를 입력하는 방식으로 수정  
+2. batch 코드 수정 -> parameter가 아닌 job의 실행 기준을 설정하여 exit되도록 수정
+3. 추가 기능 출금 구현
