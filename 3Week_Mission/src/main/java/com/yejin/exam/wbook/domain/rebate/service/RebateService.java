@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -78,7 +79,11 @@ public class RebateService {
 
     @Transactional
     public ResultResponse rebate(long orderItemId) {
-        RebateOrderItem rebateOrderItem = rebateOrderItemRepository.findByOrderItemId(orderItemId).get();
+        Optional<RebateOrderItem> oRebateOrderItem = rebateOrderItemRepository.findByOrderItemId(orderItemId);
+        if(!oRebateOrderItem.isPresent()){
+            return ResultResponse.of("REBATE_NO_ITEM_FAILED", "정산가능한 주문 품목이 없습니다.");
+        }
+        RebateOrderItem rebateOrderItem = oRebateOrderItem.get();
 
         if (rebateOrderItem.isRebateAvailable() == false) {
             return ResultResponse.of("REBATE_AVAILABLE_FAILED", "정산을 할 수 없는 상태입니다.");

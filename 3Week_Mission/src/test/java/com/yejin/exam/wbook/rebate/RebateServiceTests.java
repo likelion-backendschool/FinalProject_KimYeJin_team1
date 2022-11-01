@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,5 +52,38 @@ public class RebateServiceTests {
         System.out.println("[testRebate] 정산 아이템 : "+ items.size());
         items.forEach(i -> System.out.println("구매자 : " + i.getBuyerName()+"상품명 : " + i.getProductSubject()+"구매날짜 : " + i.getPayDate()));
         assertThat(items.size()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("주문 item 1개 정산하기 ")
+    void t3() {
+
+        ResultResponse rebateResultResponse = rebateService.rebate(1L);
+
+        System.out.println(rebateResultResponse.getResultCode() + " "+ rebateResultResponse.getMessage()+" "+rebateResultResponse.getData());
+        assertThat(rebateResultResponse.isSuccess()).isTrue();
+    }
+    @Test
+    @DisplayName("주문 item 모두 정산하기 ")
+    void t4() {
+        String ids = "1,2,3,4,7,8";
+        String[] idsArr = ids.split(",");
+        Arrays.stream(idsArr)
+                .mapToLong(Long::parseLong)
+                .forEach(id -> {
+                    ResultResponse rebateResultResponse = rebateService.rebate(id);
+                    System.out.println(rebateResultResponse.getResultCode() + " "+ rebateResultResponse.getMessage()+" "+rebateResultResponse.getData());
+                    assertThat(rebateResultResponse.isSuccess()).isTrue();
+                });
+
+        ids = "5,6";
+        idsArr = ids.split(",");
+        Arrays.stream(idsArr)
+                .mapToLong(Long::parseLong)
+                .forEach(id -> {
+                    ResultResponse rebateResultResponse = rebateService.rebate(id);
+                    System.out.println(rebateResultResponse.getResultCode() + " "+ rebateResultResponse.getMessage()+" "+rebateResultResponse.getData());
+                    assertThat(rebateResultResponse.isFail()).isTrue();
+                });
     }
 }
