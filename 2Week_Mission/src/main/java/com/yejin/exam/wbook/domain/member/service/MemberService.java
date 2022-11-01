@@ -1,5 +1,7 @@
 package com.yejin.exam.wbook.domain.member.service;
 
+import com.yejin.exam.wbook.domain.cash.entity.CashLog;
+import com.yejin.exam.wbook.domain.cash.service.CashService;
 import com.yejin.exam.wbook.domain.member.dto.MemberDto;
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.member.entity.MemberRole;
@@ -31,6 +33,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final PostService postService;
+    private final CashService cashService;
 
     public Member join(MemberDto memberDto) {
         if (memberRepository.existsByUsername(memberDto.getUsername())) {
@@ -129,5 +132,20 @@ public class MemberService {
 
     public List<Member> findAll() {
         return memberRepository.findAll();
+    }
+
+    @Transactional
+    public long addCash(Member member, long price, String eventType) {
+        CashLog cashLog = cashService.addCash(member, price, eventType);
+
+        long newRestCash = member.getRestCash() + cashLog.getPrice();
+        member.setRestCash(newRestCash);
+        memberRepository.save(member);
+
+        return newRestCash;
+    }
+
+    public long getRestCash(Member member) {
+        return member.getRestCash();
     }
 }

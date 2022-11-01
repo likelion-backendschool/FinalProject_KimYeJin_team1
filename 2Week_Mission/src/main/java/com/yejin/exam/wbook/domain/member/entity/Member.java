@@ -35,6 +35,8 @@ public class Member extends BaseEntity {
     @Enumerated(EnumType.ORDINAL)
     private MemberRole authLevel;
 
+    private long restCash;
+
     public Member(long id) {
         super(id);
     }
