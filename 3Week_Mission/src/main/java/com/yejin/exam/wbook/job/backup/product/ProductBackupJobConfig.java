@@ -1,6 +1,8 @@
 package com.yejin.exam.wbook.job.backup.product;
 
 import com.yejin.exam.wbook.domain.product.entity.Product;
+import com.yejin.exam.wbook.domain.product.entity.ProductBackup;
+import com.yejin.exam.wbook.domain.product.repository.ProductBackupRepository;
 import com.yejin.exam.wbook.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
