@@ -60,4 +60,13 @@ public class Member extends BaseEntity {
 
         return authorities;
     }
+
+    public String getName() {
+        if (nickname != null) {
+            return nickname;
+        }
+
+        return username;
+    }
+
 }
