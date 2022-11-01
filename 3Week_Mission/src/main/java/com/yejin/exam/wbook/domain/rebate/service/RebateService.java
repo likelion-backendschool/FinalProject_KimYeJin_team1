@@ -5,6 +5,7 @@ import com.yejin.exam.wbook.domain.member.service.MemberService;
 import com.yejin.exam.wbook.domain.order.entity.OrderItem;
 import com.yejin.exam.wbook.domain.order.service.OrderService;
 import com.yejin.exam.wbook.domain.rebate.entity.RebateOrderItem;
+import com.yejin.exam.wbook.domain.rebate.repository.RebateOrderItemRepository;
 import com.yejin.exam.wbook.global.result.ResultResponse;
 import com.yejin.exam.wbook.util.Util;
 import lombok.RequiredArgsConstructor;
@@ -67,8 +68,8 @@ public class RebateService {
 
         String fromDateStr = yearMonth + "-01 00:00:00.000000";
         String toDateStr = yearMonth + "-%02d 23:59:59.999999".formatted(monthEndDay);
-        LocalDateTime fromDate = Ut.date.parse(fromDateStr);
-        LocalDateTime toDate = Ut.date.parse(toDateStr);
+        LocalDateTime fromDate = Util.date.parse(fromDateStr);
+        LocalDateTime toDate = Util.date.parse(toDateStr);
 
         return rebateOrderItemRepository.findAllByPayDateBetweenOrderByIdAsc(fromDate, toDate);
     }
