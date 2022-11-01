@@ -8,6 +8,7 @@ import com.yejin.exam.wbook.domain.member.entity.MemberRole;
 import com.yejin.exam.wbook.domain.member.repository.MemberRepository;
 import com.yejin.exam.wbook.domain.post.service.PostService;
 import com.yejin.exam.wbook.global.exception.EntityAlreadyExistException;
+import com.yejin.exam.wbook.global.result.ResultResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -141,16 +142,16 @@ public class MemberService {
         return memberRepository.findAll();
     }
 
-    @Transactional
-    public long addCash(Member member, long price, String eventType) {
-        CashLog cashLog = cashService.addCash(member, price, eventType);
-
-        long newRestCash = member.getRestCash() + cashLog.getPrice();
-        member.setRestCash(newRestCash);
-        memberRepository.save(member);
-
-        return newRestCash;
-    }
+//    @Transactional
+//    public long addCash(Member member, long price, String eventType) {
+//        CashLog cashLog = cashService.addCash(member, price, eventType);
+//
+//        long newRestCash = member.getRestCash() + cashLog.getPrice();
+//        member.setRestCash(newRestCash);
+//        memberRepository.save(member);
+//
+//        return newRestCash;
+//    }
 
     @Data
     @AllArgsConstructor
@@ -166,4 +167,28 @@ public class MemberService {
     public Optional<Member> findById(long id) {
         return memberRepository.findById(id);
     }
+
+    @Transactional
+    public ResultResponse<AddCashResultResponseBody> addCash(Member member, long price, String eventType) {
+        CashLog cashLog = cashService.addCash(member, price, eventType);
+
+        long newRestCash = member.getRestCash() + cashLog.getPrice();
+        member.setRestCash(newRestCash);
+        memberRepository.save(member);
+
+        return ResultResponse.of(
+                "ADD_CASH_OK",
+                "성공",
+                new AddCashResultResponseBody(cashLog, newRestCash)
+        );
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class AddCashResultResponseBody {
+        CashLog cashLog;
+        long newRestCash;
+    }
+
+
 }

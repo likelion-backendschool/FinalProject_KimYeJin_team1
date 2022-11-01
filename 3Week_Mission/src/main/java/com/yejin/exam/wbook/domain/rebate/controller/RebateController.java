@@ -1,6 +1,7 @@
 package com.yejin.exam.wbook.domain.rebate.controller;
 
 import com.yejin.exam.wbook.domain.rebate.entity.RebateOrderItem;
+import com.yejin.exam.wbook.domain.rebate.service.RebateService;
 import com.yejin.exam.wbook.global.result.ResultResponse;
 import com.yejin.exam.wbook.util.Util;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class RebateController {
     public String makeData(String yearMonth) {
         ResultResponse makeDateResultResponse = rebateService.makeDate(yearMonth);
 
-        String redirect = makeDateResultResponse.addMsgToUrl("redirect:/adm/rebate/rebateOrderItemList?yearMonth=" + yearMonth);
+        String redirect = makeDateResultResponse.addMessageToUrl("redirect:/adm/rebate/rebateOrderItemList?yearMonth=" + yearMonth);
 
         return redirect;
     }
@@ -64,7 +65,7 @@ public class RebateController {
 
         String redirect = "redirect:/adm/rebate/rebateOrderItemList?yearMonth=" + yearMonth;
 
-        redirect = rebateResultResponse.addMsgToUrl(redirect);
+        redirect = rebateResultResponse.addMessageToUrl(redirect);
 
         return redirect;
     }
