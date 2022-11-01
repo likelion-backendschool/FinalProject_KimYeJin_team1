@@ -18,11 +18,13 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
+import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -39,14 +41,27 @@ public class MakeRebateOrderItemJobConfig {
     private final RebateOrderItemRepository rebateOrderItemRepository;
 
     @Bean
+    //    @Scheduled(cron= "0 0 4 15 * ?"  )
+    @Scheduled(cron= "0 1 * * * ?"  )
     public Job makeRebateOrderItemJob(Step makeRebateOrderItemStep1, CommandLineRunner initData) throws Exception {
         initData.run();
         log.debug("[rebateJob] start");
         return jobBuilderFactory.get("makeRebateOrderItemJob")
                 .start(makeRebateOrderItemStep1)
+                .start(step2(null))
                 .build();
     }
-
+//    @Bean
+//    @JobScope
+//    public Step step2(@Value("#{jobParameters[month]}") String date) {
+//        return stepBuilderFactory.get("step2")
+//                .tasklet((contribution, chunkContext) -> {
+//                    log.info(">>>>> This is step2");
+//                    log.info(">>>>> date = {}", date);
+//                    return RepeatStatus.FINISHED;
+//                })
+//                .build();
+//    }
     @Bean
     @JobScope
     public Step makeRebateOrderItemStep1(
