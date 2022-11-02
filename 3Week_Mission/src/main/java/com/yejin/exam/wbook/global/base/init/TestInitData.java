@@ -29,6 +29,8 @@ import java.util.List;
 @Configuration
 @Profile("test")
 public class TestInitData {
+
+    private boolean initDataDone = false;
     @Bean
     CommandLineRunner initData(
             MemberService memberService,
@@ -41,6 +43,11 @@ public class TestInitData {
             WithdrawService withdrawService
     ) {
         return args -> {
+
+            if (initDataDone) return;
+
+            initDataDone = true;
+
             Member member1=memberService.join(new MemberDto("user1","1234","1234","kyj011202@naver.com","author1"));
             Member member2=memberService.join(new MemberDto("user2","1234","1234","kyj2212@gmail.com",null));
             Member memberAdmin = memberService.join(new MemberDto("admin","1234","1234","yejin123kim@gmail.com","admin"));
