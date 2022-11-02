@@ -50,28 +50,17 @@ public class MakeRebateOrderItemJobConfig {
     private final RebateOrderItemRepository rebateOrderItemRepository;
 
     @Bean(JOB_NAME+"Job")
-    //    @Scheduled(cron= "0 0 4 15 * ?"  )
-//    @Scheduled(cron= "0 1 * * * ?"  )
+    //    @Scheduled(cron= "0 1 * * * ?"  )
+    @Scheduled(cron= "0 0 4 15 * ?"  )
     public Job makeRebateOrderItemJob(Step makeRebateOrderItemStep1, CommandLineRunner initData) throws Exception {
         initData.run();
         log.debug("[rebateJob] start");
         return jobBuilderFactory.get(JOB_NAME+"Job")
                 .start(makeRebateOrderItemStep1)
                 .incrementer(new RunIdIncrementer())
-//                .start(step2(null))
                 .build();
     }
-//    @Bean
-//    @JobScope
-//    public Step step2(@Value("#{jobParameters[month]}") String date) {
-//        return stepBuilderFactory.get("step2")
-//                .tasklet((contribution, chunkContext) -> {
-//                    log.info(">>>>> This is step2");
-//                    log.info(">>>>> date = {}", date);
-//                    return RepeatStatus.FINISHED;
-//                })
-//                .build();
-//    }
+
     @Bean(JOB_NAME+"Step1")
     @JobScope
     public Step makeRebateOrderItemStep1(
@@ -118,33 +107,6 @@ public class MakeRebateOrderItemJobConfig {
                 .parameterValues(parameters)
                 .build();
     }
-
-//    @StepScope
-//    @Bean("orderItemReader")
-//    public RepositoryItemReader<OrderItem> orderItemReader(
-//            @Value("#{jobParameters['month']}") String yearMonth
-//    ) throws Exception {
-//        log.debug("[rebateJob] reader start");
-//        if(yearMonth==null){
-//            yearMonth = "2022-11";
-//        }
-////        int monthEndDay = Util.date.getEndDayOf(jobParameter.getCreateDate());
-//        int monthEndDay = Util.date.getEndDayOf(yearMonth);
-//        LocalDateTime fromDate = Util.date.parse(yearMonth + "-01 00:00:00.000000");
-//        LocalDateTime toDate = Util.date.parse(yearMonth + "-%02d 23:59:59.999999".formatted(monthEndDay));
-//
-//        log.debug("[batch] findAllByPayDateBetween : ");
-//        RepositoryItemReader<OrderItem> repositoryItemReader = new RepositoryItemReaderBuilder<OrderItem>()
-//                .name(JOB_NAME+"reader")
-//                .repository(orderItemRepository)
-//                .methodName("findAllByPayDateBetween")
-//                .pageSize(5)
-//                .arguments(Arrays.asList(fromDate, toDate))
-//                .sorts(Collections.singletonMap("id", Sort.Direction.ASC))
-//                .build();
-////        log.debug("[batch] respositoryReader : " + repositoryItemReader.read().getId());
-//        return repositoryItemReader;
-//    }
 
     @StepScope
     @Bean
