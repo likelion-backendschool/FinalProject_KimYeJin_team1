@@ -33,6 +33,8 @@ import javax.persistence.EntityManagerFactory;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @RequiredArgsConstructor
@@ -87,6 +89,8 @@ public class MakeRebateOrderItemJobConfig {
         log.debug("[step] processor : "+step.toString());
         return step;
     }
+
+
     @StepScope
     @Bean("orderItemReader")
     public JpaPagingItemReader<OrderItem> orderItemReader(@Value("#{jobParameters['month']}") String yearMonth) throws Exception{
@@ -101,20 +105,17 @@ public class MakeRebateOrderItemJobConfig {
         LocalDateTime toDate = Util.date.parse(yearMonth + "-%02d 23:59:59.999999".formatted(monthEndDay));
 
         log.debug("[batch] findAllByPayDateBetween : ");
-//        RepositoryItemReader<OrderItem> repositoryItemReader = new RepositoryItemReaderBuilder<OrderItem>()
-//                .name(JOB_NAME+"reader")
-//                .repository(orderItemRepository)
-//                .methodName("findAllByPayDateBetween")
-//                .pageSize(5)
-//                .arguments(Arrays.asList(fromDate, toDate))
-//                .sorts(Collections.singletonMap("id", Sort.Direction.ASC))
-//                .build();
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("fromDate", fromDate);
+        parameters.put("toDate", toDate);
 
         return new JpaPagingItemReaderBuilder<OrderItem>()
                 .name("orderItemReader")
                 .entityManagerFactory(emf)
                 .pageSize(5)
-                .queryString("SELECT o FROM OrderItem as o")
+                .queryString("SELECT o FROM OrderItem as o where o.payDate between :fromDate and :toDate ORDER BY o.id ASC")
+                .parameterValues(parameters)
                 .build();
     }
 
