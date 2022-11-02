@@ -17,6 +17,7 @@ logging:
   level:
     com.yejin.exam.wbook: debug
 
+#spring.batch.initialize-schema: always
 #custom:
 #  genFileDirPath: c:/temp/app10
 
