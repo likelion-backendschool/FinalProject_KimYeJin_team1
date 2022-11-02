@@ -32,6 +32,7 @@ cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/
 [https://techblog.woowahan.com/2711/](https://techblog.woowahan.com/2711/)  
 
 #### **<Rebate 도메인>**
+#### **<Withdraw 도메인>**
 
 
 ### [지난 주 필수 기능]
