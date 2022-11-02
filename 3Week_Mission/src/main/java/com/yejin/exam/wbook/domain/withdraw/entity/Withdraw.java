@@ -1,5 +1,6 @@
 package com.yejin.exam.wbook.domain.withdraw.entity;
 
+import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.global.base.entity.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,7 +9,10 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Getter
@@ -18,6 +22,8 @@ import javax.persistence.Table;
 @ToString(callSuper = true)
 @Table(name = "withdraw")
 public class Withdraw extends BaseEntity {
+    @ManyToOne(fetch = LAZY)
+    private Member member;
     private String bankName;
     private String backAccountNo;
     private int price;

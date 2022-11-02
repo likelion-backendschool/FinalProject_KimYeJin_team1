@@ -1,6 +1,5 @@
 package com.yejin.exam.wbook.domain.withdraw.controller;
 
-import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.withdraw.dto.WithdrawDto;
 import com.yejin.exam.wbook.domain.withdraw.entity.Withdraw;
 import com.yejin.exam.wbook.domain.withdraw.service.WithdrawService;
@@ -8,13 +7,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Controller
 @RequestMapping("/withdraw")
@@ -40,7 +39,7 @@ public class WithdrawController {
 
         Withdraw withdraw = withdrawService.apply(withdrawdto);
 
-        final boolean isApplied = withdraw != null;
+        final boolean isApplied = withdraw.isApplied();
         if (isApplied) {
             mav.addObject("msg", "출금 신청이 완료되었습니다.");
             mav.addObject("url", "/withdraw/applyList");
@@ -52,5 +51,14 @@ public class WithdrawController {
             mav.setViewName("alert");
             return mav;
         }
+    }
+
+    @GetMapping("/applyList")
+    public ModelAndView applyList(ModelAndView mav){
+        List<Withdraw> withdraws = withdrawService.findByMember();
+        mav.addObject("withdraws", withdraws);
+        mav.setViewName("withdraw/applyList");
+        return mav;
+
     }
 }
