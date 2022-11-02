@@ -3,6 +3,7 @@ package com.yejin.exam.wbook.domain.withdraw.controller;
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.withdraw.dto.WithdrawDto;
 import com.yejin.exam.wbook.domain.withdraw.entity.Withdraw;
+import com.yejin.exam.wbook.domain.withdraw.service.WithdrawService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,8 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 @Slf4j
 public class WithdrawController {
+
+    private final WithdrawService withdrawService;
 
     @GetMapping("/apply")
     public String showApply(WithdrawDto withdrawdto){
