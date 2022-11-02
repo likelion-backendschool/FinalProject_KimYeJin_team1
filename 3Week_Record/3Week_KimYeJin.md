@@ -49,7 +49,7 @@ cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/
 
 ### [추가기능]
 - [x] 정산데이터 배치로 생성
-- [ ] 출금 기능 
+- [ ] 출금 기능 // 구현 중
 
 <br>
 <br> 
@@ -362,6 +362,45 @@ SELECT o FROM OrderItem as o where o.payDate between :fromDate and :toDate ORDER
 ![img2](https://i.imgur.com/wBIdmJi.png)  
 
 
+
+<br>
+
+### 출금 도메인
+
+<br>
+
+1. mvc 구성
+
+```java
+withdraw
+    entity/WithdrawApply // 출금신청
+    dto/WithdrawApplyDto // 출금신청 작성 폼
+    controller/AdmWithddrawController // 관리자 출금 처리
+              /WithdrawController // 사용자 출금 신청 
+    service/WithdrawService // 출금 비지니스 로직 
+    repository/WithdrawApplyRepository // 출금신청 repository
+```
+
+WithdraApply entity 구성은 아래와 같다.
+
+출금 신청서 작성자 Member와, 은행 계좌정보, 출금 가격 정보를 필드로 가지며,
+
+신청서가 작성이 되었는지, 취소하였는지, 출금처리가 완료되었는지 여부를 확인하는 boolean 필드 세가지를 추가로 구성하였다.
+
+```java
+public class WithdrawApply extends BaseEntity {
+    @ManyToOne(fetch = LAZY)
+    private Member member;
+    private String bankName;
+    private String backAccountNo;
+    private int price;
+    private boolean isApplied; // 신청여부
+    private boolean isCanceled; // 취소여부
+    private boolean isPaid; // 출금처리여부(지급여부)
+}
+```
+
+2. 출금 테스트 작성
 
 ## **[특이사항]**
 
