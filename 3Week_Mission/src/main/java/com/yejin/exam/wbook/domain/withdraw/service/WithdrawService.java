@@ -51,7 +51,7 @@ public class WithdrawService {
     }
 
     public ResultResponse withdraw(long withdrawApplyId) {
-        Optional<WithdrawApply> oWithdrawApply = withdrawApplyRepository.findByWithdrawApplyId(withdrawApplyId);
+        Optional<WithdrawApply> oWithdrawApply = withdrawApplyRepository.findById(withdrawApplyId);
         if(!oWithdrawApply.isPresent()){
             return ResultResponse.of("NO_WITHDRAW_APPLY_FAILED", "출금가능한 신청서가 없습니다.");
         }

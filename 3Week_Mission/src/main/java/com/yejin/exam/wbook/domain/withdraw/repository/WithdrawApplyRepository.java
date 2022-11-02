@@ -11,6 +11,5 @@ public interface WithdrawApplyRepository extends JpaRepository<WithdrawApply, Lo
 
     List<WithdrawApply> findAllByMember(Member member);
 
-    Optional<WithdrawApply> findByWithdrawApplyId(long withdrawApplyId);
 
 }

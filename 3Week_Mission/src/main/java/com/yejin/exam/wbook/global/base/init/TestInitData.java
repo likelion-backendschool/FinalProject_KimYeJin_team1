@@ -12,6 +12,8 @@ import com.yejin.exam.wbook.domain.post.service.PostService;
 import com.yejin.exam.wbook.domain.product.entity.Product;
 import com.yejin.exam.wbook.domain.product.service.ProductService;
 import com.yejin.exam.wbook.domain.rebate.service.RebateService;
+import com.yejin.exam.wbook.domain.withdraw.dto.WithdrawApplyDto;
+import com.yejin.exam.wbook.domain.withdraw.service.WithdrawService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +37,8 @@ public class TestInitData {
             CartService cartService,
             OrderService orderService,
             OrderRepository orderRepository,
-            RebateService rebateService
+            RebateService rebateService,
+            WithdrawService withdrawService
     ) {
         return args -> {
             Member member1=memberService.join(new MemberDto("user1","1234","1234","kyj011202@naver.com","author1"));
@@ -135,6 +138,8 @@ public class TestInitData {
                     )
             );
             //rebateService.makeDate("2022-11");
+
+            withdrawService.apply(member1,new WithdrawApplyDto("우리은행","123412341234",10));
 
         };
     }
