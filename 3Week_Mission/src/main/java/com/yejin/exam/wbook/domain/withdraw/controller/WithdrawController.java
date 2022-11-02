@@ -1,10 +1,13 @@
 package com.yejin.exam.wbook.domain.withdraw.controller;
 
+import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.withdraw.dto.WithdrawDto;
 import com.yejin.exam.wbook.domain.withdraw.entity.Withdraw;
 import com.yejin.exam.wbook.domain.withdraw.service.WithdrawService;
+import com.yejin.exam.wbook.global.base.dto.MemberContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,14 +33,14 @@ public class WithdrawController {
 
     }
     @PostMapping("/apply")
-    public ModelAndView apply(@Valid WithdrawDto withdrawdto, ModelAndView mav, BindingResult bindingResult){
+    public ModelAndView apply(@AuthenticationPrincipal MemberContext memberContext, @Valid WithdrawDto withdrawdto, ModelAndView mav, BindingResult bindingResult){
         mav.setViewName("withdraw/apply_form");
 
         if (bindingResult.hasErrors()) {
             return mav;
         }
-
-        Withdraw withdraw = withdrawService.apply(withdrawdto);
+        Member member = memberContext.getMember();
+        Withdraw withdraw = withdrawService.apply(member, withdrawdto);
 
         final boolean isApplied = withdraw.isApplied();
         if (isApplied) {
@@ -54,8 +57,9 @@ public class WithdrawController {
     }
 
     @GetMapping("/applyList")
-    public ModelAndView applyList(ModelAndView mav){
-        List<Withdraw> withdraws = withdrawService.findByMember();
+    public ModelAndView applyList(@AuthenticationPrincipal MemberContext memberContext, ModelAndView mav){
+        Member member = memberContext.getMember();
+        List<Withdraw> withdraws = withdrawService.findByMember(member);
         mav.addObject("withdraws", withdraws);
         mav.setViewName("withdraw/applyList");
         return mav;
