@@ -68,6 +68,8 @@ public class DevInitData {
             Product product2 = productService.create(member2, "상품명2", 40_000, "스프링부트", "#IT #REACT");
             Product product3 = productService.create(member1, "상품명3", 50_000, "REACT", "#IT #REACT");
             Product product4 = productService.create(member2, "상품명4", 60_000, "HTML", "#IT #HTML");
+            Product product5 = productService.create(member2, "상품명5", 90_000, "HTML", "#태그5 #태그6");
+            Product product6 = productService.create(member2, "상품명6", 90_000, "HTML", "#태그5 #태그6");
 
             memberService.addCash(member1, 10_000, "충전__무통장입금");
             memberService.addCash(member1, 20_000, "충전__무통장입금");
@@ -133,8 +135,14 @@ public class DevInitData {
                             product4
                     )
             );
-
-            rebateService.makeDate("2022-11");
+            Order order6 = helper.order(member2, Arrays.asList(
+                            product5,
+                            product6
+                    )
+            );
+            orderService.payByRestCashOnly(order5);
+            orderService.payByRestCashOnly(order6);
+            //rebateService.makeDate("2022-11");
 
         };
     }

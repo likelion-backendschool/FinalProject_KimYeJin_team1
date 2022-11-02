@@ -134,7 +134,7 @@ public class TestInitData {
                             product6
                     )
             );
-            rebateService.makeDate("2022-11");
+            //rebateService.makeDate("2022-11");
 
         };
     }
