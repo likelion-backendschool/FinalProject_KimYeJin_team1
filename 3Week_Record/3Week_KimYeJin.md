@@ -48,6 +48,10 @@ cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/
 
 ### [추가기능]
 - [x] 정산데이터 배치로 생성
+- [ ] 출금 기능 
+
+<br>
+<br> 
 
 ### 3주차 미션 요약
 
@@ -264,30 +268,99 @@ SecurityConfig 는 아래와 같다.
 
 ### batch
 
-1. 정산 Job 생성  
+1. 정산 Job 
 
 `@Scheduled (cron=)` 을 이용하여 매월 15일 4시에 실행되도록 설정  
+`incrementer(new RunIdIncrementer())` 를 이용하여 run_id 라는 파라미터로 job 이 서로 다른 스케쥴로 인식되어 실행될 수 있도록 한다.
 
 ```java
-    @Bean
+    @Bean(JOB_NAME+"Job")
     @Scheduled(cron= "0 0 4 15 * ?"  )
     public Job makeRebateOrderItemJob(Step makeRebateOrderItemStep1, CommandLineRunner initData) throws Exception {
-        initData.run();
-        log.debug("[rebateJob] start");
-        return jobBuilderFactory.get("makeRebateOrderItemJob")
-                .start(makeRebateOrderItemStep1)
-                .build();
+            initData.run();
+            log.debug("[rebateJob] start");
+            return jobBuilderFactory.get(JOB_NAME+"Job")
+            .start(makeRebateOrderItemStep1)
+            .incrementer(new RunIdIncrementer())
+            .build();
     }
 ```
 ![img1](https://i.imgur.com/ufK5UPM.png)  
 
+
+2. Job 파라미터  
+
+job 파라미터를 확인 하면 아래와 같다.
+java 실행 시 입력한 parameter 인 month = 2022-11 값을 기준으로 데이터를 정렬한다.
+단, month 값이 들어오지 않을 시 default로 2022-11로 실행되도록 하였다.
+```java
+    @StepScope
+    @Bean("orderItemReader")
+    public JpaPagingItemReader<OrderItem> orderItemReader(@Value("#{jobParameters['month']}") String yearMonth) throws Exception{
+
+        log.debug("[rebateJob] reader start");
+        if(yearMonth==null){
+            yearMonth="2022-11";
+        }
+        // .. 생략 ...
+    }
+```
+![img3](https://i.imgur.com/Uu8PifK.png)
+
 <br>
-배치 후 아래와 같이 정산데이터 생성됨.
+run configuration 에 아래와 같이 parameter를 지정하였다.  
+(처음에 environment variable에 값을 넣고 parameter가 계속 null 이 나와 엄청난 삽질을 하였다...)  
 
-![img2](https://i.imgur.com/BfFwBlh.png)  
+![img4](https://i.imgur.com/fQ94KRV.png)
 
-추후 수정 필요
---> 한번 batch가 돌아간 이후로는 parameter를 통해 job 이 다시 돌아가도록 해야함.
+3. ItemReader : RepositoryItemReader -> JpaPagingItemReader  
+
+처음에는 RepositoryItemReader로 OrderItemRespsitory의 `findAllByPayDateBetween` 메소드를 이용하였으나,
+Reader 값이 반복적으로 null 이 나와 Processor(), writer()가 정상적으로 실행되지 못하였다.  
+
+따라서 일반적으로 ItemReader 구현 클래스로 많이 사용하는 JpaPagingItemReader 클래스를 사용해 보았다.  
+
+참고자료 : [https://renuevo.github.io/spring/batch/spring-batch-chapter-3/](https://renuevo.github.io/spring/batch/spring-batch-chapter-3/)  
+-> `JdbcPagingItemReader`, `JpaPagingItemReader`, `RepositoryItemReader` 세가지 클래스를 모두 잘 설명하고 있어 많은 참고가 되었다.
+
+```java
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("fromDate", fromDate);
+        parameters.put("toDate", toDate);
+
+        return new JpaPagingItemReaderBuilder<OrderItem>()
+                .name("orderItemReader")
+                .entityManagerFactory(emf)
+                .pageSize(5)
+                .queryString("SELECT o FROM OrderItem as o where o.payDate between :fromDate and :toDate ORDER BY o.id ASC")
+                .parameterValues(parameters)
+                .build();
+```
+
+JpaPaging 은 Paging ItemReader의 한가지로 속도가 느리다는 단점이 있지만 메모리 이슈가 없고 성능상 유리하기 때문에 많이 사용한다고 한다.    
+여기서 pageSize 는 chunksize과 동일하게 맞추는 것이 좋다고 하여 chunksize로 설정한 '5' 를 동일하게 설정하였다.  
+
+<br>
+queryString에 파라미터를 넣기 위하여 `parameterValues` 를 사용하였다.  
+
+파라미터를 모은 map 를 parameterValues()로 세팅 후 아래와 같이 파라미터의 key값을 기준으로 `:key값` 의 형태로 query문에 값을 사용할 수 있다.
+```java
+SELECT o FROM OrderItem as o where o.payDate between :fromDate and :toDate ORDER BY o.id ASC"
+
+```
+
+참고자료 : [https://sadcode.tistory.com/47](https://sadcode.tistory.com/47)
+-> 단순히 parameter를 사용하는 부분만 참고하였으나, 포스팅 내용은 영속성과 관련된 내용  
+
+<br>
+
+
+4. 정산 데이터 배치로 생성 부분 확인  
+
+정산데이터 리스트 접근시 데이터가 정상적으로 생성된 것을 확인  
+![img2](https://i.imgur.com/wBIdmJi.png)  
+
+
 
 ## **[특이사항]**
 
@@ -334,10 +407,22 @@ rebatePrice를 계산하는 회계적인 이론을 잘 모르겠어서 도매가
 
 ```
 <br>
-  
+
+3. RepositoryItemReader 클래스로 null이 발생한 원인 분석
+
+-> 아직 어느 부분에서 null이 발생하는지 원인을 찾지 못했다. paging을 하는 과정에서 아래 메소드가 잘못된 것인지 리팩토링 수 확인해 봐야겠다.
+`Page<OrderItem> findAllByPayDateBetween(LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable)`
+
 ### Refcatoring 시 추가적으로 구현하고 싶은 부분  
 
 1. yearMonth를 선택하지 않은 url에서는 정산을 할 시, Refer에서 url을 가져오는 과정에서 yearMonth가 없기 때문에 500 에러 발생
---> default month정보를 입력하는 방식으로 수정  
-2. batch 코드 수정 -> parameter가 아닌 job의 실행 기준을 설정하여 exit되도록 수정
+--> default month정보를 입력하는 방식으로 수정   
+<br>
+
+
+2. ItemReader에 QueryDSL 도입
+ItemReader 에 queryDsl을 도입한 예시를 찾아서 이부분으로 구현해보고 refactoring 해보고 싶다.
+참고자료 : [https://techblog.woowahan.com/2662/](https://techblog.woowahan.com/2662/)  
+<br>
+
 3. 추가 기능 출금 구현
