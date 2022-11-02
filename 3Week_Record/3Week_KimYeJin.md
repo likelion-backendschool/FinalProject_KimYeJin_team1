@@ -413,6 +413,61 @@ rebatePrice를 계산하는 회계적인 이론을 잘 모르겠어서 도매가
 -> 아직 어느 부분에서 null이 발생하는지 원인을 찾지 못했다. paging을 하는 과정에서 아래 메소드가 잘못된 것인지 리팩토링 수 확인해 봐야겠다.
 `Page<OrderItem> findAllByPayDateBetween(LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable)`
 
+<br>
+
+4. reader() 의 리턴은 인터페이스가 아닌 클래스로 리턴해야 한다.  
+batch 구현 중 아래와 같은 에러 발생
+```java
+Method threw 'java.lang.IllegalArgumentException' exception. Cannot evaluate com.sun.proxy....
+```
+디버깅 하며 확인해보니, ItemReader의 값이 null이 발생하여 proxy를 구현할 수 없는 상황으로 확인 하여 ItemReader 수정  
+
+reader() 의 리턴값은 ItemReadear의 구현체인 JpaPaginItemReader나 JdbcPagingItemReader와 같이 클래스로 리턴해야 함을 알게됨  
+
+참고자료 : [https://jojoldu.tistory.com/132](https://jojoldu.tistory.com/132)
+
+5. batch 구현하며 만난 에러
+
+- [ ] 여러개의 batch를 동일하게 세팅하였을 때 발생 -> 한개의 jpa로 수정
+```text
+JPA does not support custom isolation levels, so locks may not be taken when launching Jobs. To silence this warning, set 'spring.batch.jdbc.isolation-level-for-create' to 'default'.
+
+```
+- [ ] initialize always 설정 -> batch 테이블이 이미 있다는 경고 메세지
+```java
+error: 1050-42s01: table 'batch_job_instance' already exists
+```
+-> 해당 메세지로 인하여 batch가 실패하지는 않으나 지속적으로 발생
+
+- [ ] processor와 wirter에 intellij 경고 메세지 
+```text
+unchecked call to 'processor(itemprocessor<? super i, ? extends o>)' as a member of raw type 'org.springframework.batch.core.step.builder.simplestepbuilder' 
+
+```
+-> 에러메세지는 아니나, intelliJ에서 수정할 것을 권고한다.. 정확한 원인은 나중에 리팩토링시 확인해봐야겠다.
+
+
+- [ ] batch의 job, step, reader, processor, write의 메소드 명과 bean 으로 생성된 클래스명이 일치하지 않아 필요한 bean을 식별하지 못하여 발생 -> 이름을 모두 동일 하게 수정
+
+```text
+spring batch required a single bean but 2 were found
+```
+`JOB_NAME` 이라는 static final 변수를 지정하여 해당 변수에 jon, step을 붙이는 규칙성있는 네이밍을 지정
+```java
+    public static final String JOB_NAME = "makeRebateOrderItem";
+
+    @Bean(JOB_NAME+"Job")
+    @Scheduled(cron= "0 0 4 15 * ?"  )
+    public Job makeRebateOrderItemJob(Step makeRebateOrderItemStep1, CommandLineRunner initData) throws Exception{
+        initData.run();
+        log.debug("[rebateJob] start");
+        return jobBuilderFactory.get(JOB_NAME+"Job")
+        // ... 생략 ...
+    }
+```
+  
+<br>
+
 ### Refcatoring 시 추가적으로 구현하고 싶은 부분  
 
 1. yearMonth를 선택하지 않은 url에서는 정산을 할 시, Refer에서 url을 가져오는 과정에서 yearMonth가 없기 때문에 500 에러 발생
