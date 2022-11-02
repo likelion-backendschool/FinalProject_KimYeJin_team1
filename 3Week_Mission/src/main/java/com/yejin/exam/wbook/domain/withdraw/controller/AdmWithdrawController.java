@@ -1,17 +1,20 @@
 package com.yejin.exam.wbook.domain.withdraw.controller;
 
-import com.yejin.exam.wbook.domain.member.entity.Member;
-import com.yejin.exam.wbook.domain.withdraw.dto.WithdrawDto;
-import com.yejin.exam.wbook.domain.withdraw.entity.Withdraw;
+import com.yejin.exam.wbook.domain.withdraw.entity.WithdrawApply;
 import com.yejin.exam.wbook.domain.withdraw.service.WithdrawService;
+import com.yejin.exam.wbook.global.result.ResultResponse;
+import com.yejin.exam.wbook.util.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Controller
@@ -24,9 +27,22 @@ public class AdmWithdrawController {
     @GetMapping("/applyList")
     @PreAuthorize("hasRole('ADMIN')")
     public ModelAndView showApply(ModelAndView mav){
-        List<Withdraw> withdraws = withdrawService.findAll();
-        mav.addObject("withdraws", withdraws);
+        List<WithdrawApply> withdrawApplies = withdrawService.findAll();
+        mav.addObject("withdrawApplies", withdrawApplies);
         mav.setViewName("adm/withdraw/applyList");
         return mav;
+    }
+
+    @PostMapping("/{withdrawApplyId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String rebateOne(@PathVariable long withdrawApplyId, HttpServletRequest req) {
+        ResultResponse withdrawResultResponse = withdrawService.withdraw(withdrawApplyId);
+
+
+        String redirect = "redirect:/adm/withdraw/applyList";
+
+        redirect = withdrawResultResponse.addMessageToUrl(redirect);
+
+        return redirect;
     }
 }

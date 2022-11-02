@@ -1,15 +1,21 @@
 package com.yejin.exam.wbook.domain.withdraw.service;
 
+import com.yejin.exam.wbook.domain.cash.entity.CashLog;
 import com.yejin.exam.wbook.domain.member.entity.Member;
-import com.yejin.exam.wbook.domain.withdraw.dto.WithdrawDto;
-import com.yejin.exam.wbook.domain.withdraw.entity.Withdraw;
-import com.yejin.exam.wbook.domain.withdraw.repository.WithdrawRepository;
+import com.yejin.exam.wbook.domain.member.service.MemberService;
+import com.yejin.exam.wbook.domain.rebate.entity.RebateOrderItem;
+import com.yejin.exam.wbook.domain.withdraw.dto.WithdrawApplyDto;
+import com.yejin.exam.wbook.domain.withdraw.entity.WithdrawApply;
+import com.yejin.exam.wbook.domain.withdraw.repository.WithdrawApplyRepository;
+import com.yejin.exam.wbook.global.result.ResultResponse;
+import com.yejin.exam.wbook.util.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -17,29 +23,56 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class WithdrawService {
 
-    private final WithdrawRepository withdrawRepository;
+    private final WithdrawApplyRepository withdrawApplyRepository;
+    private final MemberService memberService;
     @Transactional
-    public Withdraw apply(Member member, WithdrawDto withdrawDto){
+    public WithdrawApply apply(Member member, WithdrawApplyDto withdrawApplydto){
 
-        Withdraw withdraw = Withdraw.builder()
+        WithdrawApply withdraw = WithdrawApply.builder()
                 .member(member)
-                .bankName(withdrawDto.getBankName())
-                .backAccountNo(withdrawDto.getBackAccountNo())
-                .price(withdrawDto.getPrice())
+                .bankName(withdrawApplydto.getBankName())
+                .backAccountNo(withdrawApplydto.getBackAccountNo())
+                .price(withdrawApplydto.getPrice())
                 .isApplied(true)
                 .isCanceled(false)
                 .isPaid(false)
                 .build();
 
-        withdrawRepository.save(withdraw);
+        withdrawApplyRepository.save(withdraw);
         return withdraw;
     }
 
-    public List<Withdraw> findByMember(Member member) {
-       return withdrawRepository.findAllByMember(member);
+    public List<WithdrawApply> findByMember(Member member) {
+       return withdrawApplyRepository.findAllByMember(member);
     }
 
-    public List<Withdraw> findAll() {
-        return withdrawRepository.findAll();
+    public List<WithdrawApply> findAll() {
+        return withdrawApplyRepository.findAll();
+    }
+
+    public ResultResponse withdraw(long withdrawApplyId) {
+        Optional<WithdrawApply> oWithdrawApply = withdrawApplyRepository.findByWithdrawApplyId(withdrawApplyId);
+        if(!oWithdrawApply.isPresent()){
+            return ResultResponse.of("NO_WITHDRAW_APPLY_FAILED", "출금가능한 신청서가 없습니다.");
+        }
+        WithdrawApply withdrawApply = oWithdrawApply.get();
+
+        if (withdrawApply.isApplied() == false) {
+            return ResultResponse.of("NOT_APPLIED_FAILED", "출금 신청되어있지 않습니다.");
+        }
+        int calculateWithdrawPrice =  withdrawApply.getPrice() * -1;
+        CashLog cashLog = memberService.addCash(
+                withdrawApply.getMember(),
+                calculateWithdrawPrice,
+                "출금__%d__지급__예치금".formatted(withdrawApplyId)
+        ).getData().getCashLog();
+
+        return ResultResponse.of(
+                "REBATE_FIN_OK",
+                "출금 신청 번호 %d번에 대해서 출금 %d 원 정상 지급되었습니다.".formatted(withdrawApplyId, calculateWithdrawPrice),
+                Util.mapOf(
+                        "cashLogId", cashLog.getId()
+                )
+        );
     }
 }

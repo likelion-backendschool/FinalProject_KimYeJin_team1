@@ -21,7 +21,7 @@ import static javax.persistence.FetchType.LAZY;
 @SuperBuilder
 @ToString(callSuper = true)
 @Table(name = "withdraw")
-public class Withdraw extends BaseEntity {
+public class WithdrawApply extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     private Member member;
     private String bankName;

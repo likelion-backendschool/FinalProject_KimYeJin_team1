@@ -3,15 +3,13 @@ package com.yejin.exam.wbook.domain.withdraw.dto;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class WithdrawDto {
+public class WithdrawApplyDto {
 
     @NotBlank(message = "은행명을 입력해주세요")
     private String bankName;

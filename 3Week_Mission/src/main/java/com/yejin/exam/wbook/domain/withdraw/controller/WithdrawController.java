@@ -1,8 +1,8 @@
 package com.yejin.exam.wbook.domain.withdraw.controller;
 
 import com.yejin.exam.wbook.domain.member.entity.Member;
-import com.yejin.exam.wbook.domain.withdraw.dto.WithdrawDto;
-import com.yejin.exam.wbook.domain.withdraw.entity.Withdraw;
+import com.yejin.exam.wbook.domain.withdraw.dto.WithdrawApplyDto;
+import com.yejin.exam.wbook.domain.withdraw.entity.WithdrawApply;
 import com.yejin.exam.wbook.domain.withdraw.service.WithdrawService;
 import com.yejin.exam.wbook.global.base.dto.MemberContext;
 import lombok.RequiredArgsConstructor;
@@ -27,22 +27,22 @@ public class WithdrawController {
     private final WithdrawService withdrawService;
 
     @GetMapping("/apply")
-    public String showApply(WithdrawDto withdrawdto){
+    public String showApply(WithdrawApplyDto withdrawApplydto){
 
         return "withdraw/apply_form";
 
     }
     @PostMapping("/apply")
-    public ModelAndView apply(@AuthenticationPrincipal MemberContext memberContext, @Valid WithdrawDto withdrawdto, ModelAndView mav, BindingResult bindingResult){
+    public ModelAndView apply(@AuthenticationPrincipal MemberContext memberContext, @Valid WithdrawApplyDto withdrawApplydto, ModelAndView mav, BindingResult bindingResult){
         mav.setViewName("withdraw/apply_form");
 
         if (bindingResult.hasErrors()) {
             return mav;
         }
         Member member = memberContext.getMember();
-        Withdraw withdraw = withdrawService.apply(member, withdrawdto);
+        WithdrawApply withdrawApply = withdrawService.apply(member, withdrawApplydto);
 
-        final boolean isApplied = withdraw.isApplied();
+        final boolean isApplied = withdrawApply.isApplied();
         if (isApplied) {
             mav.addObject("msg", "출금 신청이 완료되었습니다.");
             mav.addObject("url", "/withdraw/applyList");
@@ -59,8 +59,8 @@ public class WithdrawController {
     @GetMapping("/applyList")
     public ModelAndView applyList(@AuthenticationPrincipal MemberContext memberContext, ModelAndView mav){
         Member member = memberContext.getMember();
-        List<Withdraw> withdraws = withdrawService.findByMember(member);
-        mav.addObject("withdraws", withdraws);
+        List<WithdrawApply> withdrawApplies = withdrawService.findByMember(member);
+        mav.addObject("withdrawApplies", withdrawApplies);
         mav.setViewName("withdraw/applyList");
         return mav;
 
