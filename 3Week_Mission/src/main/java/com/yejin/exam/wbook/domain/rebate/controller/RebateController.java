@@ -44,7 +44,7 @@ public class RebateController {
     @GetMapping("/rebateOrderItemList")
     @PreAuthorize("hasRole('ADMIN')")
     public String showRebateOrderItemList(String yearMonth, Model model) {
-        if (yearMonth == null) {
+        if (yearMonth.isEmpty() || yearMonth==null) {
             yearMonth = "2022-11";
         }
 
