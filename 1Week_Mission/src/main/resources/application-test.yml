@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mariadb://${testDbIp:shadows.site}:3326/wbook__test?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul
+    url: jdbc:mariadb://${testDbIp:t2.yejin.site}:3306/wbook_test?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul
     username: ${testDbId:yejin}
     password: ${testDbPw:yejin1234}
   jpa:

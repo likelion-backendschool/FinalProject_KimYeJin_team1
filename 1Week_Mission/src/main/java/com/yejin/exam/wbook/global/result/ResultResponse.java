@@ -24,16 +24,16 @@ public class ResultResponse<T> {
         return new ResultResponse<>(resultCode,message,null);
     }
 
-    public static <T> ResultResponse<T> successOf(String resultCode,String message,T data) {
-        return of(resultCode, message, data);
+    public static <T> ResultResponse<T> successOf(T data) {
+        return of("S-1", "성공", data);
     }
 
-    public static <T> ResultResponse<T> failOf(String resultCode,String message,T data) {
-        return of(resultCode, message, data);
+    public static <T> ResultResponse<T> failOf(T data) {
+        return of("F-1", "실패", data);
     }
 
     public boolean isSuccess() {
-        return resultCode.endsWith("OK");
+        return resultCode.startsWith("S-1");
     }
 
     public boolean isFail() {

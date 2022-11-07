@@ -111,17 +111,14 @@ public class MemberController {
         mav.setViewName("member/profile_form");
         Member member = memberService.findByUsername(principal.getName()).orElseThrow(()->new RuntimeException());
         if(memberModifyPasswordDto.getOldPassword() == memberModifyPasswordDto.getPassword()){
-            bindingResult.addError(new FieldError("member", "password","기존 패스워드와 동일한 패스워드로 바꿀 수 없습니다."));
+            bindingResult.addError(new FieldError("member", "Pwd","기존 패스워드와 동일한 패스워드로 바꿀 수 없습니다."));
             return mav;
         }
         if (!memberModifyPasswordDto.getPassword().equals(memberModifyPasswordDto.getPasswordConfirm())) {
-            bindingResult.addError(new FieldError("member", "passwordConfirm","2개의 패스워드가 일치하지 않습니다."));
+            bindingResult.addError(new FieldError("member", "PwdConfirm","2개의 패스워드가 일치하지 않습니다."));
             return mav;
         }
-        if(!memberService.modifyPassword(member,memberModifyPasswordDto.getPassword(),memberModifyPasswordDto.getOldPassword())){
-            bindingResult.addError(new FieldError("member", "oldPassword","올바른 기존 패스워드를 입력하세요."));
-            return mav;
-        }
+        memberService.modifyPassword(member,memberModifyPasswordDto.getPassword());
         mav.setViewName("redirect:/member/profile");
         return mav;
 
@@ -135,9 +132,9 @@ public class MemberController {
     public ResponseEntity<ResultResponse> findUsername(ModelAndView mav, String email){
         Optional<Member> oMember = memberService.findByEmail(email);
         if(oMember.isPresent()){
-            return ResponseEntity.ok(ResultResponse.successOf("FIND_USERNAME_OK","해당하는 ID가 존재합니다." ,oMember.get().getUsername()));
+            return ResponseEntity.ok(ResultResponse.of("FIND_USERNAME_OK","해당하는 ID가 존재합니다." ,oMember.get().getUsername()));
         }
-        return ResponseEntity.ok(ResultResponse.failOf("FIND_USERNAME_FAIL","해당하는 ID가 없습니다.",false));
+        return ResponseEntity.ok(ResultResponse.of("FIND_USERNAME_FAIL","해당하는 ID가 없습니다.",false));
     }
 
     @GetMapping("/findPassword")
