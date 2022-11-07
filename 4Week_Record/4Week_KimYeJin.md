@@ -321,6 +321,56 @@ public class BookChapterDto {
 
 ![img5](https://i.imgur.com/pg6gW69.png)
 
+
+6. swagger2 적용 시 patchmatch 로 인한 patternsCondition = null 이슈
+```text
+springfox.documentation.spi.service.contexts.Orderings.patternsCondition is null 발생
+```
+
+application.yml 에 matching 전략을 ant path로 설정
+```yaml
+spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant-path-matcher
+```
+
+swaager 설정 파일에서 patchs가 잘 적용되는지 확인  
+PathSelector.any() 를 이용하여 모든 ant-path에 대하여 적용
+```java
+        return new Docket(DocumentationType.SWAGGER_2)
+                .useDefaultResponseMessages(false)
+                .globalResponseMessage(RequestMethod.POST, responseMessages)
+                .globalResponseMessage(RequestMethod.GET, responseMessages)
+                .globalResponseMessage(RequestMethod.DELETE, responseMessages)
+                .globalResponseMessage(RequestMethod.PUT, responseMessages)
+                .apiInfo(apiInfo())
+                .securityContexts(List.of(securityContext()))
+                .securitySchemes(List.of(apiKey()))
+                .select()
+                .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
+                .paths(PathSelectors.any())
+                .build();
+    }
+```
+
+7. swagger2를 이용하여 api response code 정보 추가  
+
+`@ApiResponsees()` 어노테이션 이용하여 resultCode S는 성공 F 는 실패 M은 auth 관련 실패 로 나누었다.  
+처음에는 resultCode를 "GET_MYBOOK_OK" 짧은 단어형태의 코드로 구현하였는데, 이렇게 문서화하여 조작하기 위해서는 더 간결한 코드가 맞다고 판단되어 수정하였다.  
+```java
+    @ApiOperation(value = "My Book 상세")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 구매 도서 상세 조회에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 존재하지 않는 도서입니다.\n"
+                    + "M001 - 유효하지 않은 사용자 입니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+    })
+```
+doc 문서에 적용한 코드 잘 나오는 것 확인
+![img6](https://i.imgur.com/mH8C0mc.png)
+
+
 ### Refcatoring 시 추가적으로 구현하고 싶은 부분  
 
 
