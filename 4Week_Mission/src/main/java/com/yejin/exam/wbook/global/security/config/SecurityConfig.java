@@ -49,17 +49,19 @@ public class SecurityConfig {
             "/robots.txt/**"
     }; // 정적 파일 인가 없이 모두 허용
     private static final String[] AUTH_ALL_LIST = {
+            "/api/v1/member/login",
             "/member/join/**",
             "/member/login/**",
             "/member/findUsername/**",
             "/member/findPassword/**",
+            "/denied",
             "/"
     }; // 모두 허용
     private static final String[] AUTH_ADMIN_LIST = {
             "/adm/**"
     }; // admin 롤 만 허용
     private static final String[] AUTH_AUTHENTICATED_LIST = {
-//            "/api/**",
+            "/api/**",
             "/member/**",
             "/post/**",
             "/product/**",
@@ -71,6 +73,7 @@ public class SecurityConfig {
 
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final AccessDeniedHandlerImpl jwtAccessDeniedHandler;
 //    @Bean
 //    public PasswordEncoder passwordEncoder() {
 //        return new BCryptPasswordEncoder();
@@ -111,6 +114,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .exceptionHandling()
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .accessDeniedHandler(jwtAccessDeniedHandler)
+        ;
+        http
                 .cors().configurationSource(corsConfigurationSource());
         http
                 .csrf()
@@ -140,18 +148,13 @@ public class SecurityConfig {
 //                .formLogin()
 //                .loginPage("/member/login")
 //                .loginProcessingUrl("/member/login")
-//                .successHandler(customSuccessHandler())
 //                .failureHandler(customFailureHandler);
 //        http
 //                .logout()
 //                .logoutRequestMatcher(new AntPathRequestMatcher("/member/logout"))
 //                .logoutSuccessUrl("/")
 //                .invalidateHttpSession(true);
-        http
-                .exceptionHandling()
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                .accessDeniedHandler(accessDeniedHandler())
-                ;
+
 
         return http.build();
     }
@@ -169,10 +172,10 @@ public class SecurityConfig {
         return source;
     }
 
-    @Bean
-    public AccessDeniedHandler accessDeniedHandler(){
-        AccessDeniedHandlerImpl accessDeniedHandler = new AccessDeniedHandlerImpl();
-        accessDeniedHandler.setErrorPage("/denied");
-        return accessDeniedHandler;
-    }
+//    @Bean
+//    public AccessDeniedHandler accessDeniedHandler(){
+//        AccessDeniedHandlerImpl accessDeniedHandler = new AccessDeniedHandlerImpl();
+//        accessDeniedHandler.setErrorPage("/denied");
+//        return accessDeniedHandler;
+//    }
 }
