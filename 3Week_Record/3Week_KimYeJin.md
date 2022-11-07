@@ -17,10 +17,10 @@
 util/
 
 global
-base/  config/  error/  exception/  request/  result/  security/
+base/      config/    error/     exception/ request/   result/    security/ 
 
 domain
-cart/  cash/  home/  member/  order/  post/  product/
+cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/  
 
 
 ```
@@ -28,37 +28,28 @@ cart/  cash/  home/  member/  order/  post/  product/
 
 ### [도메인별 체크리스트]
 
-#### **<Product 도메인>**
+이번주 정산 도메인은 아래 참고 자료를 확인하여 작성하였습니다.  
+[https://techblog.woowahan.com/2711/](https://techblog.woowahan.com/2711/)  
 
-**1. mvc 구성**
-**2. 체크리스트**
-
-#### **<order 도메인>**
-
-**1. mvc 구성**
-**2. 체크리스트**
-
-#### **<cart 도메인>**
-
-**1. mvc 구성**
-**2. 체크리스트**
+#### **<Rebate 도메인>**
 
 
 ### [지난 주 필수 기능]
-- [x]  글 작성, 글 수정, 글 리스트, 글 삭제
-### [지난 주 추가 기능]
-- [x]  상품 등록, 상품 수정, 상품 리스트, 상품 상세페이지
+- [x] 장바구니 내의 상품 주문
+- [x] 기존 회원이 가지고 있는 cash를 이용한 결제
+- [x] 토스페이를 이용한 결제
+- [x] 결제 이후 환불 가능
+
 
 ### [필수기능]
-- [x] 장바구니에 상품 추가, 제거
-- [ ] 장바구니 내의 상품 주문
-- [ ] 기존 회원이 가지고 있는 cash를 이용한 결제
-- [ ] 토스페이를 이용한 결제
-- [ ] 결제 이후 환불 가능
+- [x] 관리자 회원, 관리자 페이지
+- [x] 정산데이터 생성
+- [x] 건별, 전체(선택) 정산 처리
 
+### [추가기능]
+- [ ] 정산데이터 배치로 생성
 
-### 2주차 미션 요약
-1주차 기능 구현 마무리를 먼저 진행하여, 2주차 필수 기능 구현을 완료하지 못하였습니다.
+### 3주차 미션 요약
 
 ---
 
@@ -113,14 +104,170 @@ url == null 인 상황 발생, RequestURI로 받도록 추가
 
 ```
 
+### 정산 도메인
+
+'정산'도 도메인인가?
+-> 도메인이다.  
+[참고링크 : https://runa-nam.tistory.com/m/120](https://runa-nam.tistory.com/m/120)
+
+1. 정산 서비스 테스트 -> OrderItem 이 없는 케이스가 들어간 경우
+
+RebateService 의 rebate 메소드 에서 Optional 예외처리 추가
+```java
+        Optional<RebateOrderItem> oRebateOrderItem = rebateOrderItemRepository.findByOrderItemId(orderItemId);
+        if(!oRebateOrderItem.isPresent()){
+            return ResultResponse.of("REBATE_NO_ITEM_FAILED", "정산가능한 주문 품목이 없습니다.");
+        }
+        RebateOrderItem rebateOrderItem = oRebateOrderItem.get();
+
+```
+
+테스트 코드로 Oder Item이 없는 경우 체크
+```java
+    @Test
+    @DisplayName("주문 item 모두 정산하기 ")
+    void t4() {
+        String ids = "1,2,3,4,7,8";
+        String[] idsArr = ids.split(",");
+        Arrays.stream(idsArr)
+                .mapToLong(Long::parseLong)
+                .forEach(id -> {
+                    ResultResponse rebateResultResponse = rebateService.rebate(id);
+                    System.out.println(rebateResultResponse.getResultCode() + " "+ rebateResultResponse.getMessage()+" "+rebateResultResponse.getData());
+                    assertThat(rebateResultResponse.isSuccess()).isTrue();
+                });
+
+        ids = "5,6";
+        idsArr = ids.split(",");
+        Arrays.stream(idsArr)
+                .mapToLong(Long::parseLong)
+                .forEach(id -> {
+                    ResultResponse rebateResultResponse = rebateService.rebate(id);
+                    System.out.println(rebateResultResponse.getResultCode() + " "+ rebateResultResponse.getMessage()+" "+rebateResultResponse.getData());
+                    assertThat(rebateResultResponse.isFail()).isTrue();
+                });
+    }
+```
+
+3. AccessDenied 예외처리  
+
+관리자가 아닌 경우, 403 AccessDenied 가 발생 -> 예외처리를 AccessDeniedException 을 AccessDeniedHandler 를 통해 앞단에서 먼저 처리하도록 하였다.
+
+먼저 아래와 같이 AccessDeniedHandler 인터페이스를 상속하는 AccessDeniedHandlerImpl 클래스를 작성한다.
+`response.sendRedirect()` 를 이용하여 원하는 errorPage로 리디렉션 하였다.  
+에러메세지를 함께 넘기기 위하여 Rq 클래스의 url에 ErrorMsg를 쿼리 파라미터에 넣는 메소드를 이용하였다.  
+초반에는 query 파라미터를 직접 입력하여 "exception"과 "message" 를 모두 넘겼으나, exception은 불필요하다 생각되어 다시 msg만 넘기는 것으로 수정하였다.  
+  
+```java
+@Component
+@Slf4j
+public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
+    private String errorPage;
+
+    public void setErrorPage(String errorPage) {
+        this.errorPage = errorPage;
+    }
+
+    @Override
+    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+        log.error("[accessDeniedHandler] AccessDeniedException", accessDeniedException);
+        String msg = "권한이 없습니다.";
+        //response.sendError(HttpServletResponse.SC_FORBIDDEN, msg);
+        log.debug("[accessDeniedHandler] error : "+accessDeniedException.getMessage());
+        response.sendRedirect(Rq.urlWithErrorMsg(errorPage,accessDeniedException.getMessage()));
+    }
+}
+```
+
+errorPage 요청이 들어오는 컨트롤러 작성  
+
+error 처리는 글로벌 범위에 속한다고 판단하여 global.error 에 컨트롤러 패키징을 추가하였다.  
+일반적으로 에러페이지를 위한 컨트롤러는 어디에 배치하는지 궁금해졌다.
+
+`global.error.controller.ErrorController` 는 아래와 같다.
+
+```java
+    @GetMapping("/denied")
+    @ResponseBody
+    public ResultResponse accessDenied(String errorMsg){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.debug("[denied] auth username : "+ authentication.getName() + " authority : "+authentication.getAuthorities());
+        log.debug("[denied] exception : "+ errorMsg);
+
+        return ResultResponse.of("ACCESS_DENIED",errorMsg);
+    }
+```
+
+Spring Security 내부에도 exception 처리에 대한 부분을 수정한다.  
+
+SecurityConfig 는 아래와 같다.
+```java
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+        // ... 생략 ..
+        http
+        .exceptionHandling()
+        .accessDeniedHandler(accessDeniedHandler())
+    }
+
+    // hander 빈으로 생성 -> 생성자 주입으로 하여도 될것 같다.
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler(){
+        AccessDeniedHandlerImpl accessDeniedHandler = new AccessDeniedHandlerImpl();
+        accessDeniedHandler.setErrorPage("/denied");
+        return accessDeniedHandler;
+    }
+    
+```
+
+
+참고 자료  
+[https://anjoliena.tistory.com/108](https://anjoliena.tistory.com/108)  
+[https://velog.io/@rudwnd33/Spring-Security-AccessDeniedException](https://velog.io/@rudwnd33/Spring-Security-AccessDeniedException)  
+[https://escapefromcoding.tistory.com/489](https://escapefromcoding.tistory.com/489)  
+
 **[특이사항]**
 
 
 ### 아쉬운점/ 궁금한점
 
-- 1주차 Product 의 구현을 완료하는데 시간을 소요하여, 2주차 기능 필수기능을 구현하지 못하였습니다.
--> 다음 주차 부터는 이전 주차의 내용을 따라하는 형식으로 구현한 후 진행하도록 하겠습니다.
+1. Admin Role 처리 ->   MemberContext.genAuthorities()
+
+처음 1주차에서 나는 MEMBER 권한, ADMIN 권한, AUTHOR 권한을 개별적으로 구현하였으나,  
+요구사항을 다시 보니 AUTHOR 권한은 중복적으로 가질 수 있는 권한으로 확인되어 아래와 같이 authorities 를 구성하도록 수정하였다.
+
+AUTHOR 권한은 추가적으로 가지는 authorities.  기본적으로 MEMBER 또는 ADMIN
+```java
+    public List<GrantedAuthority> genAuthorities() {
+
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(authLevel.name()));
+
+        if (StringUtils.hasText(nickname)) {
+            authorities.add(new SimpleGrantedAuthority("AUTHOR"));
+        }
+        System.out.println("[member] authority : "+authorities);
+        return authorities;
+    }
+```
+[https://escapefromcoding.tistory.com/m/526](https://escapefromcoding.tistory.com/m/526)  
 
 
-### Refcatoring 시 추가적으로 구현하고 싶은 부분
-- 
+2. 정산 비율 5:5  
+
+rebatePrice를 계산하는 회계적인 이론을 잘 모르겠어서 도매가를 기준으로  
+`도매가 -pgFee = 100` 이라면, 작가가 받을 수 있는 정산 비용은 `(도매가-pgFee)/2` 라고 판단하여 구현하였다.  
+
+```java
+    public int calculateRebatePrice() {
+        if (refundPrice > 0) {
+            return 0;
+        }
+
+        return (wholesalePrice - pgFee)/2;
+    }
+
+```
+
+  
+### Refcatoring 시 추가적으로 구현하고 싶은 부분  

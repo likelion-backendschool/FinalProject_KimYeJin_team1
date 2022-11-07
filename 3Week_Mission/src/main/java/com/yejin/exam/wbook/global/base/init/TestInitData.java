@@ -3,6 +3,7 @@ package com.yejin.exam.wbook.global.base.init;
 import com.yejin.exam.wbook.domain.cart.service.CartService;
 import com.yejin.exam.wbook.domain.member.dto.MemberDto;
 import com.yejin.exam.wbook.domain.member.entity.Member;
+import com.yejin.exam.wbook.domain.member.entity.MemberRole;
 import com.yejin.exam.wbook.domain.member.service.MemberService;
 import com.yejin.exam.wbook.domain.order.entity.Order;
 import com.yejin.exam.wbook.domain.order.repository.OrderRepository;
@@ -10,6 +11,7 @@ import com.yejin.exam.wbook.domain.order.service.OrderService;
 import com.yejin.exam.wbook.domain.post.service.PostService;
 import com.yejin.exam.wbook.domain.product.entity.Product;
 import com.yejin.exam.wbook.domain.product.service.ProductService;
+import com.yejin.exam.wbook.domain.rebate.service.RebateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -32,11 +34,15 @@ public class TestInitData {
             ProductService productService,
             CartService cartService,
             OrderService orderService,
-            OrderRepository orderRepository
+            OrderRepository orderRepository,
+            RebateService rebateService
     ) {
         return args -> {
             Member member1=memberService.join(new MemberDto("user1","1234","1234","kyj011202@naver.com","author1"));
             Member member2=memberService.join(new MemberDto("user2","1234","1234","kyj2212@gmail.com",null));
+            Member memberAdmin = memberService.join(new MemberDto("admin","1234","1234","yejin123kim@gmail.com","admin"));
+            memberService.setAuthLevel(memberAdmin,MemberRole.ROLE_ADMIN);
+
             postService.write(member1, "제목 1", "내용 1", "내용 1", "#IT# 프론트엔드 #HTML #CSS");
             postService.write(member1, "제목 2", "내용 2", "내용 2", "#IT #스프링부트 #자바");
             postService.write(member2, "제목 3", "내용 3", "내용 3", "#IT# 프론트엔드 #HTML #CSS");
@@ -119,6 +125,7 @@ public class TestInitData {
                     )
             );
 
+            rebateService.makeDate("2022-11");
 
         };
     }

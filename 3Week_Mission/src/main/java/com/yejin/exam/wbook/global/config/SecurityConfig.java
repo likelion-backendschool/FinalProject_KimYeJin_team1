@@ -2,17 +2,20 @@ package com.yejin.exam.wbook.global.config;
 
 
 import com.yejin.exam.wbook.domain.member.service.MemberSecurityService;
+import com.yejin.exam.wbook.global.security.handler.AccessDeniedHandlerImpl;
 import com.yejin.exam.wbook.global.security.handler.CustomSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
@@ -27,6 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     /* 인가 구분을 위한 url path 지정 */
@@ -53,12 +57,13 @@ public class SecurityConfig {
             "/"
     }; // 모두 허용
     private static final String[] AUTH_ADMIN_LIST = {
-            "/admin/**"
+            "/adm/**"
     }; // admin 롤 만 허용
     private static final String[] AUTH_AUTHENTICATED_LIST = {
             "/member/**",
             "/post/**",
-            "/product/**"
+            "/product/**",
+            "/adm/**"
     }; // 인가 필요
 
     private final MemberSecurityService memberSecurityService;
@@ -112,7 +117,8 @@ public class SecurityConfig {
                 .mvcMatchers("/member/login/**").permitAll()
                 .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                 .antMatchers(AUTH_ALL_LIST).permitAll()
-                .antMatchers(AUTH_AUTHENTICATED_LIST).authenticated();
+                .antMatchers(AUTH_AUTHENTICATED_LIST).authenticated()
+                ;
         http
                 .headers()
                 .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN));
@@ -129,7 +135,8 @@ public class SecurityConfig {
                 .invalidateHttpSession(true);
         http
                 .exceptionHandling()
-                .accessDeniedPage("/restrict");
+                .accessDeniedHandler(accessDeniedHandler())
+                ;
 
         return http.build();
     }
@@ -147,4 +154,10 @@ public class SecurityConfig {
         return source;
     }
 
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler(){
+        AccessDeniedHandlerImpl accessDeniedHandler = new AccessDeniedHandlerImpl();
+        accessDeniedHandler.setErrorPage("/denied");
+        return accessDeniedHandler;
+    }
 }

@@ -3,6 +3,7 @@ package com.yejin.exam.wbook.global.base.init;
 import com.yejin.exam.wbook.domain.cart.service.CartService;
 import com.yejin.exam.wbook.domain.member.dto.MemberDto;
 import com.yejin.exam.wbook.domain.member.entity.Member;
+import com.yejin.exam.wbook.domain.member.entity.MemberRole;
 import com.yejin.exam.wbook.domain.member.service.MemberService;
 import com.yejin.exam.wbook.domain.order.entity.Order;
 import com.yejin.exam.wbook.domain.order.repository.OrderRepository;
@@ -12,6 +13,7 @@ import com.yejin.exam.wbook.domain.post.service.PostService;
 import com.yejin.exam.wbook.domain.product.entity.Product;
 import com.yejin.exam.wbook.domain.product.entity.ProductOption;
 import com.yejin.exam.wbook.domain.product.service.ProductService;
+import com.yejin.exam.wbook.domain.rebate.service.RebateService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,11 +34,18 @@ public class DevInitData {
             ProductService productService,
             CartService cartService,
             OrderService orderService,
-            OrderRepository orderRepository
+            OrderRepository orderRepository,
+            RebateService rebateService
     ) {
         return args -> {
             Member member1=memberService.join(new MemberDto("user1","1234","1234","kyj011202@naver.com","author1"));
             Member member2=memberService.join(new MemberDto("user2","1234","1234","kyj2212@gmail.com","author2"));
+            Member memberAdmin = memberService.join(new MemberDto("admin","1234","1234","yejin123kim@gmail.com","admin"));
+
+            memberService.setAuthLevel(memberAdmin,MemberRole.ROLE_ADMIN);
+            System.out.println("[dev init] member role : "+ memberAdmin.getAuthLevel());
+            System.out.println("[dev init] member role db : "+ memberService.findByUsername("admin").get().getAuthLevel());
+
             for(int i =1;i<=2;i++){
                 postService.write(member1,"제목%d".formatted(i),"내용%d".formatted(i),"내용%d".formatted(i),"#태그%d #태그%d".formatted(i,i+1));
             }
@@ -116,6 +125,9 @@ public class DevInitData {
                             product4
                     )
             );
+
+            rebateService.makeDate("2022-11");
+
         };
     }
 }
