@@ -1,0 +1,28 @@
+spring:
+  profiles:
+    active: dev
+    include:
+      - base-addi
+      - email
+  batch:
+    job:
+      names: ${job.name:NONE}
+    jdbc:
+      initialize-schema: ALWAYS
+  jpa:
+    show-sql: true
+  output:
+    ansi-enabled: always
+logging:
+  level:
+    com.yejin.exam.wbook: debug
+
+#spring.batch.initialize-schema: always
+#custom:
+#  genFileDirPath: c:/temp/app10
+
+custom:
+  site:
+    name: wbook
+    baseUrl: "http://localhost:8080"
+
