@@ -50,6 +50,6 @@ public class WithdrawApply extends BaseEntity {
         withdrawDate = LocalDateTime.now();
         this.withdrawCashLog = new CashLog(cashLogId);
     }
-
+    private boolean isApplied; // 사용자 신청서 정상 신청여부
     private boolean isCanceled; // 취소여부
 }
