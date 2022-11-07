@@ -194,9 +194,39 @@ Product, OrderItem 필드가 내부에 Member를 다시 참조하고 있기 때�
 api 요구사항의 날짜 json 형태와 조금 다른 형태로 표출됨. --> 추후 수정 필요
 ![img3](https://i.imgur.com/es3YK73.png)
 
+4. 유효하지 않은 자격 증명의 경우 예외처리
+기존의 AccessDeniedHandler는 403 authority 가 없는 경우만 예외처리 됨.  
+유효한 Authentication 없는 경우(token==null) 401 인 경우 예외처리 추가.
+
+AuthenticationEntryPoint 클래스를 상속받은 JwtAuthenticationEntryPoint 클래스를 적용.
+
+```java
+    @Override
+    public void commence(HttpServletRequest request,
+                         HttpServletResponse response,
+                         AuthenticationException authException) throws IOException {
+        // 유효한 자격증명을 제공하지 않고 접근하려 할때
+        log.debug("[accessDeniedHandler] error : "+authException.getMessage());
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED,authException.getMessage());
+    }
+```
+SecurityConfig에 JwtauthenticationEntryPoint 추가
+```java
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+        http
+                .exceptionHandling()
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler())
+                ;
+```
 
 ### Refcatoring 시 추가적으로 구현하고 싶은 부분  
 
+
+### 궁금한 점
+1. handler와 entrypoint로 예외처리 시 responseentiry의 형태로 예외처리 가능한지  
+
+    -> REST API 에서의 예외처리 방식은 어떻게 되는가?
 
 <br>
 
