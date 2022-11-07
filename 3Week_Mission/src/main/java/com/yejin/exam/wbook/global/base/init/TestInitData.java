@@ -12,6 +12,8 @@ import com.yejin.exam.wbook.domain.post.service.PostService;
 import com.yejin.exam.wbook.domain.product.entity.Product;
 import com.yejin.exam.wbook.domain.product.service.ProductService;
 import com.yejin.exam.wbook.domain.rebate.service.RebateService;
+import com.yejin.exam.wbook.domain.withdraw.dto.WithdrawApplyDto;
+import com.yejin.exam.wbook.domain.withdraw.service.WithdrawService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +29,8 @@ import java.util.List;
 @Configuration
 @Profile("test")
 public class TestInitData {
+
+    private boolean initDataDone = false;
     @Bean
     CommandLineRunner initData(
             MemberService memberService,
@@ -35,9 +39,15 @@ public class TestInitData {
             CartService cartService,
             OrderService orderService,
             OrderRepository orderRepository,
-            RebateService rebateService
+            RebateService rebateService,
+            WithdrawService withdrawService
     ) {
         return args -> {
+
+            if (initDataDone) return;
+
+            initDataDone = true;
+
             Member member1=memberService.join(new MemberDto("user1","1234","1234","kyj011202@naver.com","author1"));
             Member member2=memberService.join(new MemberDto("user2","1234","1234","kyj2212@gmail.com",null));
             Member memberAdmin = memberService.join(new MemberDto("admin","1234","1234","yejin123kim@gmail.com","admin"));
@@ -52,10 +62,13 @@ public class TestInitData {
             postService.write(member2, "제목 7", "내용 7", "내용 7", "#IT# 프론트엔드 #HTML #CSS");
             postService.write(member2, "제목 8", "내용 8", "내용 8", "#IT #스프링부트 #자바");
 
-            Product product1 = productService.create(member1, "상품명1 상품명1 상품명1 상품명1 상품명1 상품명1", 30_000, "카프카", "#IT #카프카");
+            Product product1 = productService.create(member1, "상품명1", 30_000, "카프카", "#IT #카프카");
             Product product2 = productService.create(member2, "상품명2", 40_000, "스프링부트", "#IT #REACT");
             Product product3 = productService.create(member1, "상품명3", 50_000, "REACT", "#IT #REACT");
             Product product4 = productService.create(member2, "상품명4", 60_000, "HTML", "#IT #HTML");
+
+            Product product5 = productService.create(member2, "상품명5", 90_000, "HTML", "#태그5 #태그6");
+            Product product6 = productService.create(member2, "상품명6", 90_000, "HTML", "#태그5 #태그6");
 
             memberService.addCash(member1, 10_000, "충전__무통장입금");
             memberService.addCash(member1, 20_000, "충전__무통장입금");
@@ -105,6 +118,7 @@ public class TestInitData {
                             product2
                     )
             );
+
             log.debug("[testData] order3 : "+order3.getId());
             log.debug("[testData] order3 items : ");
             order3.getOrderItems().forEach(i -> System.out.println("[testData] "+i.getProduct().getSubject()));
@@ -125,7 +139,14 @@ public class TestInitData {
                     )
             );
 
-            rebateService.makeDate("2022-11");
+            Order order6 = helper.order(member2, Arrays.asList(
+                            product5,
+                            product6
+                    )
+            );
+            //rebateService.makeDate("2022-11");
+
+            withdrawService.apply(member1,new WithdrawApplyDto("우리은행","123412341234","10"));
 
         };
     }
