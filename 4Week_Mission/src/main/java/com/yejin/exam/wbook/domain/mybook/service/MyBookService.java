@@ -45,4 +45,8 @@ public class MyBookService {
     public Optional<List<MyBook>> findByOwner(Long ownerId){
         return myBookRepository.findByOwnerId(ownerId);
     }
+
+    public Optional<MyBook> findById(Long id) {
+        return myBookRepository.findById(id);
+    }
 }
