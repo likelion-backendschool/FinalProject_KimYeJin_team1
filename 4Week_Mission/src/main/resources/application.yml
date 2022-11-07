@@ -11,8 +11,14 @@ spring:
       initialize-schema: ALWAYS
   jpa:
     show-sql: true
+#  cache:
+#    type: redis
+#  redis:
+#    host: 127.0.0.1
+#    port: 6379
   output:
-    ansi-enabled: always
+    ansi:
+      enabled: ALWAYS
 logging:
   level:
     com.yejin.exam.wbook: debug

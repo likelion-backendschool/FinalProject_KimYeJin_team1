@@ -4,12 +4,15 @@ import com.yejin.exam.wbook.domain.member.dto.MemberDto;
 import com.yejin.exam.wbook.domain.member.dto.MemberModifyDto;
 import com.yejin.exam.wbook.domain.member.dto.MemberModifyPasswordDto;
 import com.yejin.exam.wbook.domain.member.entity.Member;
+import com.yejin.exam.wbook.domain.member.request.LoginDto;
 import com.yejin.exam.wbook.domain.member.service.MemberService;
 import com.yejin.exam.wbook.global.result.ResultResponse;
+import com.yejin.exam.wbook.util.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.Banner;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -31,6 +34,8 @@ public class MemberController {
 
     private final MemberService memberService;
 
+
+
     @GetMapping(value = "/join")
     public String showJoin(MemberDto memberDto) {
         return "member/join_form";
@@ -51,7 +56,7 @@ public class MemberController {
 
         final boolean isRegistered = member != null;
         if (isRegistered) {
-            memberService.login(memberDto.getUsername(), memberDto.getPassword());
+            //memberService.login(memberDto.getUsername(), memberDto.getPassword());
             mav.addObject("msg", "회원가입을 축하합니다.");
             mav.addObject("url", "/");
             mav.setViewName("common/alert");
@@ -118,10 +123,10 @@ public class MemberController {
             bindingResult.addError(new FieldError("member", "passwordConfirm","2개의 패스워드가 일치하지 않습니다."));
             return mav;
         }
-        if(!memberService.modifyPassword(member,memberModifyPasswordDto.getPassword(),memberModifyPasswordDto.getOldPassword())){
-            bindingResult.addError(new FieldError("member", "oldPassword","올바른 기존 패스워드를 입력하세요."));
-            return mav;
-        }
+//        if(!memberService.modifyPassword(member,memberModifyPasswordDto.getPassword(),memberModifyPasswordDto.getOldPassword())){
+//            bindingResult.addError(new FieldError("member", "oldPassword","올바른 기존 패스워드를 입력하세요."));
+//            return mav;
+//        }
         mav.setViewName("redirect:/member/profile");
         return mav;
 
@@ -150,7 +155,7 @@ public class MemberController {
         if(!oMember.isPresent()){
             return ResponseEntity.ok(ResultResponse.of("FIND_PWD_FAIL","해당하는 ID가 없습니다.",username));
         }
-        memberService.setTempPassword(oMember.get());
+//        memberService.setTempPassword(oMember.get());
         return ResponseEntity.ok(ResultResponse.of("FIND_PWD_OK","%s로 임시 비밀번호를 전송하였습니다.".formatted(email),username));
 
     }
@@ -162,5 +167,6 @@ public class MemberController {
         memberService.delete(member);
         return "redirect:/";
     }
+
 
 }

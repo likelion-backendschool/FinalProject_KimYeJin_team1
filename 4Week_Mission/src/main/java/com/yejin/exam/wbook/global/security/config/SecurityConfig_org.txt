@@ -1,25 +1,19 @@
-package com.yejin.exam.wbook.global.config;
+package com.yejin.exam.wbook.global.security.config;
 
 
-import com.yejin.exam.wbook.domain.member.service.MemberSecurityService;
 import com.yejin.exam.wbook.global.security.handler.AccessDeniedHandlerImpl;
-import com.yejin.exam.wbook.global.security.handler.CustomSuccessHandler;
+import com.yejin.exam.wbook.global.security.jwt.JwtAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsUtils;
@@ -27,10 +21,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+
 @RequiredArgsConstructor
-@Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+//@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     /* 인가 구분을 위한 url path 지정 */
@@ -66,26 +61,28 @@ public class SecurityConfig {
             "/adm/**"
     }; // 인가 필요
 
-    private final MemberSecurityService memberSecurityService;
-    private final AuthenticationFailureHandler customFailureHandler;
+//    private final MemberSecurityService memberSecurityService;
+//    private final AuthenticationFailureHandler customFailureHandler;
+
+    private final JwtAuthorizationFilter jwtAuthorizationFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-        daoAuthenticationProvider.setUserDetailsService(memberSecurityService);
-        return daoAuthenticationProvider;
-    }
+//    @Bean
+//    public DaoAuthenticationProvider daoAuthenticationProvider() {
+//        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+//        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+//        daoAuthenticationProvider.setUserDetailsService(memberSecurityService);
+//        return daoAuthenticationProvider;
+//    }
 
-    @Bean
-    public AuthenticationSuccessHandler customSuccessHandler() {
-        return new CustomSuccessHandler("/");
-    }
+//    @Bean
+//    public AuthenticationSuccessHandler customSuccessHandler() {
+//        return new CustomSuccessHandler("/");
+//    }
 
     /*  스프링에서 보안상의 이슈로 ignoring() 을 권장하지 않음.
     @Bean
@@ -106,7 +103,7 @@ public class SecurityConfig {
         return http.build();
     }
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) throws Exception {
         http
                 .cors().configurationSource(corsConfigurationSource());
         http
@@ -119,20 +116,31 @@ public class SecurityConfig {
                 .antMatchers(AUTH_ALL_LIST).permitAll()
                 .antMatchers(AUTH_AUTHENTICATED_LIST).authenticated()
                 ;
+//        http
+//                .headers()
+//                .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN));
         http
-                .headers()
-                .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN));
-        http
-                .formLogin()
-                .loginPage("/member/login")
-                .loginProcessingUrl("/member/login")
-                .successHandler(customSuccessHandler())
-                .failureHandler(customFailureHandler);
-        http
-                .logout()
-                .logoutRequestMatcher(new AntPathRequestMatcher("/member/logout"))
-                .logoutSuccessUrl("/")
-                .invalidateHttpSession(true);
+                .httpBasic().disable() // httpBaic 로그인 방식 끄기
+                .formLogin().disable() // 폼 로그인 방식 끄기
+                .sessionManagement(sessionManagement ->
+                        sessionManagement.sessionCreationPolicy(STATELESS)
+                )
+                .addFilterBefore(
+                        jwtAuthorizationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                )
+        ;
+//        http
+//                .formLogin()
+//                .loginPage("/member/login")
+//                .loginProcessingUrl("/member/login")
+//                .successHandler(customSuccessHandler())
+//                .failureHandler(customFailureHandler);
+//        http
+//                .logout()
+//                .logoutRequestMatcher(new AntPathRequestMatcher("/member/logout"))
+//                .logoutSuccessUrl("/")
+//                .invalidateHttpSession(true);
         http
                 .exceptionHandling()
                 .accessDeniedHandler(accessDeniedHandler())

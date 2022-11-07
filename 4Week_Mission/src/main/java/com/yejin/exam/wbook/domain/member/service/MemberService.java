@@ -7,22 +7,24 @@ import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.member.entity.MemberRole;
 import com.yejin.exam.wbook.domain.member.repository.MemberRepository;
 import com.yejin.exam.wbook.domain.post.service.PostService;
+import com.yejin.exam.wbook.global.config.AppConfig;
 import com.yejin.exam.wbook.global.exception.EntityAlreadyExistException;
 import com.yejin.exam.wbook.global.result.ResultResponse;
+import com.yejin.exam.wbook.global.security.jwt.JwtProvider;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,10 +36,11 @@ import static com.yejin.exam.wbook.global.error.ErrorCode.USERNAME_ALREADY_EXIST
 @Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final PostService postService;
     private final CashService cashService;
+    private final JwtProvider jwtProvider;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public Member join(MemberDto memberDto) {
@@ -68,6 +71,7 @@ public class MemberService {
         Member member = Member.builder()
                 .username(memberDto.getUsername())
                 .password(passwordEncoder.encode(memberDto.getPassword()))
+//                .password(memberDto.getPassword())
                 .email(memberDto.getEmail())
                 .nickname(memberDto.getNickname())
                 .build();
@@ -82,11 +86,40 @@ public class MemberService {
         return member;
     }
 
+
     public void login(String username, String password) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
         SecurityContextHolder.getContext().setAuthentication(token);
     }
+    @Transactional
+    public String genAccessToken(Member member) {
+        String accessToken = member.getAccessToken();
 
+        if (StringUtils.hasLength(accessToken) == false) {
+            accessToken = jwtProvider.generateAccessToken(member.getAccessTokenClaims(), 60L * 60 * 24 * 365 * 100);
+            member.setAccessToken(accessToken);
+        }
+
+        return accessToken;
+    }
+
+    public boolean verifyWithWhiteList(Member member, String token) {
+        return member.getAccessToken().equals(token);
+    }
+
+    @Cacheable("member")
+    public Map<String, Object> getMemberMapByUsername__cached(String username) {
+        Member member = findByUsername(username).orElse(null);
+
+        return member.toMap();
+    }
+
+    public Member getByUsername__cached(String username) {
+        MemberService thisObj = (MemberService) AppConfig.getContext().getBean("memberService");
+        Map<String, Object> memberMap = thisObj.getMemberMapByUsername__cached(username);
+
+        return Member.fromMap(memberMap);
+    }
     public Optional<Member> findByUsername(String username) {
         return memberRepository.findByUsername(username);
     }
@@ -147,6 +180,10 @@ public class MemberService {
         member.setAuthLevel(role);
         log.debug("[member] role : "+ role + " member "+member.getAuthLevel());
         memberRepository.save(member);
+    }
+
+    public boolean isMatched(String inputPassword, String password) {
+        return passwordEncoder.matches(inputPassword,password);
     }
 
 //    @Transactional
