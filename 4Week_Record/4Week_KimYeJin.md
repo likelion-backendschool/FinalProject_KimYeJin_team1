@@ -316,6 +316,8 @@ public class BookChapterDto {
 }
 ```
 
+![img5](https://i.imgur.com/pg6gW69.png)
+
 ### Refcatoring 시 추가적으로 구현하고 싶은 부분  
 
 
