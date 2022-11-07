@@ -37,7 +37,7 @@ public class ResultResponse<T> {
     }
 
     public boolean isSuccess() {
-        return resultCode.endsWith("OK");
+        return resultCode.startsWith("S");
     }
 
     public boolean isFail() {
