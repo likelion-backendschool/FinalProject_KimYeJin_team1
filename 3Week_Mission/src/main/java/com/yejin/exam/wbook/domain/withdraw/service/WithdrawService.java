@@ -48,7 +48,7 @@ public class WithdrawService {
     public List<WithdrawApply> findAll() {
         return withdrawApplyRepository.findAll();
     }
-
+    @Transactional
     public ResultResponse withdraw(long withdrawApplyId) {
         Optional<WithdrawApply> oWithdrawApply = withdrawApplyRepository.findById(withdrawApplyId);
         if(!oWithdrawApply.isPresent()){
@@ -66,6 +66,7 @@ public class WithdrawService {
                 "출금__%d__지급__예치금".formatted(withdrawApplyId)
         ).getData().getCashLog();
 
+        log.debug("[withdraw] [cachlog] member" + cashLog.getMember() + " price : "+cashLog.getPrice());
         withdrawApply.setPay(cashLog.getId());
 
         return ResultResponse.of(

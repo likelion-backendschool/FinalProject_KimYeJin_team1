@@ -36,12 +36,13 @@ public class AdmWithdrawController {
     @PostMapping("/{withdrawApplyId}")
     @PreAuthorize("hasRole('ADMIN')")
     public String rebateOne(@PathVariable long withdrawApplyId, HttpServletRequest req) {
+        log.debug("[withdraw] [adm] post mapping");
         ResultResponse withdrawResultResponse = withdrawService.withdraw(withdrawApplyId);
-
+        log.debug("[withdraw] [adm] response : "+ withdrawResultResponse);
 
         String redirect = "redirect:/adm/withdraw/applyList";
-
         redirect = withdrawResultResponse.addMessageToUrl(redirect);
+        log.debug("[withdraw] [adm] redirect url : "+ redirect);
 
         return redirect;
     }
