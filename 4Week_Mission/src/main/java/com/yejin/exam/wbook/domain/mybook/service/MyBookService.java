@@ -23,7 +23,7 @@ public class MyBookService {
         order.getOrderItems()
                 .stream()
                 .map(orderItem -> MyBook.builder()
-                        .owner(order.getBuyer())
+                        .ownerId(order.getBuyer().getId())
                         .orderItem(orderItem)
                         .product(orderItem.getProduct())
                         .build())
@@ -42,7 +42,7 @@ public class MyBookService {
     }
 
     @Transactional
-    public Optional<List<MyBook>> findByOwner(Member owner){
-        return myBookRepository.findByOwner(owner);
+    public Optional<List<MyBook>> findByOwner(Long ownerId){
+        return myBookRepository.findByOwnerId(ownerId);
     }
 }

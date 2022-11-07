@@ -24,10 +24,8 @@ import static javax.persistence.FetchType.LAZY;
 @SuperBuilder
 @ToString(callSuper = true)
 public class MyBook extends BaseEntity {
-    @ManyToOne(fetch = LAZY)
-    @ToString.Exclude
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private Member owner;
+
+    private Long ownerId;
 
     @ManyToOne(fetch = LAZY)
     @ToString.Exclude

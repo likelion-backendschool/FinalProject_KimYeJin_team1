@@ -27,7 +27,7 @@ public class MyBookController {
     @GetMapping("")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResultResponse> list(@AuthenticationPrincipal MemberContext memberContext) {
-        Optional<List<MyBook>> oMyBooks = myBookService.findByOwner(memberContext.getMember());
+        Optional<List<MyBook>> oMyBooks = myBookService.findByOwner(memberContext.getId());
         if(!oMyBooks.isPresent()){
             return Util.spring.responseEntityOf(ResultResponse.failOf("GET_MYBOOKS_FAILED","mybooks이 없습니다.",null));
         }
