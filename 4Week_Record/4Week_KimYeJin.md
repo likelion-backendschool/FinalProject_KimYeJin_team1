@@ -168,22 +168,22 @@ UserDetail 객체를 직접 생성 (기존 UserDetailService를 상속받았던 
 하지만 postMan으로 테스트 시 정상. 테스크 코드를 추후 수정필요.
 ![img2](https://i.imgur.com/WpRXBdb.png)
 
-3. mybooks owner 필드의 lazy로 인한 json 오류
+3. mybooks 의 ManyToOne 필드들의 무한 참조 이슈
 오류 메세지
 ```text
-(through reference chain: com.yejin.exam.wbook.global.result.ResultResponse["data"]->java.util.ArrayList[0]->com.yejin.exam.wbook.domain.mybook.entity.MyBook["owner"]->com.yejin.exam.wbook.domain.member.entity.Member$HibernateProxy$jBUFbZrX["hibernateLazyInitializer"])
+(through reference chain: com.yejin.exam.wbook.global.result.ResultResponse["data"]->java.util.ArrayList[0]->com.yejin.exam.wbook.domain.mybook.entity.MyBook["product"]->com.yejin.exam.wbook.domain.member.entity.Member$HibernateProxy$jBUFbZrX["hibernateLazyInitializer"])
 ```
+Product, OrderItem 필드가 내부에 Member를 다시 참조하고 있기 때문에 무한 참조 에러가 발생.  
+따라서 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) 어노테이션을 추가.
 
-@JsonIgnore 추가
+추가로 기존의 Member 타입의 필드를 api 요구사항에 맞추어 Long타입의 ownerId로 변경
 ```java
-    @ManyToOne(fetch = LAZY)
-    @ToString.Exclude
-    @JsonIgnore
-    private Member owner;
+
+    private Long ownerId;
 
     @ManyToOne(fetch = LAZY)
     @ToString.Exclude
-    @JsonIgnore
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Product product;
 
     @ManyToOne(fetch = LAZY)
@@ -191,17 +191,13 @@ UserDetail 객체를 직접 생성 (기존 UserDetailService를 상속받았던 
     @JsonIgnore
     private OrderItem orderItem;
 ```
+api 요구사항의 날짜 json 형태와 조금 다른 형태로 표출됨. --> 추후 수정 필요
+![img3](https://i.imgur.com/es3YK73.png)
+
 
 ### Refcatoring 시 추가적으로 구현하고 싶은 부분  
 
-1. yearMonth를 선택하지 않은 url에서는 정산을 할 시, Refer에서 url을 가져오는 과정에서 yearMonth가 없기 때문에 500 에러 발생
---> default month정보를 입력하는 방식으로 수정   
-<br>
 
-
-2. ItemReader에 QueryDSL 도입
-ItemReader 에 queryDsl을 도입한 예시를 찾아서 이부분으로 구현해보고 refactoring 해보고 싶다.
-참고자료 : [https://techblog.woowahan.com/2662/](https://techblog.woowahan.com/2662/)  
 <br>
 
 3. 추가 기능 출금 구현
