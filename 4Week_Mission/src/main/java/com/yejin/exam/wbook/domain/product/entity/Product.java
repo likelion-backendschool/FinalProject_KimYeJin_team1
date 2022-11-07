@@ -1,5 +1,6 @@
 package com.yejin.exam.wbook.domain.product.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yejin.exam.wbook.domain.cart.entity.CartItem;
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.post.entity.PostKeyword;
