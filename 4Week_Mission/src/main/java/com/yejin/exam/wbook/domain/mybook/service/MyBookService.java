@@ -43,6 +43,6 @@ public class MyBookService {
 
     @Transactional
     public Optional<List<MyBook>> findByOwner(Member owner){
-        return myBookRepository.findByOwer(owner);
+        return myBookRepository.findByOwner(owner);
     }
 }

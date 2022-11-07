@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface MyBookRepository extends JpaRepository<MyBook, Long> {
     void deleteByProductIdAndOwnerId(long productId, long ownerId);
 
-    Optional<List<MyBook>> findByOwer(Member owner);
+    Optional<List<MyBook>> findByOwner(Member owner);
 }
