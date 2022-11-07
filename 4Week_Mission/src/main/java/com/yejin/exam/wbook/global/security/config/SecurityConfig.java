@@ -2,6 +2,7 @@ package com.yejin.exam.wbook.global.security.config;
 
 
 import com.yejin.exam.wbook.global.security.handler.AccessDeniedHandlerImpl;
+import com.yejin.exam.wbook.global.security.jwt.JwtAuthenticationEntryPoint;
 import com.yejin.exam.wbook.global.security.jwt.JwtAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -47,16 +49,19 @@ public class SecurityConfig {
             "/robots.txt/**"
     }; // 정적 파일 인가 없이 모두 허용
     private static final String[] AUTH_ALL_LIST = {
+            "/api/v1/member/login",
             "/member/join/**",
             "/member/login/**",
             "/member/findUsername/**",
             "/member/findPassword/**",
+            "/denied",
             "/"
     }; // 모두 허용
     private static final String[] AUTH_ADMIN_LIST = {
             "/adm/**"
     }; // admin 롤 만 허용
     private static final String[] AUTH_AUTHENTICATED_LIST = {
+            "/api/**",
             "/member/**",
             "/post/**",
             "/product/**",
@@ -67,6 +72,8 @@ public class SecurityConfig {
 //    private final AuthenticationFailureHandler customFailureHandler;
 
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final AccessDeniedHandlerImpl jwtAccessDeniedHandler;
 //    @Bean
 //    public PasswordEncoder passwordEncoder() {
 //        return new BCryptPasswordEncoder();
@@ -107,6 +114,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .exceptionHandling()
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .accessDeniedHandler(jwtAccessDeniedHandler)
+        ;
+        http
                 .cors().configurationSource(corsConfigurationSource());
         http
                 .csrf()
@@ -136,17 +148,13 @@ public class SecurityConfig {
 //                .formLogin()
 //                .loginPage("/member/login")
 //                .loginProcessingUrl("/member/login")
-//                .successHandler(customSuccessHandler())
 //                .failureHandler(customFailureHandler);
 //        http
 //                .logout()
 //                .logoutRequestMatcher(new AntPathRequestMatcher("/member/logout"))
 //                .logoutSuccessUrl("/")
 //                .invalidateHttpSession(true);
-        http
-                .exceptionHandling()
-                .accessDeniedHandler(accessDeniedHandler())
-                ;
+
 
         return http.build();
     }
@@ -164,10 +172,10 @@ public class SecurityConfig {
         return source;
     }
 
-    @Bean
-    public AccessDeniedHandler accessDeniedHandler(){
-        AccessDeniedHandlerImpl accessDeniedHandler = new AccessDeniedHandlerImpl();
-        accessDeniedHandler.setErrorPage("/denied");
-        return accessDeniedHandler;
-    }
+//    @Bean
+//    public AccessDeniedHandler accessDeniedHandler(){
+//        AccessDeniedHandlerImpl accessDeniedHandler = new AccessDeniedHandlerImpl();
+//        accessDeniedHandler.setErrorPage("/denied");
+//        return accessDeniedHandler;
+//    }
 }
