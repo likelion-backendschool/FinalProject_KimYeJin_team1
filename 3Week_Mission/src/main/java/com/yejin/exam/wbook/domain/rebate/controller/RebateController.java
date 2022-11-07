@@ -44,7 +44,7 @@ public class RebateController {
     @GetMapping("/rebateOrderItemList")
     @PreAuthorize("hasRole('ADMIN')")
     public String showRebateOrderItemList(String yearMonth, Model model) {
-        if (yearMonth == null) {
+        if (yearMonth==null || yearMonth.isEmpty()) {
             yearMonth = "2022-11";
         }
 
@@ -61,7 +61,7 @@ public class RebateController {
         ResultResponse rebateResultResponse = rebateService.rebate(orderItemId);
 
         String referer = req.getHeader("Referer");
-        String yearMonth = Util.url.getQueryParamValue(referer, "yearMonth", "");
+        String yearMonth = Util.url.getQueryParamValue(referer, "yearMonth", "2022-11");
 
         String redirect = "redirect:/adm/rebate/rebateOrderItemList?yearMonth=" + yearMonth;
 

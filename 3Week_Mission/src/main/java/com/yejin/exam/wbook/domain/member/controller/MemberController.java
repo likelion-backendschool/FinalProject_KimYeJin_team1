@@ -54,12 +54,12 @@ public class MemberController {
             memberService.login(memberDto.getUsername(), memberDto.getPassword());
             mav.addObject("msg", "회원가입을 축하합니다.");
             mav.addObject("url", "/");
-            mav.setViewName("alert");
+            mav.setViewName("common/alert");
             return mav;
         } else {
             mav.addObject("msg", "회원가입이 불가합니다.");
             mav.addObject("url", "/member/join");
-            mav.setViewName("alert");
+            mav.setViewName("common/alert");
             return mav;
         }
     }

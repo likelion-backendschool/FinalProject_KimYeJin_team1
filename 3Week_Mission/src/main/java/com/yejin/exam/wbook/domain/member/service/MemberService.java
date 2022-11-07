@@ -182,7 +182,7 @@ public class MemberService {
         long newRestCash = member.getRestCash() + cashLog.getPrice();
         member.setRestCash(newRestCash);
         memberRepository.save(member);
-
+        log.debug("[member service] resetcash : " + member.getRestCash());
         return ResultResponse.of(
                 "ADD_CASH_OK",
                 "성공",
