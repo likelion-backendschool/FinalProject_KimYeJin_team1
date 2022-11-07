@@ -9,13 +9,18 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -26,7 +31,7 @@ public class JwtProvider {
     private String secretKeyPlain;
 
     private SecretKey jwtSecretKey;
-//    private final UserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
     @PostConstruct
     private void init(){
         System.out.println("[PostConstruct] init Jwt secret key");
@@ -48,20 +53,20 @@ public class JwtProvider {
                 .compact();
     }
 
-//    public Authentication getAuthentication(String token) {
-//
-//        Map<String,Object> claims = getClaims(token);
-//        log.debug("claims : "+ claims);
-//        Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("authorities").toString().split(","))
-//                .map(SimpleGrantedAuthority::new)
-//                .collect(Collectors.toList());
-//        // UserDetails 객체를 만들어서 Authentication 리턴
-//
-//        User principal = new User(claims.get("username").toString(),"",authorities);
-//
-//        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
-//
-//    }
+    public Authentication getAuthentication(String token) {
+
+        Map<String,Object> claims = getClaims(token);
+        log.debug("claims : "+ claims);
+        Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("authorities").toString().split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+        // UserDetails 객체를 만들어서 Authentication 리턴
+
+        User principal = new User(claims.get("username").toString(),"",authorities);
+
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+
+    }
 
     private Claims parseClaimsJws(String token) {
         try {

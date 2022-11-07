@@ -68,33 +68,6 @@ public class MemberController {
             return mav;
         }
     }
-    @PostMapping("/login")
-    public ResponseEntity<ResultResponse> login(@Valid @RequestBody LoginDto loginDto) {
-        Member member = memberService.findByUsername(loginDto.getUsername()).orElse(null);
-
-        if (member == null) {
-            return Util.spring.responseEntityOf(ResultResponse.of("F-2", "일치하는 회원이 존재하지 않습니다."));
-        }
-
-//        if (passwordEncoder.matches(loginDto.getPassword(), member.getPassword()) == false) {
-//            return Util.spring.responseEntityOf(ResultResponse.of("F-3", "비밀번호가 일치하지 않습니다."));
-//        }
-
-        log.debug("Util.json.toStr(member.getAccessTokenClaims()) : " + Util.json.toStr(member.getAccessTokenClaims()));
-
-        String accessToken = memberService.genAccessToken(member);
-
-        return Util.spring.responseEntityOf(
-                ResultResponse.of(
-                        "S-1",
-                        "로그인 성공, Access Token을 발급합니다.",
-                        Util.mapOf(
-                                "accessToken", accessToken
-                        )
-                ),
-                Util.spring.httpHeadersOf("Authentication", accessToken)
-        );
-    }
 
     @GetMapping("/login")
     public String login(MemberDto memberDto) {
@@ -194,5 +167,6 @@ public class MemberController {
         memberService.delete(member);
         return "redirect:/";
     }
+
 
 }

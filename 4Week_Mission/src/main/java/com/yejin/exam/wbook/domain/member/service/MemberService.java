@@ -16,6 +16,8 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,10 +87,10 @@ public class MemberService {
     }
 
 
-/*    public void login(String username, String password) {
+    public void login(String username, String password) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
         SecurityContextHolder.getContext().setAuthentication(token);
-    }*/
+    }
     @Transactional
     public String genAccessToken(Member member) {
         String accessToken = member.getAccessToken();
@@ -136,28 +138,28 @@ public class MemberService {
         }
         memberRepository.save(member);
     }
-//    @Transactional
-//    public boolean modifyPassword(Member member, String password,String oldPassword) {
-//        if(!passwordEncoder.matches(oldPassword,member.getPassword())){
-//            return false;
-//        }
-//        member.setEncryptedPassword(passwordEncoder.encode(password));
-//        memberRepository.save(member);
-//        return true;
-//    }
-//    @Transactional
-//    public void setTempPassword(Member member) {
-//
-//        String subject = "[wbook] %s 님의 임시 비밀번호 입니다.".formatted(member.getUsername());
-//        String tempPassword = UUID.randomUUID().toString().replace("-","");
-//        member.setEncryptedPassword(passwordEncoder.encode(tempPassword));
-//        String text = """
-//                        임시 비밀번호 : %s
-//                        위의 임시 비밀번호로 로그인 후, 비밀번호를 변경해 주세요.
-//                        """.formatted(tempPassword);
-//
-//        emailService.sendMessage(member.getEmail(),subject,text);
-//    }
+    @Transactional
+    public boolean modifyPassword(Member member, String password,String oldPassword) {
+        if(!passwordEncoder.matches(oldPassword,member.getPassword())){
+            return false;
+        }
+        member.setEncryptedPassword(passwordEncoder.encode(password));
+        memberRepository.save(member);
+        return true;
+    }
+    @Transactional
+    public void setTempPassword(Member member) {
+
+        String subject = "[wbook] %s 님의 임시 비밀번호 입니다.".formatted(member.getUsername());
+        String tempPassword = UUID.randomUUID().toString().replace("-","");
+        member.setEncryptedPassword(passwordEncoder.encode(tempPassword));
+        String text = """
+                        임시 비밀번호 : %s
+                        위의 임시 비밀번호로 로그인 후, 비밀번호를 변경해 주세요.
+                        """.formatted(tempPassword);
+
+        emailService.sendMessage(member.getEmail(),subject,text);
+    }
 
     public Optional<Member> findByEmail(String email) {
         return memberRepository.findByEmail(email);
@@ -178,6 +180,10 @@ public class MemberService {
         member.setAuthLevel(role);
         log.debug("[member] role : "+ role + " member "+member.getAuthLevel());
         memberRepository.save(member);
+    }
+
+    public boolean isMatched(String inputPassword, String password) {
+        return passwordEncoder.matches(inputPassword,password);
     }
 
 //    @Transactional

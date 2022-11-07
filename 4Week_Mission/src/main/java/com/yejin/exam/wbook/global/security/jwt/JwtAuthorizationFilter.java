@@ -6,6 +6,7 @@ import com.yejin.exam.wbook.global.base.dto.MemberContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -36,12 +37,16 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
         // 1. Request Header 에서 토큰을 꺼냄
         String token = resolveToken(req);
-
+        log.debug("[jwtFilter] token : " + token);
         // 2. validateToken 으로 토큰 유효성 검사
         // 정상 토큰이면 해당 토큰으로 Authentication 을 가져와서 MemberContext 에 저장
         if (token!=null && jwtProvider.verify(token)) {
-//            Authentication authentication = jwtProvider.getAuthentication(token);
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.debug("[jwtFilter] provider verify ok : " + jwtProvider.verify(token));
+
+            Authentication authentication = jwtProvider.getAuthentication(token);
+            log.debug("[jwtFilter] authentication: " + authentication.getName());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.debug("[jwtFilter] securifycontext: " + SecurityContextHolder.getContext().getAuthentication().getName());
             Map<String, Object> claims = jwtProvider.getClaims(token);
             String username = (String) claims.get("username");
             Member member = memberService.findByUsername(username).orElseThrow(
@@ -56,7 +61,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private void forceAuthentication(Member member) {
         MemberContext memberContext = new MemberContext(member,member.genAuthorities());
-
+        log.debug("[jwtFilter] context : " + memberContext.getName());
         UsernamePasswordAuthenticationToken authentication =
                 UsernamePasswordAuthenticationToken.authenticated(
                         memberContext,
