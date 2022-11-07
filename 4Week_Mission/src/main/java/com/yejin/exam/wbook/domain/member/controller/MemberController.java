@@ -51,7 +51,7 @@ public class MemberController {
 
         final boolean isRegistered = member != null;
         if (isRegistered) {
-            memberService.login(memberDto.getUsername(), memberDto.getPassword());
+            //memberService.login(memberDto.getUsername(), memberDto.getPassword());
             mav.addObject("msg", "회원가입을 축하합니다.");
             mav.addObject("url", "/");
             mav.setViewName("common/alert");

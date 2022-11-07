@@ -1,9 +1,12 @@
-package com.yejin.exam.wbook.global.config;
+package com.yejin.exam.wbook.global.security.config;
 
 
 import com.yejin.exam.wbook.domain.member.service.MemberSecurityService;
+import com.yejin.exam.wbook.domain.member.service.MemberService;
 import com.yejin.exam.wbook.global.security.handler.AccessDeniedHandlerImpl;
 import com.yejin.exam.wbook.global.security.handler.CustomSuccessHandler;
+import com.yejin.exam.wbook.global.security.jwt.JwtAuthorizationFilter;
+import com.yejin.exam.wbook.global.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
@@ -26,6 +30,8 @@ import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @RequiredArgsConstructor
 @Configuration
@@ -68,6 +74,8 @@ public class SecurityConfig {
 
     private final MemberSecurityService memberSecurityService;
     private final AuthenticationFailureHandler customFailureHandler;
+
+    private final JwtAuthorizationFilter jwtAuthorizationFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -123,16 +131,25 @@ public class SecurityConfig {
                 .headers()
                 .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN));
         http
-                .formLogin()
-                .loginPage("/member/login")
-                .loginProcessingUrl("/member/login")
-                .successHandler(customSuccessHandler())
-                .failureHandler(customFailureHandler);
-        http
-                .logout()
-                .logoutRequestMatcher(new AntPathRequestMatcher("/member/logout"))
-                .logoutSuccessUrl("/")
-                .invalidateHttpSession(true);
+                .httpBasic().disable() // httpBaic 로그인 방식 끄기
+                .formLogin().disable() // 폼 로그인 방식 끄기
+                .sessionManagement(sessionManagement ->
+                        sessionManagement.sessionCreationPolicy(STATELESS)
+                ).addFilterBefore(
+                        jwtAuthorizationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
+//        http
+//                .formLogin()
+//                .loginPage("/member/login")
+//                .loginProcessingUrl("/member/login")
+//                .successHandler(customSuccessHandler())
+//                .failureHandler(customFailureHandler);
+//        http
+//                .logout()
+//                .logoutRequestMatcher(new AntPathRequestMatcher("/member/logout"))
+//                .logoutSuccessUrl("/")
+//                .invalidateHttpSession(true);
         http
                 .exceptionHandling()
                 .accessDeniedHandler(accessDeniedHandler())

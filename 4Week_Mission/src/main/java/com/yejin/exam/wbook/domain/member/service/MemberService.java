@@ -82,11 +82,39 @@ public class MemberService {
         return member;
     }
 
-    public void login(String username, String password) {
+/*    public void login(String username, String password) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
         SecurityContextHolder.getContext().setAuthentication(token);
+    }*/
+/*    @Transactional
+    public String genAccessToken(Member member) {
+        String accessToken = member.getAccessToken();
+
+        if (StringUtils.hasLength(accessToken) == false) {
+            accessToken = jwtProvider.generateAccessToken(member.getAccessTokenClaims(), 60L * 60 * 24 * 365 * 100);
+            member.setAccessToken(accessToken);
+        }
+
+        return accessToken;
     }
 
+    public boolean verifyWithWhiteList(Member member, String token) {
+        return member.getAccessToken().equals(token);
+    }
+
+    @Cacheable("member")
+    public Map<String, Object> getMemberMapByUsername__cached(String username) {
+        Member member = findByUsername(username).orElse(null);
+
+        return member.toMap();
+    }
+
+    public Member getByUsername__cached(String username) {
+        MemberService thisObj = (MemberService)AppConfig.getContext().getBean("memberService");
+        Map<String, Object> memberMap = thisObj.getMemberMapByUsername__cached(username);
+
+        return Member.fromMap(memberMap);
+    }*/
     public Optional<Member> findByUsername(String username) {
         return memberRepository.findByUsername(username);
     }

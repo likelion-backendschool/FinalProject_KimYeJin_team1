@@ -1,5 +1,10 @@
 package com.yejin.exam.wbook.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.yejin.exam.wbook.global.config.AppConfig;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
@@ -135,4 +140,32 @@ public class Util {
     public String nf(long number) {
         return String.format("%,d", (int) number);
     }
+
+
+    private static ObjectMapper getObjectMapper() {
+        ObjectMapper mapper = (ObjectMapper) AppConfig.getContext().getBean("objectMapper");
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return mapper;
+    }
+    public static class json {
+
+        public static Object toStr(Map<String, Object> map) {
+            try {
+                return getObjectMapper().writeValueAsString(map);
+            } catch (JsonProcessingException e) {
+                return null;
+            }
+        }
+
+        public static Map<String, Object> toMap(String jsonStr) {
+            try {
+                return getObjectMapper().readValue(jsonStr, LinkedHashMap.class);
+            } catch (JsonProcessingException e) {
+                return null;
+            }
+        }
+    }
+
+
 }
