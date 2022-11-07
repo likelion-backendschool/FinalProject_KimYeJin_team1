@@ -2,7 +2,6 @@ package com.yejin.exam.wbook.global.config;
 
 
 import com.yejin.exam.wbook.domain.member.service.MemberSecurityService;
-import com.yejin.exam.wbook.global.security.handler.CustomSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -61,7 +60,7 @@ public class SecurityConfig {
     }; // 인가 필요
 
     private final MemberSecurityService memberSecurityService;
-    private final AuthenticationFailureHandler customFailureHandler;
+    //private final AuthenticationFailureHandler customFailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -76,10 +75,10 @@ public class SecurityConfig {
         return daoAuthenticationProvider;
     }
 
-    @Bean
-    public AuthenticationSuccessHandler customSuccessHandler() {
-        return new CustomSuccessHandler("/");
-    }
+//    @Bean
+//    public AuthenticationSuccessHandler customSuccessHandler() {
+//        return new CustomSuccessHandler("/main");
+//    }
 
     /*  스프링에서 보안상의 이슈로 ignoring() 을 권장하지 않음.
     @Bean
@@ -116,18 +115,17 @@ public class SecurityConfig {
                 .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN));
         http
                 .formLogin()
-                .loginPage("/member/login")
-                .loginProcessingUrl("/member/login")
-                .successHandler(customSuccessHandler())
-                .failureHandler(customFailureHandler);
+                .loginPage("/member/login");
+        //.successHandler(customSuccessHandler())
+        //.failureHandler(customFailureHandler);
         http
                 .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/member/logout"))
                 .logoutSuccessUrl("/")
                 .invalidateHttpSession(true);
-        http
-                .exceptionHandling()
-                .accessDeniedPage("/restrict");
+//        http
+//                .exceptionHandling()
+//                .accessDeniedPage("/restrict");
 
         return http.build();
     }

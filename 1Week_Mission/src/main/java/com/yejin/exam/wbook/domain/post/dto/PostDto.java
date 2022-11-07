@@ -13,7 +13,6 @@ public class PostDto {
     private String subject;
     @NotEmpty
     private String content;
-    @NotEmpty
-    private String contentHTML;
+
     private String hashTagsStr;
 }
