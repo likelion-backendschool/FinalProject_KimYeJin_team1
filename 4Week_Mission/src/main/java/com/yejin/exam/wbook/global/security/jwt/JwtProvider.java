@@ -1,5 +1,9 @@
 package com.yejin.exam.wbook.global.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yejin.exam.wbook.global.error.ErrorResponse;
+import com.yejin.exam.wbook.global.exception.BaseException;
+import com.yejin.exam.wbook.global.security.handler.AccessDeniedHandlerImpl;
 import com.yejin.exam.wbook.util.Util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -9,6 +13,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,6 +24,10 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.AccessDeniedException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -83,6 +92,7 @@ public class JwtProvider {
                     .build()
                     .parseClaimsJws(token);
         } catch (Exception e) {
+            log.debug("[jwt provider] error : "+e.getMessage());
             return false;
         }
 

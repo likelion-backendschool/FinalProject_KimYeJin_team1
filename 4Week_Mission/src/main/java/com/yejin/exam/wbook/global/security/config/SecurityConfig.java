@@ -2,6 +2,7 @@ package com.yejin.exam.wbook.global.security.config;
 
 
 import com.yejin.exam.wbook.global.security.handler.AccessDeniedHandlerImpl;
+import com.yejin.exam.wbook.global.security.jwt.JwtAuthenticationEntryPoint;
 import com.yejin.exam.wbook.global.security.jwt.JwtAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -57,6 +59,7 @@ public class SecurityConfig {
             "/adm/**"
     }; // admin 롤 만 허용
     private static final String[] AUTH_AUTHENTICATED_LIST = {
+//            "/api/**",
             "/member/**",
             "/post/**",
             "/product/**",
@@ -67,6 +70,7 @@ public class SecurityConfig {
 //    private final AuthenticationFailureHandler customFailureHandler;
 
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 //    @Bean
 //    public PasswordEncoder passwordEncoder() {
 //        return new BCryptPasswordEncoder();
@@ -145,6 +149,7 @@ public class SecurityConfig {
 //                .invalidateHttpSession(true);
         http
                 .exceptionHandling()
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .accessDeniedHandler(accessDeniedHandler())
                 ;
 
