@@ -33,9 +33,7 @@ public class WithdrawService {
                 .bankName(withdrawApplydto.getBankName())
                 .backAccountNo(withdrawApplydto.getBackAccountNo())
                 .price(withdrawApplydto.getPrice())
-                .isApplied(true)
                 .isCanceled(false)
-                .isPaid(false)
                 .build();
 
         withdrawApplyRepository.save(withdraw);
