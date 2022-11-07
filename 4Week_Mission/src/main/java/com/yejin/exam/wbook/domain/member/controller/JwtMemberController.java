@@ -54,9 +54,9 @@ public class JwtMemberController {
         );
     }
 
-    @GetMapping("/profile")
+    @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ResultResponse> detail(@AuthenticationPrincipal MemberContext memberContext) {
+    public ResponseEntity<ResultResponse> me(@AuthenticationPrincipal MemberContext memberContext) {
         if (memberContext == null) {
             return Util.spring.responseEntityOf(ResultResponse.failOf("GET_PROFILE_FAILED","로그인이 필요합니다.",null));
         }
