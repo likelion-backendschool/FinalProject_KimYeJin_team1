@@ -84,6 +84,88 @@ public class WbookApplication {
 }
 ```
 
+2. jwt 토큰 이용한 로그인, 회원정보 확인
+
+Spring Security의 securityContext 를 사용하여 PreAuthorize() 등의 인증/인가 모듈을 사용하기 위하여
+JwtProvider에서 생성한 token으로 부터 Authentication을 가져와서 SecurityContextHolder에 해당 Authentication을 저장하는 방법을 사용하였다.  
+
+JwtAuthorizationFilter - 신규 로그인 정보 생성 로직
+```java
+        MemberContext memberContext = new MemberContext(member,member.genAuthorities());
+        log.debug("[jwtFilter] context : " + memberContext.getName());
+        UsernamePasswordAuthenticationToken authentication =
+                UsernamePasswordAuthenticationToken.authenticated(
+                        memberContext,
+                        null,
+                        memberContext.getAuthorities()
+                );
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
+```
+
+JwtAuthorizationFilter - 헤더의 토큰으로부터 로그인 정보 판단 로직
+```java
+
+        // 1. Request Header 에서 토큰을 꺼냄
+        String token = resolveToken(req);
+        log.debug("[jwtFilter] token : " + token);
+        // 2. validateToken 으로 토큰 유효성 검사
+        // 정상 토큰이면 해당 토큰으로 Authentication 을 가져와서 MemberContext 에 저장
+        if (token!=null && jwtProvider.verify(token)) {
+            log.debug("[jwtFilter] provider verify ok : " + jwtProvider.verify(token));
+
+            Authentication authentication = jwtProvider.getAuthentication(token);
+            log.debug("[jwtFilter] authentication: " + authentication.getName());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.debug("[jwtFilter] securifycontext: " + SecurityContextHolder.getContext().getAuthentication().getName());
+            Map<String, Object> claims = jwtProvider.getClaims(token);
+            String username = (String) claims.get("username");
+            Member member = memberService.findByUsername(username).orElseThrow(
+                    () -> new UsernameNotFoundException("'%s' Username not found.".formatted(username))
+            );
+
+            forceAuthentication(member);
+        }
+
+```
+Jwt provider의 token으로부터 authentication 가져오는 로직
+UserDetail 객체를 직접 생성 (기존 UserDetailService를 상속받았던 것과 유사)
+```java
+    public Authentication getAuthentication(String token) {
+
+        Map<String,Object> claims = getClaims(token);
+        log.debug("claims : "+ claims);
+        Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("authorities").toString().split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+        // UserDetails 객체를 만들어서 Authentication 리턴
+
+        User principal = new User(claims.get("username").toString(),"",authorities);
+
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+
+    }
+```
+
+![img1](https://i.imgur.com/sjN7v59.png)
+
+
+```java
+    @GetMapping("/profile")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResultResponse> detail(@AuthenticationPrincipal MemberContext memberContext) {
+        if (memberContext == null) {
+            return Util.spring.responseEntityOf(ResultResponse.failOf("GET_PROFILE_FAILED","로그인이 필요합니다.",null));
+        }
+
+        return Util.spring.responseEntityOf(ResultResponse.successOf("GET_PROFILE_OK","사용자 프로필",memberContext));
+    }
+```
+회원정보 테스트 확인 시 accessToken=null 발생.   
+하지만 postMan으로 테스트 시 정상. 테스크 코드를 추후 수정필요.
+![img2](https://i.imgur.com/WpRXBdb.png)
 
 
 
