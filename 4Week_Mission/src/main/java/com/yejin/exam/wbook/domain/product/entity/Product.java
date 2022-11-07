@@ -38,8 +38,10 @@ import static javax.persistence.FetchType.LAZY;
 @ToString(callSuper = true)
 public class Product extends BaseEntity {
     @ManyToOne(fetch = LAZY)
+    @JsonIgnore
     private Member author;
     @ManyToOne(fetch = LAZY)
+    @JsonIgnore
     private PostKeyword postKeyword;
     private String subject;
     private int price;

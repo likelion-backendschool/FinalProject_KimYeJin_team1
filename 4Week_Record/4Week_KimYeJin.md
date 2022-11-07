@@ -168,7 +168,29 @@ UserDetail 객체를 직접 생성 (기존 UserDetailService를 상속받았던 
 하지만 postMan으로 테스트 시 정상. 테스크 코드를 추후 수정필요.
 ![img2](https://i.imgur.com/WpRXBdb.png)
 
+3. mybooks owner 필드의 lazy로 인한 json 오류
+오류 메세지
+```text
+(through reference chain: com.yejin.exam.wbook.global.result.ResultResponse["data"]->java.util.ArrayList[0]->com.yejin.exam.wbook.domain.mybook.entity.MyBook["owner"]->com.yejin.exam.wbook.domain.member.entity.Member$HibernateProxy$jBUFbZrX["hibernateLazyInitializer"])
+```
 
+@JsonIgnore 추가
+```java
+    @ManyToOne(fetch = LAZY)
+    @ToString.Exclude
+    @JsonIgnore
+    private Member owner;
+
+    @ManyToOne(fetch = LAZY)
+    @ToString.Exclude
+    @JsonIgnore
+    private Product product;
+
+    @ManyToOne(fetch = LAZY)
+    @ToString.Exclude
+    @JsonIgnore
+    private OrderItem orderItem;
+```
 
 ### Refcatoring 시 추가적으로 구현하고 싶은 부분  
 
