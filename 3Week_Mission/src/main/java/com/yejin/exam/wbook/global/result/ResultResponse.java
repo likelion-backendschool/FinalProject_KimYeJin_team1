@@ -1,5 +1,6 @@
 package com.yejin.exam.wbook.global.result;
 
+import com.yejin.exam.wbook.util.Util;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,5 +42,13 @@ public class ResultResponse<T> {
 
     public boolean isFail() {
         return isSuccess() == false;
+    }
+
+    public String addMessageToUrl(String url) {
+        if ( isFail() ) {
+            return Util.url.modifyQueryParam(url, "errorMsg", getMessage());
+        }
+
+        return Util.url.modifyQueryParam(url, "msg", getMessage());
     }
 }

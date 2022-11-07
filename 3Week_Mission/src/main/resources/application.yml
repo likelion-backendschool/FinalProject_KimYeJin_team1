@@ -4,14 +4,20 @@ spring:
     include:
       - base-addi
       - email
-  datasource:
-    driver-class-name: org.mariadb.jdbc.Driver
+  batch:
+    job:
+      names: ${job.name:NONE}
+    jdbc:
+      initialize-schema: ALWAYS
+  jpa:
+    show-sql: true
   output:
     ansi-enabled: always
 logging:
   level:
     com.yejin.exam.wbook: debug
 
+#spring.batch.initialize-schema: always
 #custom:
 #  genFileDirPath: c:/temp/app10
 
@@ -19,3 +25,4 @@ custom:
   site:
     name: wbook
     baseUrl: "http://localhost:8080"
+

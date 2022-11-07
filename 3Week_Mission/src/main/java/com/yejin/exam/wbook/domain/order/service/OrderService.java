@@ -237,4 +237,8 @@ public class OrderService {
 
         return ResultResponse.of("ORDER_CANCEL_OK", "취소할 수 있습니다.");
     }
+
+    public List<OrderItem> findAllByPayDateBetweenOrderByIdAsc(LocalDateTime fromDate, LocalDateTime toDate) {
+        return orderItemRepository.findAllByPayDateBetween(fromDate, toDate);
+    }
 }

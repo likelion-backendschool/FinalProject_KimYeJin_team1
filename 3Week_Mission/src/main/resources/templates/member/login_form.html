@@ -2,9 +2,10 @@
 <html
         xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
         xmlns:th="http://www.thymeleaf.org"
-        layout:decorate="~{layout}">
+        layout:decorate="~{layout/layout}">
+<main layout:fragment="main">
 
-<div layout:fragment="content" class="container-fluid py-4">
+<div class="container-fluid py-4">
     <div class="row">
         <div class="col-lg-15 mb-lg-0 mb-4">
             <div class="card z-index-2 h-100">
@@ -38,6 +39,7 @@
         </div>
     </div>
 </div>
+</main>
 <script th:inline="javascript" th:src="@{/js/signup.js}"></script>
 
 </html>

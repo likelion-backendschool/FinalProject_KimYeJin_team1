@@ -3,6 +3,7 @@ package com.yejin.exam.wbook.global.base.init;
 import com.yejin.exam.wbook.domain.cart.service.CartService;
 import com.yejin.exam.wbook.domain.member.dto.MemberDto;
 import com.yejin.exam.wbook.domain.member.entity.Member;
+import com.yejin.exam.wbook.domain.member.entity.MemberRole;
 import com.yejin.exam.wbook.domain.member.service.MemberService;
 import com.yejin.exam.wbook.domain.order.entity.Order;
 import com.yejin.exam.wbook.domain.order.repository.OrderRepository;
@@ -12,6 +13,7 @@ import com.yejin.exam.wbook.domain.post.service.PostService;
 import com.yejin.exam.wbook.domain.product.entity.Product;
 import com.yejin.exam.wbook.domain.product.entity.ProductOption;
 import com.yejin.exam.wbook.domain.product.service.ProductService;
+import com.yejin.exam.wbook.domain.rebate.service.RebateService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +27,8 @@ import java.util.List;
 @Configuration
 @Profile("dev")
 public class DevInitData {
+    private boolean initDataDone = false;
+
     @Bean
     CommandLineRunner initData(
             MemberService memberService,
@@ -32,11 +36,24 @@ public class DevInitData {
             ProductService productService,
             CartService cartService,
             OrderService orderService,
-            OrderRepository orderRepository
+            OrderRepository orderRepository,
+            RebateService rebateService
     ) {
         return args -> {
+
+            if (initDataDone) return;
+
+            initDataDone = true;
+
+
             Member member1=memberService.join(new MemberDto("user1","1234","1234","kyj011202@naver.com","author1"));
             Member member2=memberService.join(new MemberDto("user2","1234","1234","kyj2212@gmail.com","author2"));
+            Member memberAdmin = memberService.join(new MemberDto("admin","1234","1234","yejin123kim@gmail.com","admin"));
+
+            memberService.setAuthLevel(memberAdmin,MemberRole.ROLE_ADMIN);
+            System.out.println("[dev init] member role : "+ memberAdmin.getAuthLevel());
+            System.out.println("[dev init] member role db : "+ memberService.findByUsername("admin").get().getAuthLevel());
+
             for(int i =1;i<=2;i++){
                 postService.write(member1,"제목%d".formatted(i),"내용%d".formatted(i),"내용%d".formatted(i),"#태그%d #태그%d".formatted(i,i+1));
             }
@@ -51,6 +68,8 @@ public class DevInitData {
             Product product2 = productService.create(member2, "상품명2", 40_000, "스프링부트", "#IT #REACT");
             Product product3 = productService.create(member1, "상품명3", 50_000, "REACT", "#IT #REACT");
             Product product4 = productService.create(member2, "상품명4", 60_000, "HTML", "#IT #HTML");
+            Product product5 = productService.create(member2, "상품명5", 90_000, "HTML", "#태그5 #태그6");
+            Product product6 = productService.create(member2, "상품명6", 90_000, "HTML", "#태그5 #태그6");
 
             memberService.addCash(member1, 10_000, "충전__무통장입금");
             memberService.addCash(member1, 20_000, "충전__무통장입금");
@@ -116,6 +135,15 @@ public class DevInitData {
                             product4
                     )
             );
+            Order order6 = helper.order(member2, Arrays.asList(
+                            product5,
+                            product6
+                    )
+            );
+            orderService.payByRestCashOnly(order5);
+            orderService.payByRestCashOnly(order6);
+            //rebateService.makeDate("2022-11");
+
         };
     }
 }
