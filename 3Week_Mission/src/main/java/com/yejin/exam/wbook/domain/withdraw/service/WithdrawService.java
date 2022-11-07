@@ -57,8 +57,8 @@ public class WithdrawService {
         }
         WithdrawApply withdrawApply = oWithdrawApply.get();
 
-        if (withdrawApply.isApplied() == false) {
-            return ResultResponse.of("NOT_APPLIED_FAILED", "출금 신청되어있지 않습니다.");
+        if (!withdrawApply.isPaid()) {
+            return ResultResponse.of("APPLY_PAID_FAILED", "이미 처리 되었습니다.");
         }
         int calculateWithdrawPrice =  withdrawApply.getPrice() * -1;
         CashLog cashLog = memberService.addCash(
@@ -66,6 +66,8 @@ public class WithdrawService {
                 calculateWithdrawPrice,
                 "출금__%d__지급__예치금".formatted(withdrawApplyId)
         ).getData().getCashLog();
+
+        withdrawApply.setPay(cashLog.getId());
 
         return ResultResponse.of(
                 "REBATE_FIN_OK",
