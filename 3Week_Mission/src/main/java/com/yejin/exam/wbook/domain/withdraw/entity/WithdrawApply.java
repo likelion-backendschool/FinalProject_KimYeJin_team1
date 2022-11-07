@@ -40,7 +40,7 @@ public class WithdrawApply extends BaseEntity {
         super(id);
     }
 
-    public boolean isPaid() { // 출금처리여부(지급여부)
+    public boolean isWithdrawAble() { // 출금처리 가능 여부
         if (withdrawDate != null || withdrawCashLog != null) {
             return false;
         }

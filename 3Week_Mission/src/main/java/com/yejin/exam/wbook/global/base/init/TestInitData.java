@@ -146,7 +146,7 @@ public class TestInitData {
             );
             //rebateService.makeDate("2022-11");
 
-            withdrawService.apply(member1,new WithdrawApplyDto("우리은행","123412341234",10));
+            withdrawService.apply(member1,new WithdrawApplyDto("우리은행","123412341234","10"));
 
         };
     }

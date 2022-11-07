@@ -32,7 +32,7 @@ public class WithdrawService {
                 .member(member)
                 .bankName(withdrawApplydto.getBankName())
                 .backAccountNo(withdrawApplydto.getBackAccountNo())
-                .price(withdrawApplydto.getPrice())
+                .price(Integer.parseInt(withdrawApplydto.getPrice()))
                 .isApplied(true)
                 .isCanceled(false)
                 .build();
@@ -56,7 +56,7 @@ public class WithdrawService {
         }
         WithdrawApply withdrawApply = oWithdrawApply.get();
 
-        if (!withdrawApply.isPaid()) {
+        if (!withdrawApply.isWithdrawAble()) {
             return ResultResponse.of("APPLY_PAID_FAILED", "이미 처리 되었습니다.");
         }
         int calculateWithdrawPrice =  withdrawApply.getPrice() * -1;

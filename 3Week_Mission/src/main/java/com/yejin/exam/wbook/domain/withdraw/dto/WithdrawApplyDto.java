@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 
 @Getter
 @Setter
@@ -15,11 +16,11 @@ public class WithdrawApplyDto {
     private String bankName;
 
     @NotBlank(message = "은행 계좌번호를 입력해주세요")
-    @Length(max = 20, message = "불가능한 계좌번호입니다.")
+    @Pattern(regexp = "^[0-9]+$", message = "숫자만 사용할 수 있습니다.")
     private String backAccountNo;
 
     @NotBlank(message = "출금하고자 하는 금액를 입력해주세요.")
-    private int price;
+    private String price;
 
 
 }

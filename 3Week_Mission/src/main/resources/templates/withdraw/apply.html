@@ -71,7 +71,7 @@
                     <label class="label">
                         <span class="label-text">출금 계좌번호</span>
                     </label>
-                    <input type="number" name="bankAccountNo" placeholder="출금 계좌번호" class="input input-bordered" maxlength="50">
+                    <input type="text" name="backAccountNo" placeholder="출금 계좌번호" class="input input-bordered" maxlength="50">
 <!--                    <input type="number" th:field ="*{bankAccountNo}" name="bankAccountNo" placeholder="출금 계좌번호" class="input input-bordered" maxlength="50">-->
                 </div>
 
@@ -90,7 +90,7 @@
 <!--                    <input type="number" th:field = "*{price}" name="price"-->
                     <input type="number" name="price"
                            min="0" th:max="${actorRestCash}"
-                           placeholder="출금 계좌번호" class="input input-bordered" maxlength="50">
+                           placeholder="출금 금액" class="input input-bordered" maxlength="50">
                 </div>
 
                 <div class="grid grid-cols-2 mt-2 gap-2">

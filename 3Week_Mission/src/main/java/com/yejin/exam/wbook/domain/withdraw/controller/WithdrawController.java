@@ -27,14 +27,20 @@ public class WithdrawController {
     private final WithdrawService withdrawService;
 
     @GetMapping("/apply")
-    public String showApply(WithdrawApplyDto withdrawApplydto){
-
-        return "withdraw/apply_form";
+    public ModelAndView showApply(@AuthenticationPrincipal MemberContext memberContext, ModelAndView mav, WithdrawApplyDto withdrawApplydto){
+        log.debug("[withdraw] get apply form");
+        Member member = memberContext.getMember();
+        log.debug("[withdraw] name : "+member.getUsername() + " cash : "+member.getRestCash());
+        mav.addObject("actorRestCash",member.getRestCash());
+        mav.setViewName("withdraw/apply");
+        return mav;
 
     }
     @PostMapping("/apply")
     public ModelAndView apply(@AuthenticationPrincipal MemberContext memberContext, @Valid WithdrawApplyDto withdrawApplydto, ModelAndView mav, BindingResult bindingResult){
-        mav.setViewName("withdraw/apply_form");
+        log.debug("[withdraw] post apply form");
+
+        mav.setViewName("withdraw/apply");
 
         if (bindingResult.hasErrors()) {
             return mav;
@@ -46,12 +52,12 @@ public class WithdrawController {
         if (isApplied) {
             mav.addObject("msg", "출금 신청이 완료되었습니다.");
             mav.addObject("url", "/withdraw/applyList");
-            mav.setViewName("alert");
+            mav.setViewName("common/alert");
             return mav;
         } else {
             mav.addObject("msg", "출금 신청에 실패하였습니다.");
             mav.addObject("url", "/withdraw/apply");
-            mav.setViewName("alert");
+            mav.setViewName("common/alert");
             return mav;
         }
     }
