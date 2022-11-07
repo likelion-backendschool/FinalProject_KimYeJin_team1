@@ -24,7 +24,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableSwagger2
 @Configuration
-public class SwaggerConfig {
+public class SwaggerConfig{
 
     @Bean
     public Docket api() {
@@ -51,7 +51,7 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("Instagram's API Docs")
+                .title("WBook API DOCS")
                 .version("1.0")
                 .description("API 명세서")
                 .build();
