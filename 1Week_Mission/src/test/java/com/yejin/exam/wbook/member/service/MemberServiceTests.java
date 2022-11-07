@@ -1,7 +1,6 @@
-package com.yejin.exam.wbook;
+package com.yejin.exam.wbook.member.service;
 
 import com.yejin.exam.wbook.domain.member.dto.MemberDto;
-import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.member.entity.MemberRole;
 import com.yejin.exam.wbook.domain.member.repository.MemberRepository;
 import com.yejin.exam.wbook.domain.member.service.EmailService;
@@ -18,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
-public class MemberTests {
+public class MemberServiceTests {
 
     @Autowired
     private MemberService memberService;
@@ -48,10 +47,18 @@ public class MemberTests {
     }
 
     @Test
-    @DisplayName("임시 비밀번호 테스트")
+    @DisplayName("임시 비밀번호 발송 테스트")
     public void test_tempPassword(){
+        System.out.println("[member] member : "+memberService.findByUsername("user1").get());
         memberService.setTempPassword(memberService.findByUsername("user1").get());
     }
 
+    @Test
+    @DisplayName("비밀번호 찾기 에서 기존 비밀번호와 다르면 fail")
+    public void test__oldPassword__failed(){
+       boolean isModifiable = memberService.modifyPassword(memberService.findByUsername("user1").get(),"4321","4321");
+
+        assertThat(isModifiable).isFalse();
+    }
 
 }

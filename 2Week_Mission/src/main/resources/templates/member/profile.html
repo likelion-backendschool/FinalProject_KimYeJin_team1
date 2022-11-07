@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns:th="http://www.thymeleaf.org"
+        layout:decorate="~{layout}">
+
+<div layout:fragment="content" class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-15 mb-lg-0 mb-4">
+            <div class="card z-index-2 h-100">
+                <div class="card-header pb-0 pt-3 bg-transparent">
+                </div>
+                <div class="card-body p-3">
+                    <div class="chart" style="height: 100%;">
+                        <h2>회원정보</h2><hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">Id</label>
+                                    <p class="form-control" th:text="${member.username}"></p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">Email address</label>
+                                    <p class="form-control" th:text="${member.email}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-control-label">작가명</label>
+                                    <p class="form-control" th:text="${member.nickname}"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bottombtn_box">
+                            <button type="button" class="btn btn-primary registerbtn bottombtn mb-1"  th:onclick="|location.href='@{|/member/modify|}'|">회원정보수정</button>
+                            <form id="deleteMember" th:action="@{|/member/delete|}" method="post">
+                                <button onclick="if ( !confirm('정말로 탈퇴하시겠습니까?') ) return false;" class="btn btn-primary" id="delete-btn">회원탈퇴</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

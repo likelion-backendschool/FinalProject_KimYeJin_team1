@@ -20,28 +20,31 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostHashTagService postHashTagService;
 
-    public Post write(Long authorId, String subject, String content) {
-        return write(new Member(authorId), subject, content);
+    public Post write(Long authorId, String subject, String content,String contentHTML) {
+        return write(new Member(authorId), subject, content,contentHTML);
     }
-    public Post write(Long authorId, String subject, String content,String hashTagsStr) {
-        return write(new Member(authorId), subject, content,hashTagsStr);
+    public Post write(Long authorId, String subject, String content,String contentHTML,String hashTagsStr) {
+        return write(new Member(authorId), subject, content,contentHTML,hashTagsStr);
     }
-    public Post write(Member author, String subject, String content) {
-        return write(author, subject, content, "");
+    public Post write(Member author, String subject, String contentHTML, String content) {
+        return write(author, subject, content, contentHTML,"");
     }
 
-    public Post write(Member author, String subject, String content, String hashTagsStr) {
+    public Post write(Member author, String subject, String content, String contentHTML, String hashTagsStr) {
         Post post = Post
                 .builder()
                 .author(author)
                 .subject(subject)
                 .content(content)
+                .contentHTML(contentHTML)
                 .build();
 
         postRepository.save(post);
 
         postHashTagService.applyHashTags(post, hashTagsStr);
-
+        log.debug("[post][write] hashtagsStr : "+hashTagsStr);
+        List<PostHashTag> postHashTags = postHashTagService.getHashTags(post);
+        log.debug("[post][write] hashtags : "+postHashTags);
         return post;
     }
     public Post getPostById(Long id) {
@@ -51,6 +54,7 @@ public class PostService {
     public Post getForPrintPostById(Long id) {
         Post post = getPostById(id);
         List<PostHashTag> postHashTags = postHashTagService.getHashTags(post);
+        log.debug("[post] hashtags : "+postHashTags);
         post.getExtra().put("age__name__33", 22);
         post.getExtra().put("postHashTags",postHashTags);
         return post;

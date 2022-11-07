@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        xmlns:th="http://www.thymeleaf.org"
+        layout:decorate="~{common/layout_editor}">
+
+<div layout:fragment="content" class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-15 mb-lg-0 mb-4">
+            <div class="card z-index-2 h-100">
+                <div class="card-header pb-0 pt-3 bg-transparent">
+                </div>
+                <div class="card-body p-3">
+                    <div class="chart" style="height: 100%;">
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+                        <h2>상세</h2>
+                        <hr/>
+                            <!--                            <div th:replace="post/form_errors :: formErrorsFragment"></div>-->
+
+                            <div class="mb-3">
+                                <label for="subject" class="form-label">제목</label>
+                                <p type="text" th:text="${post.subject}" class="form-control"></p>
+                            </div>
+                            <div class="mb-3">
+                                <label for="content" class="form-label">내용</label>
+                                <p th:text="${post.content}" class="form-control"></p>
+                            </div>
+                        <div class="text-sm md:text-base leading-normal max-w-xl text-center mx-auto text-gray-800">
+<!--                            <div class="toast-ui-viewer">-->
+<!--                                <script type="text/x-template">-->
+<!--                                    ${post.contentHTML}-->
+<!--                                </script>-->
+<!--                            </div>-->
+                        </div>
+                        <div class="mb-3">
+                            <label for="hashTagsStr" class="form-label">해시태그</label>
+                            <th:block th:each="hashTag : ${post.extra.postHashTags}">
+                                <a th:href="@{${hashTag.keyword.listUrl}}">
+                                    #[[${hashTag.keyword.content}]]
+                                </a>
+                            </th:block>
+                        </div>
+                        <div class="d-flex">
+                            <button class="btn btn-primary mr-2"  th:onclick="|location.href='@{|/post/${post.id}/modify|}'|">수정</button>
+                            <form id="deleteMember" th:action="@{|/post/${post.id}/delete|}" method="post">
+                                <button onclick="if ( !confirm('정말 삭제하시겠습니까?') ) return false;" class="btn btn-primary" id="delete-btn">삭제</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function SubmitForm(form){
+
+
+    const editor = $(form).find('.toast-ui-editor').data("data-toast-editor");
+    console.log(editor);
+    const markdown = editor.getMarkdown();
+    const html = editor.getHtml();
+    form.content.value=markdown.trim();
+    form.contentHTML.value=html;
+    console.log(form.content.value);
+    console.log(form.contentHTML.value);
+    form.content.value = form.content.value.trim();
+    if(form.content.value.length==0) {
+            alert('내용을 입력해주세요');
+    form.submit();
+}
+</script>
+</html>
