@@ -6,7 +6,6 @@ import com.yejin.exam.wbook.global.base.dto.MemberContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -34,7 +33,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     }
 
     @Override
-
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
         // 1. Request Header 에서 토큰을 꺼냄
         String token = resolveToken(req);
@@ -42,8 +40,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         // 2. validateToken 으로 토큰 유효성 검사
         // 정상 토큰이면 해당 토큰으로 Authentication 을 가져와서 MemberContext 에 저장
         if (token!=null && jwtProvider.verify(token)) {
-            Authentication authentication = jwtProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+//            Authentication authentication = jwtProvider.getAuthentication(token);
+//            SecurityContextHolder.getContext().setAuthentication(authentication);
             Map<String, Object> claims = jwtProvider.getClaims(token);
             String username = (String) claims.get("username");
             Member member = memberService.findByUsername(username).orElseThrow(
