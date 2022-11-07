@@ -42,10 +42,13 @@ cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/
 ### [필수기능]
 - [x] jwt 회원 로그인 구현
 - [x] jwt 회원 정보 디테일 구현
+- [x] mybook 리스트 구현
+- [x] mybook 디테일 구현
+- [ ] spring doc 으로 API 문서화
 
 
 ### [추가기능]
-- [ ] 정산데이터 배치로 생성
+- [ ] 
 
 
 <br>
