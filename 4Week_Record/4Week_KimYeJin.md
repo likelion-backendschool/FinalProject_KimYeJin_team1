@@ -220,6 +220,102 @@ SecurityConfig에 JwtauthenticationEntryPoint 추가
                 ;
 ```
 
+5. Dto를 이용하여 원하는 데이터 추출
+
+요구사항 json 데이터와 동일하게 출력하기 위하여  
+`MyBook, Product, Post(bookChapter)` 데이터의 필요부분만 추출하여 dto를 생성하였다.
+`builder`를 두지않고 간단히 생성자를 이용하였으나, refactoring 해본다면 builder 등을 이용하여 좀더 통일성을 줄 수 있을 것 같다. 
+
+기존의 MyBook 엔티티와 다르게 `Product`가 아닌 `ProductBookChaptersDto`를 가진 Dto.  
+
+```java
+@Getter
+@NoArgsConstructor
+public class MyBookDto {
+
+    private Long id;
+    private LocalDateTime createDate;
+    private LocalDateTime modifyDate;
+    private Long ownerId;
+    private ProductBookChaptersDto product;
+
+    @QueryProjection
+    public MyBookDto(MyBook myBook, Product product, List<Post> bookChapters) {
+        this.id=myBook.getId();
+        this.createDate=myBook.getCreateDate();
+        this.modifyDate=myBook.getModifyDate();
+        this.ownerId = myBook.getOwnerId();
+        this.product = new ProductBookChaptersDto(product,bookChapters);
+    }
+}
+```
+
+기존의 Product 엔티니에서 `List<Post>` 에 해당하는 `List<BookChapterDto>` 를 포함하는 dto.  
+`getBookChapters(List<Post>)` 메소드를 통해 스트림을 이용하여 `BookChapterDto`를 얻도록 하였다.  
+```java
+@Getter
+@NoArgsConstructor
+public class ProductBookChaptersDto{
+
+    private Long id;
+    private LocalDateTime createDate;
+    private LocalDateTime modifyDate;
+    private Long authorId;
+    private String authorName;
+    private String subject;
+    @ManyToOne(fetch = LAZY)
+    @ToString.Exclude
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private List<BookChapterDto> bookChapters;
+    private int price;
+
+    @QueryProjection
+    public ProductBookChaptersDto(Product product,List<Post> posts){
+        this.id=product.getId();
+        this.createDate=product.getCreateDate();
+        this.modifyDate=product.getModifyDate();
+        this.authorId=product.getAuthor().getId();
+        this.authorName=product.getAuthor().getName();
+        this.subject=product.getSubject();
+        this.bookChapters=getBookChapters(posts);
+        this.price=product.getPrice();
+    }
+
+    private List<BookChapterDto> getBookChapters(List<Post> posts){
+        List<BookChapterDto> bookChaptersDtos = new ArrayList<>();
+        posts.stream()
+                .map(post -> new BookChapterDto(post)
+                        )
+                .forEach(bookChaptersDto -> bookChaptersDtos.add(bookChaptersDto));
+        return bookChaptersDtos;
+    }
+}
+```
+
+마지막으로 createDate, modifyDate, Author를 뺀 BookChapterDto.
+```java
+@Getter
+@NoArgsConstructor
+public class BookChapterDto {
+    private Long id;
+    @Column(nullable = false)
+    private String subject;
+
+    @Column(nullable = false)
+    private String content;
+
+    private String contentHTML;
+
+    @QueryProjection
+    public BookChapterDto(Post post){
+        this.id=post.getId();
+        this.subject=post.getSubject();
+        this.content=post.getContent();
+        this.contentHTML=post.getContentHTML();
+    }
+}
+```
+
 ### Refcatoring 시 추가적으로 구현하고 싶은 부분  
 
 

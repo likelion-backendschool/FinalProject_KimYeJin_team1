@@ -26,7 +26,7 @@ public class MyBookDto {
         this.id=myBook.getId();
         this.createDate=myBook.getCreateDate();
         this.modifyDate=myBook.getModifyDate();
-        this.ownerId = ownerId;
+        this.ownerId = myBook.getOwnerId();
         this.product = new ProductBookChaptersDto(product,bookChapters);
     }
 }

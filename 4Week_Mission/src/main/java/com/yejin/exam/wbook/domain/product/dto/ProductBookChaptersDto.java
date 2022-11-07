@@ -39,6 +39,7 @@ public class ProductBookChaptersDto{
         this.modifyDate=product.getModifyDate();
         this.authorId=product.getAuthor().getId();
         this.authorName=product.getAuthor().getName();
+        this.subject=product.getSubject();
         this.bookChapters=getBookChapters(posts);
         this.price=product.getPrice();
     }
