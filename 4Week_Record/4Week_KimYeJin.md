@@ -40,7 +40,8 @@ cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/
 
 
 ### [필수기능]
-- [ ] jwt 회원 로그인 구현
+- [x] jwt 회원 로그인 구현
+- [x] jwt 회원 정보 디테일 구현
 
 
 ### [추가기능]
@@ -153,9 +154,9 @@ UserDetail 객체를 직접 생성 (기존 UserDetailService를 상속받았던 
 
 
 ```java
-    @GetMapping("/profile")
+    @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ResultResponse> detail(@AuthenticationPrincipal MemberContext memberContext) {
+    public ResponseEntity<ResultResponse> me(@AuthenticationPrincipal MemberContext memberContext) {
         if (memberContext == null) {
             return Util.spring.responseEntityOf(ResultResponse.failOf("GET_PROFILE_FAILED","로그인이 필요합니다.",null));
         }
