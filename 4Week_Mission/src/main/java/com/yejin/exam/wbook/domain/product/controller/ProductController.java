@@ -105,7 +105,6 @@ public class ProductController {
         return "product/list";
     }
 
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}/modify")
     public String showModify(@AuthenticationPrincipal MemberContext memberContext, @PathVariable long id, Model model) {
         Product product = productService.findForPrintById(id).get();
@@ -130,7 +129,6 @@ public class ProductController {
             @ApiResponse(code = 403, message = "M004 - 작가 권한이 필요한 화면입니다.")
     })
     @ApiImplicitParam(name = "id", value = "도서 PK", example = "1", required = true)
-    @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/modify")
     public String modify(@AuthenticationPrincipal MemberContext memberContext, @Valid ProductModifyDto productModifyDto, @PathVariable long id) {
         Product product = productService.findById(id).get();
@@ -152,7 +150,6 @@ public class ProductController {
             @ApiResponse(code = 403, message = "M004 - 작가 권한이 필요한 화면입니다.")
     })
     @ApiImplicitParam(name = "id", value = "도서 PK", example = "1", required = true)
-    @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/remove")
     public String remove(@AuthenticationPrincipal MemberContext memberContext, @PathVariable long id) {
         Product product = productService.findById(id).get();

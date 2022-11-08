@@ -29,7 +29,6 @@ public class CartController {
     private final Rq rq;
 
     @GetMapping("/items")
-    @PreAuthorize("isAuthenticated()")
     public String showItems(@AuthenticationPrincipal MemberContext memberContext, Model model) {
         Member buyer = memberContext.getMember();
 
@@ -47,7 +46,6 @@ public class CartController {
     })
     @ApiImplicitParam(name = "productId", value = "도서 PK", example = "1", required = true)
     @PostMapping("/addItem/{productId}")
-    @PreAuthorize("isAuthenticated()")
     public String addItem(@PathVariable long productId) {
         cartService.addItem(rq.getMember(), new Product((productId)));
 
@@ -61,7 +59,6 @@ public class CartController {
     })
     @ApiImplicitParam(name = "productId", value = "도서 PK", example = "1", required = true)
     @PostMapping("/removeItem/{productId}")
-    @PreAuthorize("isAuthenticated()")
     public String removeItem(@PathVariable long productId) {
         cartService.removeItem(rq.getMember(), new Product((productId)));
 
@@ -75,7 +72,6 @@ public class CartController {
     })
     @ApiImplicitParam(name = "ids", value = "도서 ids", example = "12", required = true)
     @PostMapping("/removeItems")
-    @PreAuthorize("isAuthenticated()")
     public String removeItems(String ids) {
         Member buyer = rq.getMember();
 

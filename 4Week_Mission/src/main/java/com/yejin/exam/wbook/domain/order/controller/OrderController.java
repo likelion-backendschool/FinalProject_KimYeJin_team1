@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,7 +49,6 @@ public class OrderController {
     })
     @ApiImplicitParam(name = "id", value = "주문 PK", example = "1", required = true)
     @PostMapping("/{id}/payByRestCashOnly")
-    @PreAuthorize("isAuthenticated()")
     public String payByRestCashOnly(@AuthenticationPrincipal MemberContext memberContext, @PathVariable long id) {
         Order order = orderService.findForPrintById(id).get();
 
@@ -74,7 +72,6 @@ public class OrderController {
     })
     @ApiImplicitParam(name = "id", value = "주문 PK", example = "1", required = true)
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public String showDetail(@AuthenticationPrincipal MemberContext memberContext, @PathVariable long id, Model model) {
         Order order = orderService.findForPrintById(id).orElse(null);
 
@@ -195,7 +192,6 @@ public class OrderController {
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
     @PostMapping("/create")
-    @PreAuthorize("isAuthenticated()")
     public String create(@AuthenticationPrincipal MemberContext memberContext) {
         Member member = memberContext.getMember();
         Order order = orderService.createFromCart(member);
@@ -212,7 +208,6 @@ public class OrderController {
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
     @GetMapping("/list")
-    @PreAuthorize("isAuthenticated()")
     public String showList(Model model) {
         List<Order> orders = orderService.findAllByBuyerId(rq.getId());
 
@@ -229,7 +224,6 @@ public class OrderController {
     })
     @ApiImplicitParam(name = "orderId", value = "주문 PK", example = "1", required = true)
     @PostMapping("/{orderId}/cancel")
-    @PreAuthorize("isAuthenticated()")
     public String cancel(@PathVariable Long orderId) {
         ResultResponse rsData = orderService.cancel(orderId, rq.getMember());
 
@@ -252,7 +246,6 @@ public class OrderController {
     })
     @ApiImplicitParam(name = "orderId", value = "주문 PK", example = "1", required = true)
     @PostMapping("/{orderId}/refund")
-    @PreAuthorize("isAuthenticated()")
     public String refund(@PathVariable Long orderId) {
         ResultResponse rsData = orderService.refund(orderId, rq.getMember());
 

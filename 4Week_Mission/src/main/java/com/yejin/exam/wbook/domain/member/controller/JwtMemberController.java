@@ -14,7 +14,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -70,7 +69,6 @@ public class JwtMemberController {
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
     @GetMapping("/me")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResultResponse> me(@AuthenticationPrincipal MemberContext memberContext) {
         if (memberContext == null) {
             return Util.spring.responseEntityOf(ResultResponse.failOf("M003","로그인이 필요한 화면입니다.",null));
