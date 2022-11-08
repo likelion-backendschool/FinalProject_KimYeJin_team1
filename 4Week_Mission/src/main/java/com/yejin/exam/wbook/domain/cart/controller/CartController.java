@@ -7,10 +7,7 @@ import com.yejin.exam.wbook.domain.product.entity.Product;
 import com.yejin.exam.wbook.global.base.dto.MemberContext;
 import com.yejin.exam.wbook.global.request.Rq;
 import com.yejin.exam.wbook.util.Util;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.Arrays;
 import java.util.List;
-
+@Api(tags = "장바구니 API")
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/cart")

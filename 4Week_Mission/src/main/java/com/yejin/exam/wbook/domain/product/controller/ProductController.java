@@ -14,10 +14,7 @@ import com.yejin.exam.wbook.domain.product.service.ProductService;
 import com.yejin.exam.wbook.global.exception.ActorCanNotModifyException;
 import com.yejin.exam.wbook.global.exception.ActorCanNotRemoveException;
 import com.yejin.exam.wbook.global.request.Rq;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
-
+@Api(tags = "도서 API")
 @Slf4j
 @Controller
 @RequiredArgsConstructor

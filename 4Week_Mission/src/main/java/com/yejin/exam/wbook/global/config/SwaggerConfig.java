@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,9 +31,9 @@ public class SwaggerConfig{
     public Docket api() {
         final List<ResponseMessage> responseMessages = new ArrayList<>();
         responseMessages.add(new ResponseMessageBuilder().code(405)
-                .message("G002 - 허용되지 않은 HTTP method입니다.").build());
+                .message("G004 - 허용되지 않은 HTTP method입니다.").build());
         responseMessages.add(new ResponseMessageBuilder().code(500)
-                .message("G001 - 내부 서버 오류입니다.").build());
+                .message("G003 - 내부 서버 오류입니다.").build());
 
         return new Docket(DocumentationType.SWAGGER_2)
                 .useDefaultResponseMessages(false)
@@ -44,7 +45,7 @@ public class SwaggerConfig{
                 .securityContexts(List.of(securityContext()))
                 .securitySchemes(List.of(apiKey()))
                 .select()
-                .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
+//                .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
                 .paths(PathSelectors.any())
                 .build();
     }

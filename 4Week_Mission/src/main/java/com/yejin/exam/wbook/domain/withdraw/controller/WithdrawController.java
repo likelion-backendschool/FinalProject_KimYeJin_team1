@@ -5,6 +5,7 @@ import com.yejin.exam.wbook.domain.withdraw.dto.WithdrawApplyDto;
 import com.yejin.exam.wbook.domain.withdraw.entity.WithdrawApply;
 import com.yejin.exam.wbook.domain.withdraw.service.WithdrawService;
 import com.yejin.exam.wbook.global.base.dto.MemberContext;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,7 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
 import java.util.List;
-
+@Api(tags = "출금 API")
 @Controller
 @RequestMapping("/withdraw")
 @RequiredArgsConstructor

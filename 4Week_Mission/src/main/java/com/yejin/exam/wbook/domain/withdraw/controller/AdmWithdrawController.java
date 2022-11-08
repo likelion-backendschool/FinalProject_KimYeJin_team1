@@ -4,6 +4,7 @@ import com.yejin.exam.wbook.domain.withdraw.entity.WithdrawApply;
 import com.yejin.exam.wbook.domain.withdraw.service.WithdrawService;
 import com.yejin.exam.wbook.global.result.ResultResponse;
 import com.yejin.exam.wbook.util.Util;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-
+@Api(tags = "관리자 정산 API")
 @Controller
 @RequestMapping("/adm/withdraw")
 @RequiredArgsConstructor

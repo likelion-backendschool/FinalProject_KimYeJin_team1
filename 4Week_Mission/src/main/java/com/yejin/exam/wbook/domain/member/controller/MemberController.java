@@ -26,7 +26,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.Optional;
-
+@Api(tags = "회원 API")
 @Slf4j
 @Controller
 @RequestMapping("/member")
