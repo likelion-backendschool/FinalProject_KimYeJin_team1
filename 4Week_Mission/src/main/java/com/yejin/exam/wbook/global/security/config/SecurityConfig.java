@@ -53,23 +53,18 @@ public class SecurityConfig {
             "/swagger-ui/**"
     };
     private static final String[] AUTH_ALL_LIST = {
-            "/api/v1/member/login",
-            "/member/join/**",
-            "/member/login/**",
-            "/member/findUsername/**",
-            "/member/findPassword/**",
+            "/api/v1/member/join/**",
+            "/api/v1/member/login/**",
+            "/api/v1/member/findUsername/**",
+            "/api/v1/member/findPassword/**",
             "/denied",
             "/"
     }; // 모두 허용
     private static final String[] AUTH_ADMIN_LIST = {
-            "/adm/**"
+            "/api/v1/adm/**"
     }; // admin 롤 만 허용
     private static final String[] AUTH_AUTHENTICATED_LIST = {
-            "/api/**",
-            "/member/**",
-            "/post/**",
-            "/product/**",
-            "/adm/**"
+            "/api/v1/**",
     }; // 인가 필요
 
 //    private final MemberSecurityService memberSecurityService;

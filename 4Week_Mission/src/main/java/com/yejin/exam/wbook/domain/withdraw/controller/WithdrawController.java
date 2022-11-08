@@ -5,71 +5,59 @@ import com.yejin.exam.wbook.domain.withdraw.dto.WithdrawApplyDto;
 import com.yejin.exam.wbook.domain.withdraw.entity.WithdrawApply;
 import com.yejin.exam.wbook.domain.withdraw.service.WithdrawService;
 import com.yejin.exam.wbook.global.base.dto.MemberContext;
+import com.yejin.exam.wbook.global.result.ResultResponse;
+import com.yejin.exam.wbook.util.Util;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
 @Api(tags = "출금 API")
-@Controller
-@RequestMapping("/withdraw")
+@RestController
+@RequestMapping("/api/v1/withdraw")
 @RequiredArgsConstructor
 @Slf4j
 public class WithdrawController {
 
     private final WithdrawService withdrawService;
 
-    @GetMapping("/apply")
-    public ModelAndView showApply(@AuthenticationPrincipal MemberContext memberContext, ModelAndView mav, WithdrawApplyDto withdrawApplydto){
-        log.debug("[withdraw] get apply form");
-        Member member = memberContext.getMember();
-        log.debug("[withdraw] name : "+member.getUsername() + " cash : "+member.getRestCash());
-        mav.addObject("actorRestCash",member.getRestCash());
-        mav.setViewName("withdraw/apply");
-        return mav;
-
-    }
+    @ApiOperation(value = "출금 신청")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 출금 신청이 완료되었습니다"),
+            @ApiResponse(code = 400, message = "FOO1 - 출금 신청에 실패하였습니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다.."),
+    })
     @PostMapping("/apply")
-    public ModelAndView apply(@AuthenticationPrincipal MemberContext memberContext, @Valid WithdrawApplyDto withdrawApplydto, ModelAndView mav, BindingResult bindingResult){
-        log.debug("[withdraw] post apply form");
+    public ResponseEntity<ResultResponse> apply(@AuthenticationPrincipal MemberContext memberContext, @Valid @RequestBody WithdrawApplyDto withdrawApplydto){
+        log.debug("[withdraw] post apply dto :  price : "+withdrawApplydto.getPrice());
 
-        mav.setViewName("withdraw/apply");
-
-        if (bindingResult.hasErrors()) {
-            return mav;
-        }
         Member member = memberContext.getMember();
         WithdrawApply withdrawApply = withdrawService.apply(member, withdrawApplydto);
 
         final boolean isApplied = withdrawApply.isApplied();
         if (isApplied) {
-            mav.addObject("msg", "출금 신청이 완료되었습니다.");
-            mav.addObject("url", "/withdraw/applyList");
-            mav.setViewName("common/alert");
-            return mav;
+            return Util.spring.responseEntityOf(ResultResponse.successOf("S001","출금 신청이 완료되었습니다", withdrawApply));
         } else {
-            mav.addObject("msg", "출금 신청에 실패하였습니다.");
-            mav.addObject("url", "/withdraw/apply");
-            mav.setViewName("common/alert");
-            return mav;
+            return Util.spring.responseEntityOf(ResultResponse.successOf("F001","출금 신청에 실패하였습니다.", null));
         }
     }
-
+    @ApiOperation(value = "출금 신청 조회")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 출금 신청 조회에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 출금 신청 조회 할 수 없습니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다.."),
+    })
     @GetMapping("/applyList")
-    public ModelAndView applyList(@AuthenticationPrincipal MemberContext memberContext, ModelAndView mav){
+    public ResponseEntity<ResultResponse> applyList(@AuthenticationPrincipal MemberContext memberContext){
         Member member = memberContext.getMember();
         List<WithdrawApply> withdrawApplies = withdrawService.findByMember(member);
-        mav.addObject("withdrawApplies", withdrawApplies);
-        mav.setViewName("withdraw/applyList");
-        return mav;
-
+        return Util.spring.responseEntityOf(ResultResponse.successOf("S001","출금 신청 조회에 성공하였습니다.", withdrawApplies));
     }
 }

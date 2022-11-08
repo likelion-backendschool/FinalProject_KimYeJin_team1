@@ -32,9 +32,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 @Api(tags = "주문 API")
-@Controller
+@RestController
 @RequiredArgsConstructor
-@RequestMapping("/order")
+@RequestMapping("/api/v1/order")
 public class OrderController {
     private final OrderService orderService;
     private final RestTemplate restTemplate = new RestTemplate();
@@ -49,21 +49,17 @@ public class OrderController {
     })
     @ApiImplicitParam(name = "id", value = "주문 PK", example = "1", required = true)
     @PostMapping("/{id}/payByRestCashOnly")
-    public String payByRestCashOnly(@AuthenticationPrincipal MemberContext memberContext, @PathVariable long id) {
+    public ResponseEntity<ResultResponse> payByRestCashOnly(@AuthenticationPrincipal MemberContext memberContext, @PathVariable long id) {
         Order order = orderService.findForPrintById(id).get();
-
         Member actor = memberContext.getMember();
-
         long restCash = memberService.getRestCash(actor);
-
         if (orderService.actorCanPayment(actor, order) == false) {
             throw new ActorCanNotPayOrderException();
         }
-
-        ResultResponse rsData = orderService.payByRestCashOnly(order);
-
-        return "redirect:/order/%d?msg=%s".formatted(order.getId(), Util.url.encode("예치금으로 결제했습니다."));
+        ResultResponse resultResponse = orderService.payByRestCashOnly(order);
+        return Util.spring.responseEntityOf(resultResponse);
     }
+
     @ApiOperation(value = "주문 상세")
     @ApiResponses({
             @ApiResponse(code = 200, message = "S001 - 주문 상세 조회에 성공하였습니다."),
@@ -72,25 +68,21 @@ public class OrderController {
     })
     @ApiImplicitParam(name = "id", value = "주문 PK", example = "1", required = true)
     @GetMapping("/{id}")
-    public String showDetail(@AuthenticationPrincipal MemberContext memberContext, @PathVariable long id, Model model) {
+    public ResponseEntity<ResultResponse> detail(@AuthenticationPrincipal MemberContext memberContext, @PathVariable long id) {
         Order order = orderService.findForPrintById(id).orElse(null);
 
         if (order == null) {
-            return rq.redirectToBackWithMsg("주문을 찾을 수 없습니다.");
+            return Util.spring.responseEntityOf(ResultResponse.failOf("F001","주문을 찾을 수 없습니다.", id));
         }
 
         Member actor = memberContext.getMember();
-
         long restCash = memberService.getRestCash(actor);
 
         if (orderService.actorCanSee(actor, order) == false) {
             throw new ActorCanNotSeeOrderException();
         }
 
-        model.addAttribute("order", order);
-        model.addAttribute("actorRestCash", restCash);
-
-        return "order/detail";
+        return Util.spring.responseEntityOf(ResultResponse.successOf("S001","%d번 도서가 생성되었습니다.", Util.mapOf("order",order,"actorRestCash",restCash)));
     }
 
     @PostConstruct
@@ -123,12 +115,11 @@ public class OrderController {
             @ApiImplicitParam(name = "amount", value = "페이 사용금액", example = "1000", required = true)
     })
     @RequestMapping("/{id}/success")
-    public String confirmPayment(
+    public ResponseEntity<ResultResponse> confirmPayment(
             @PathVariable long id,
             @RequestParam String paymentKey,
             @RequestParam String orderId,
             @RequestParam Long amount,
-            Model model,
             @AuthenticationPrincipal MemberContext memberContext
     ) throws Exception {
 
@@ -164,26 +155,19 @@ public class OrderController {
 
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
 
-            orderService.payByTossPayments(order, payPriceRestCash);
-
-            return Rq.redirectWithMsg(
-                    "/order/%d".formatted(order.getId()),
-                    "%d번 주문이 결제처리되었습니다.".formatted(order.getId())
-            );
+            ResultResponse resultResponse = orderService.payByTossPayments(order, payPriceRestCash);
+            return Util.spring.responseEntityOf(resultResponse);
         } else {
             JsonNode failNode = responseEntity.getBody();
-            model.addAttribute("message", failNode.get("message").asText());
-            model.addAttribute("code", failNode.get("code").asText());
-            return "order/fail";
+            return Util.spring.responseEntityOf(ResultResponse.failOf(failNode.get("code").asText(), failNode.get("message").asText(), null));
         }
     }
 
     @RequestMapping("/{id}/fail")
-    public String failPayment(@RequestParam String message, @RequestParam String code, Model model) {
-        model.addAttribute("message", message);
-        model.addAttribute("code", code);
-        return "order/fail";
+    public ResponseEntity<ResultResponse> failPayment(@RequestParam String message, @RequestParam String code) {
+        return Util.spring.responseEntityOf(ResultResponse.failOf(code, message, null));
     }
+
     @ApiOperation(value = "주문 생성")
     @ApiResponses({
             @ApiResponse(code = 200, message = "S001 - %d번 주문이 생성되었습니다."),
@@ -192,15 +176,12 @@ public class OrderController {
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
     @PostMapping("/create")
-    public String create(@AuthenticationPrincipal MemberContext memberContext) {
+    public ResponseEntity<ResultResponse> create(@AuthenticationPrincipal MemberContext memberContext) {
         Member member = memberContext.getMember();
         Order order = orderService.createFromCart(member);
-
-        return Rq.redirectWithMsg(
-                "/order/%d".formatted(order.getId()),
-                "%d번 주문이 생성되었습니다.".formatted(order.getId())
-        );
+        return Util.spring.responseEntityOf(ResultResponse.successOf("S001","%d번 주문이 생성되었습니다.", order));
     }
+
     @ApiOperation(value = "주문 조회")
     @ApiResponses({
             @ApiResponse(code = 200, message = "S001 - 주문 조회에 성공하였습니다."),
@@ -208,12 +189,11 @@ public class OrderController {
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
     @GetMapping("/list")
-    public String showList(Model model) {
+    public ResponseEntity<ResultResponse> list() {
         List<Order> orders = orderService.findAllByBuyerId(rq.getId());
-
-        model.addAttribute("orders", orders);
-        return "order/list";
+        return Util.spring.responseEntityOf(ResultResponse.successOf("S001","주문 조회에 성공하였습니다.", orders));
     }
+
     @ApiOperation(value = "주문 취소")
     @ApiResponses({
             @ApiResponse(code = 200, message = "S001 - 주문이 취소되었습니다."),
@@ -224,15 +204,11 @@ public class OrderController {
     })
     @ApiImplicitParam(name = "orderId", value = "주문 PK", example = "1", required = true)
     @PostMapping("/{orderId}/cancel")
-    public String cancel(@PathVariable Long orderId) {
-        ResultResponse rsData = orderService.cancel(orderId, rq.getMember());
-
-        if (rsData.isFail()) {
-            return Rq.redirectWithErrorMsg("/order/%d".formatted(orderId), rsData);
-        }
-
-        return Rq.redirectWithMsg("/order/%d".formatted(orderId), rsData);
+    public ResponseEntity<ResultResponse> cancel(@PathVariable Long orderId) {
+        ResultResponse resultResponse = orderService.cancel(orderId, rq.getMember());
+        return Util.spring.responseEntityOf(resultResponse);
     }
+
     @ApiOperation(value = "환불")
     @ApiResponses({
             @ApiResponse(code = 200, message = "S001 - %d원 환불되었습니다."),
@@ -246,13 +222,8 @@ public class OrderController {
     })
     @ApiImplicitParam(name = "orderId", value = "주문 PK", example = "1", required = true)
     @PostMapping("/{orderId}/refund")
-    public String refund(@PathVariable Long orderId) {
-        ResultResponse rsData = orderService.refund(orderId, rq.getMember());
-
-        if (rsData.isFail()) {
-            return Rq.redirectWithErrorMsg("/order/%d".formatted(orderId), rsData);
-        }
-
-        return Rq.redirectWithMsg("/order/%d".formatted(orderId), rsData);
+    public ResponseEntity<ResultResponse> refund(@PathVariable Long orderId) {
+        ResultResponse resultResponse = orderService.refund(orderId, rq.getMember());
+        return Util.spring.responseEntityOf(resultResponse);
     }
 }

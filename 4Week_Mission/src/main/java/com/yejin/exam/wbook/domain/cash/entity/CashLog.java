@@ -1,5 +1,6 @@
 package com.yejin.exam.wbook.domain.cash.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.global.base.entity.BaseEntity;
 import lombok.Getter;
@@ -19,6 +20,7 @@ import static javax.persistence.FetchType.LAZY;
 @ToString(callSuper = true)
 public class CashLog extends BaseEntity {
     @ManyToOne(fetch = LAZY)
+    @JsonIgnore
     private Member member;
     private long price; // 변동
     private String eventType;

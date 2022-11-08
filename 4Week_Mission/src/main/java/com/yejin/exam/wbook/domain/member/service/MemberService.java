@@ -157,8 +157,8 @@ public class MemberService {
                         임시 비밀번호 : %s
                         위의 임시 비밀번호로 로그인 후, 비밀번호를 변경해 주세요.
                         """.formatted(tempPassword);
-
-        emailService.sendMessage(member.getEmail(),subject,text);
+        // 이메일 전송 모듈만 임시로 주석처리
+        // emailService.sendMessage(member.getEmail(),subject,text);
     }
 
     public Optional<Member> findByEmail(String email) {

@@ -394,7 +394,95 @@ doc 문서에 적용한 코드 잘 나오는 것 확인
 
 <br>
 
+### 8. referer에서 가져오던 yearMonth -> orderItem의 payData에서 파싱으로 변경 
+
+기존의 헤더에서 referer의 param에서 가져오던 yearMonth를 정산 아이템의 paydate 값에서 가져오는 로직으로 변경하였다.    
+```java
+        String yearMonth = rebateOrderItem.getPayDate().format(DateTimeFormatter.ofPattern("YYYY-MM"));
+
+        return ResultResponse.of(
+        "S001",
+        "주문품목번호 %d번에 대해서 판매자에게 %s원 정산을 완료하였습니다.".formatted(rebateOrderItem.getOrderItem().getId(), calculateRebatePrice),
+        Util.mapOf(
+        "cashLogId", cashLog.getId(),"yearMonth",yearMonth
+        )
+        );
+```
+파싱한 yearMonth 값을 응답 data에 추가하였다.  
+![img7](https://i.imgur.com/tPXLv8N.png)
+
+단점은 여러건의 rebate를 할때 yearMonth를 가져오는 로직이 중첩된다.  
+이를 위해 controller에서 request param으로 받는 방법도 고려해 봐야햘 것 같다.
+
+
+<br>
+
+
+### 9. 도서 상세조회, tag 조회를 위한 dto 추가 생성
+
+mybook과 동일하게 tag에 대한 중복 이슈로 인하여 출력 dto 따로 작성
+```java
+// 도서 상세 조회를 위한 postTagsDto
+@Getter
+@NoArgsConstructor
+public class ProductTagsDto {
+    private Long authorId;
+    private String authorName;
+    private String subject;
+    private int price;
+
+    private List<String> productKeywords=new ArrayList<>();
+
+    @QueryProjection
+    public ProductTagsDto(Product product){
+        this.authorId=product.getAuthor().getId();
+        this.authorName=product.getAuthor().getName();
+        this.subject=product.getSubject();
+        this.price=product.getPrice();
+        this.productKeywords.add(product.getPostKeyword().getContent());
+    }
+}
+
+// 출력 data에 해당 productTagasDto로 변환하여 전달
+    List<Product> products = productService.findAllForPrintByOrderByIdDesc(author);
+    List<ProductTagsDto> productTagsDtos = new ArrayList<>();
+    products.stream()
+            .map(product -> new ProductTagsDto(product))
+            .forEach(productTagsDto -> productTagsDtos.add(productTagsDto));
+    return Util.spring.responseEntityOf(ResultResponse.successOf("S001","도서 조회에 성공하였습니다.",productTagsDtos));
+```
+
+<br>
+
+### 10. 주문 목록에 포함된 도서 상품은 삭제하지 못하도록 수정  
+
+order item에 존재하는 도서는 삭제하지 못하는 예외처리 추가  
+
+```java
+// 서비스
+        if(orderService.existsByProduct(product.getId())){
+            return false;
+        }
+        productRepository.delete(product);
+        return true;
+
+// 컨트롤러
+        if(!productService.remove(product)){
+            return Util.spring.responseEntityOf(ResultResponse.successOf("F002","주문 목록에 포함되어 있는 상품입니다.",null));
+        }
+        return Util.spring.responseEntityOf(ResultResponse.successOf("S001","%d번 도서가 삭제되었습니다.",id));
+```
+
+주문목록에 존재하는 도서를 삭제할 경우 fail 메세지로 응답
+![img10](https://i.imgur.com/pPAXcU5.png)
+
+<br>
+
+
 ### Refcatoring 시 추가적으로 구현하고 싶은 부분  
+
+1. 정산 data에 대한 json 응답 dto 로 변경  
+현재는 `@JsonIgnore`을 이용하여 중복되는 엔티티의 항목은 제외하는 형태로 출력하였으나, 리팩토링시 Mybook에서와 같이 json 응답 dto로 구현해 볼 예정.
 
 <br>
 

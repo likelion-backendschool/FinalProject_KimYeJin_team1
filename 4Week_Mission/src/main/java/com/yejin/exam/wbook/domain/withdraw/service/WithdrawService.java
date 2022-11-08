@@ -52,12 +52,12 @@ public class WithdrawService {
     public ResultResponse withdraw(long withdrawApplyId) {
         Optional<WithdrawApply> oWithdrawApply = withdrawApplyRepository.findById(withdrawApplyId);
         if(!oWithdrawApply.isPresent()){
-            return ResultResponse.of("NO_WITHDRAW_APPLY_FAILED", "출금가능한 신청서가 없습니다.");
+            return ResultResponse.failOf("F001", "출금가능한 신청서가 없습니다.",null);
         }
         WithdrawApply withdrawApply = oWithdrawApply.get();
 
         if (!withdrawApply.isWithdrawAble()) {
-            return ResultResponse.of("APPLY_PAID_FAILED", "이미 처리 되었습니다.");
+            return ResultResponse.failOf("F002", "이미 처리 되었습니다.",null);
         }
         int calculateWithdrawPrice =  withdrawApply.getPrice() * -1;
         CashLog cashLog = memberService.addCash(
@@ -69,8 +69,8 @@ public class WithdrawService {
         log.debug("[withdraw] [cachlog] member" + cashLog.getMember() + " price : "+cashLog.getPrice());
         withdrawApply.setPay(cashLog.getId());
 
-        return ResultResponse.of(
-                "REBATE_FIN_OK",
+        return ResultResponse.successOf(
+                "S001",
                 "출금 신청 번호 %d번에 대해서 출금 %d 원 정상 지급되었습니다.".formatted(withdrawApplyId, calculateWithdrawPrice),
                 Util.mapOf(
                         "cashLogId", cashLog.getId()
