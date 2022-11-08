@@ -27,7 +27,7 @@ import java.util.Optional;
 
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
-@Api(tags = "게시물 API")
+@Api(tags = "Mybook API")
 @RestController
 @RequestMapping("/api/v1/myBooks")
 @RequiredArgsConstructor
