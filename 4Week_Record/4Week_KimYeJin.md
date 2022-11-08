@@ -396,6 +396,7 @@ doc 문서에 적용한 코드 잘 나오는 것 확인
 
 ### 8. referer에서 가져오던 yearMonth -> orderItem의 payData에서 파싱으로 변경 
 
+기존의 헤더에서 referer의 param에서 가져오던 yearMonth를 정산 아이템의 paydate 값에서 가져오는 로직으로 변경하였다.    
 ```java
         String yearMonth = rebateOrderItem.getPayDate().format(DateTimeFormatter.ofPattern("YYYY-MM"));
 
@@ -407,9 +408,11 @@ doc 문서에 적용한 코드 잘 나오는 것 확인
         )
         );
 ```
+파싱한 yearMonth 값을 응답 data에 추가하였다.  
+![img7](https://i.imgur.com/tPXLv8N.png)
 
 단점은 여러건의 rebate를 할때 yearMonth를 가져오는 로직이 중첩된다.  
-이를 위해 controller에서 request param으로 받는 방법도 고려해 봐야햘 것 같다.  
+이를 위해 controller에서 request param으로 받는 방법도 고려해 봐야햘 것 같다.
 
 <br>
 
