@@ -372,15 +372,22 @@ PathSelector.any() 를 이용하여 모든 ant-path에 대하여 적용
 ### 7. swagger2를 이용하여 api response code 정보 추가  
 
 `@ApiResponsees()` 어노테이션 이용하여 resultCode S는 성공 F 는 실패 M은 auth 관련 실패 로 나누었다.  
-처음에는 resultCode를 "GET_MYBOOK_OK" 짧은 단어형태의 코드로 구현하였는데, 이렇게 문서화하여 조작하기 위해서는 더 간결한 코드가 맞다고 판단되어 수정하였다.  
+처음에는 resultCode를 "GET_MYBOOK_OK" 짧은 단어형태의 코드로 구현하였는데, 이렇게 문서화하여 조작하기 위해서는 더 간결한 코드가 맞다고 판단되어 수정하였다.
+
+`@ApiImplicitParams` 어노테이션을 통해 특정 파라미터의 예시값, 
 ```java
-    @ApiOperation(value = "My Book 상세")
+    @ApiOperation(value = "토스페이먼츠 결제")
     @ApiResponses({
-            @ApiResponse(code = 200, message = "S001 - 구매 도서 상세 조회에 성공하였습니다."),
-            @ApiResponse(code = 400, message = "FOO1 - 존재하지 않는 도서입니다.\n"
-                    + "M001 - 유효하지 않은 사용자 입니다."),
+            @ApiResponse(code = 200, message = "S001 - %d번 주문이 결제처리되었습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 예치금이 부족합니다.\n"),
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "주문 PK", example = "1", required = true),
+            @ApiImplicitParam(name = "paymentKey", value = "페이지", example = "1", required = true),
+            @ApiImplicitParam(name = "orderId", value = "주문번호", example = "order__1__78893412342", required = true),
+            @ApiImplicitParam(name = "amount", value = "페이 사용금액", example = "1000", required = true)
+})
 ```
 doc 문서에 적용한 코드 잘 나오는 것 확인
 ![img6](https://i.imgur.com/mH8C0mc.png)
