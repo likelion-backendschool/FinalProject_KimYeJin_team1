@@ -4,22 +4,19 @@ import com.yejin.exam.wbook.domain.member.dto.MemberDto;
 import com.yejin.exam.wbook.domain.member.dto.MemberModifyDto;
 import com.yejin.exam.wbook.domain.member.dto.MemberModifyPasswordDto;
 import com.yejin.exam.wbook.domain.member.entity.Member;
-import com.yejin.exam.wbook.domain.member.request.LoginDto;
 import com.yejin.exam.wbook.domain.member.service.MemberService;
+import com.yejin.exam.wbook.global.base.dto.MemberContext;
 import com.yejin.exam.wbook.global.result.ResultResponse;
-import com.yejin.exam.wbook.util.Util;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.Banner;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -90,16 +87,16 @@ public class MemberController {
     }
 
     @GetMapping("/modify")
-    public ModelAndView showModify(Principal principal, ModelAndView mav, MemberModifyDto memberModifyDto){
-        Member member = memberService.findByUsername(principal.getName()).orElseThrow(()->new RuntimeException());
+    public ModelAndView showModify(@AuthenticationPrincipal MemberContext memberContext, ModelAndView mav, MemberModifyDto memberModifyDto){
+        Member member = memberContext.getMember();
         mav.addObject("member",member);
         mav.setViewName("member/profile_form");
         return mav;
     }
 
     @PostMapping("/modify")
-    public ModelAndView modify(Principal principal, ModelAndView mav, @Valid MemberModifyDto memberModifyDto, BindingResult bindingResult) {
-        Member member = memberService.findByUsername(principal.getName()).orElseThrow(()->new RuntimeException());
+    public ModelAndView modify(@AuthenticationPrincipal MemberContext memberContext, ModelAndView mav, @Valid MemberModifyDto memberModifyDto, BindingResult bindingResult) {
+        Member member = memberContext.getMember();
         if (bindingResult.hasErrors()) {
             mav.addObject("member",member);
             mav.setViewName("member/profile_form");
@@ -111,8 +108,8 @@ public class MemberController {
     }
 
     @GetMapping("/modifyPassword")
-    public ModelAndView showModifyPassword(Principal principal, ModelAndView mav, MemberModifyPasswordDto memberModifyPasswordDto){
-        Member member = memberService.findByUsername(principal.getName()).orElseThrow(()->new RuntimeException());
+    public ModelAndView showModifyPassword(@AuthenticationPrincipal MemberContext memberContext, ModelAndView mav, MemberModifyPasswordDto memberModifyPasswordDto){
+        Member member = memberContext.getMember();
         mav.addObject("member",member);
         mav.setViewName("member/profilePassword_form");
         return mav;
@@ -126,9 +123,9 @@ public class MemberController {
                     + "F002 - 기존 패스워드와 동일한 패스워드로 바꿀 수 없습니다."),
     })
     @PostMapping("/modifyPassword")
-    public ModelAndView modifyPassword(Principal principal, ModelAndView mav, @Valid MemberModifyPasswordDto memberModifyPasswordDto, BindingResult bindingResult){
+    public ModelAndView modifyPassword(@AuthenticationPrincipal MemberContext memberContext, ModelAndView mav, @Valid MemberModifyPasswordDto memberModifyPasswordDto, BindingResult bindingResult){
         mav.setViewName("member/profile_form");
-        Member member = memberService.findByUsername(principal.getName()).orElseThrow(()->new RuntimeException());
+        Member member = memberContext.getMember();
         if(memberModifyPasswordDto.getOldPassword() == memberModifyPasswordDto.getPassword()){
             bindingResult.addError(new FieldError("member", "password","기존 패스워드와 동일한 패스워드로 바꿀 수 없습니다."));
             return mav;

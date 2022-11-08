@@ -40,7 +40,6 @@ public class MyBookController {
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
     @GetMapping("")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResultResponse> list(@AuthenticationPrincipal MemberContext memberContext) {
         Optional<List<MyBook>> oMyBooks = myBookService.findByOwner(memberContext.getId());
         if(!oMyBooks.isPresent()){
@@ -57,7 +56,6 @@ public class MyBookController {
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ResultResponse> detail(@AuthenticationPrincipal MemberContext memberContext, @PathVariable Long id) {
         Optional<MyBook> oMyBook = myBookService.findById(id);
         if(!oMyBook.isPresent()){

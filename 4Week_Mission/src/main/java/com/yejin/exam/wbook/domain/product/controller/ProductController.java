@@ -11,6 +11,7 @@ import com.yejin.exam.wbook.domain.product.dto.ProductModifyDto;
 import com.yejin.exam.wbook.domain.product.entity.Product;
 import com.yejin.exam.wbook.domain.product.entity.ProductTag;
 import com.yejin.exam.wbook.domain.product.service.ProductService;
+import com.yejin.exam.wbook.global.base.dto.MemberContext;
 import com.yejin.exam.wbook.global.exception.ActorCanNotModifyException;
 import com.yejin.exam.wbook.global.exception.ActorCanNotRemoveException;
 import com.yejin.exam.wbook.global.request.Rq;
@@ -18,6 +19,7 @@ import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,11 +43,10 @@ public class ProductController {
 
     @PreAuthorize("isAuthenticated() and hasAuthority('AUTHOR')")
     @GetMapping("/create")
-    public String showCreate(Principal principal,Model model) {
-        Long memberId = memberService.findByUsername(principal.getName()).get().getId();
+    public String showCreate(@AuthenticationPrincipal MemberContext memberContext, Model model) {
+        Long memberId = memberContext.getId();
         List<PostKeyword> postKeywords = postKeywordService.findByMemberId(memberId);
 //        log.debug("[product] rq.getId : "+rq.getMember().getNickname());
-        log.debug("[product] principal : "+principal.getName());
         log.debug("[product] postKeywords : "+postKeywords);
         model.addAttribute("postKeywords", postKeywords);
         return "product/create";
@@ -60,9 +61,9 @@ public class ProductController {
     })
     @PreAuthorize("isAuthenticated() and hasAuthority('AUTHOR')")
     @PostMapping("/create")
-    public String create(Principal principal,@Valid ProductDto productDto) {
+    public String create(@AuthenticationPrincipal MemberContext memberContext,@Valid ProductDto productDto) {
 //        Member author = rq.getMember();
-        Member author = memberService.findByUsername(principal.getName()).get();
+        Member author = memberContext.getMember();
         Product product = productService.create(author, productDto.getSubject(), productDto.getPrice(), productDto.getPostKeywordId(), productDto.getProductTagContents());
         return "redirect:/product/" + product.getId();
     }
@@ -75,8 +76,8 @@ public class ProductController {
     })
     @ApiImplicitParam(name = "id", value = "도서 PK", example = "1", required = true)
     @GetMapping("/{id}")
-    public String detail(Principal principal, @PathVariable Long id, Model model) {
-        Member author = memberService.findByUsername(principal.getName()).get();
+    public String detail(@AuthenticationPrincipal MemberContext memberContext, @PathVariable Long id, Model model) {
+        Member author = memberContext.getMember();
 
         Product product = productService.findForPrintById(id).get();
         List<Post> posts = productService.findPostsByProduct(product);
@@ -95,8 +96,8 @@ public class ProductController {
             @ApiResponse(code = 403, message = "M004 - 작가 권한이 필요한 화면입니다.")
     })
     @GetMapping("/list")
-    public String list(Principal principal, Model model) {
-        Member author = memberService.findByUsername(principal.getName()).get();
+    public String list(@AuthenticationPrincipal MemberContext memberContext, Model model) {
+        Member author = memberContext.getMember();
         List<Product> products = productService.findAllForPrintByOrderByIdDesc(author);
 
         model.addAttribute("products", products);
@@ -104,14 +105,13 @@ public class ProductController {
         return "product/list";
     }
 
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}/modify")
-    public String showModify(Principal principal, @PathVariable long id, Model model) {
+    public String showModify(@AuthenticationPrincipal MemberContext memberContext, @PathVariable long id, Model model) {
         Product product = productService.findForPrintById(id).get();
 
 //        Member actor = rq.getMember();
 
-        Member actor = memberService.findByUsername(principal.getName()).get();
+        Member actor = memberContext.getMember();
         if (productService.actorCanModify(actor, product) == false) {
             throw new ActorCanNotModifyException();
         }
@@ -129,12 +129,11 @@ public class ProductController {
             @ApiResponse(code = 403, message = "M004 - 작가 권한이 필요한 화면입니다.")
     })
     @ApiImplicitParam(name = "id", value = "도서 PK", example = "1", required = true)
-    @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/modify")
-    public String modify(Principal principal, @Valid ProductModifyDto productModifyDto, @PathVariable long id) {
+    public String modify(@AuthenticationPrincipal MemberContext memberContext, @Valid ProductModifyDto productModifyDto, @PathVariable long id) {
         Product product = productService.findById(id).get();
 //        Member actor = rq.getMember();
-        Member actor = memberService.findByUsername(principal.getName()).get();
+        Member actor = memberContext.getMember();
 
         if (productService.actorCanModify(actor, product) == false) {
             throw new ActorCanNotModifyException();
@@ -151,12 +150,11 @@ public class ProductController {
             @ApiResponse(code = 403, message = "M004 - 작가 권한이 필요한 화면입니다.")
     })
     @ApiImplicitParam(name = "id", value = "도서 PK", example = "1", required = true)
-    @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/remove")
-    public String remove(Principal principal, @PathVariable long id) {
+    public String remove(@AuthenticationPrincipal MemberContext memberContext, @PathVariable long id) {
         Product product = productService.findById(id).get();
 //        Member actor = rq.getMember();
-        Member actor = memberService.findByUsername(principal.getName()).get();
+        Member actor = memberContext.getMember();
 
         if (productService.actorCanRemove(actor, product) == false) {
             throw new ActorCanNotRemoveException();
@@ -175,8 +173,8 @@ public class ProductController {
     })
     @ApiImplicitParam(name = "tagContent", value = "태그", example = "#태그1", required = true)
     @GetMapping("/tag/{tagContent}")
-    public String tagList(Principal principal, Model model, @PathVariable String tagContent) {
-        Member author = memberService.findByUsername(principal.getName()).get();
+    public String tagList(@AuthenticationPrincipal MemberContext memberContext, Model model, @PathVariable String tagContent) {
+        Member author = memberContext.getMember();
 
         List<ProductTag> productTags = productService.getProductTags(tagContent, author);
 
