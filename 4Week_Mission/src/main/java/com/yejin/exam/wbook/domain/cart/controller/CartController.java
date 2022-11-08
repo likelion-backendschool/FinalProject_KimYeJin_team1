@@ -7,6 +7,10 @@ import com.yejin.exam.wbook.domain.product.entity.Product;
 import com.yejin.exam.wbook.global.base.dto.MemberContext;
 import com.yejin.exam.wbook.global.request.Rq;
 import com.yejin.exam.wbook.util.Util;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,7 +42,13 @@ public class CartController {
 
         return "cart/items";
     }
-
+    @ApiOperation(value = "장바구니 추가")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 장바구니에 추가되었습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 이미 장바구니에 존재하는 항목입니다. 수량을 추가하세요."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+    })
+    @ApiImplicitParam(name = "productId", value = "도서 PK", example = "1", required = true)
     @PostMapping("/addItem/{productId}")
     @PreAuthorize("isAuthenticated()")
     public String addItem(@PathVariable long productId) {
@@ -46,7 +56,13 @@ public class CartController {
 
         return rq.redirectToBackWithMsg("장바구니에 추가되었습니다.");
     }
-
+    @ApiOperation(value = "장바구니 삭제")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 장바구니에서 삭제되었습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 존재하지 않는 상품입니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+    })
+    @ApiImplicitParam(name = "productId", value = "도서 PK", example = "1", required = true)
     @PostMapping("/removeItem/{productId}")
     @PreAuthorize("isAuthenticated()")
     public String removeItem(@PathVariable long productId) {
@@ -54,7 +70,13 @@ public class CartController {
 
         return rq.redirectToBackWithMsg("장바구니에서 삭제되었습니다.");
     }
-
+    @ApiOperation(value = "장바구니 삭제")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - %d건의 품목을 삭제하였습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 존재하지 않는 상품입니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+    })
+    @ApiImplicitParam(name = "ids", value = "도서 ids", example = "12", required = true)
     @PostMapping("/removeItems")
     @PreAuthorize("isAuthenticated()")
     public String removeItems(String ids) {

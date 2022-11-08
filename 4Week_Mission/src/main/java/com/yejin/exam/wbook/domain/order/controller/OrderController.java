@@ -14,6 +14,7 @@ import com.yejin.exam.wbook.global.exception.OrderNotEnoughRestCashException;
 import com.yejin.exam.wbook.global.request.Rq;
 import com.yejin.exam.wbook.global.result.ResultResponse;
 import com.yejin.exam.wbook.util.Util;
+import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -31,7 +32,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@Api(tags = "주문 API")
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/order")
@@ -41,7 +42,13 @@ public class OrderController {
     private final ObjectMapper objectMapper;
     private final MemberService memberService;
     private final Rq rq;
-
+    @ApiOperation(value = "예치금 결제")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - %d원 예치금 결제가 완료되었습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 예치금이 부족합니다.\n"),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+    })
+    @ApiImplicitParam(name = "id", value = "주문 PK", example = "1", required = true)
     @PostMapping("/{id}/payByRestCashOnly")
     @PreAuthorize("isAuthenticated()")
     public String payByRestCashOnly(@AuthenticationPrincipal MemberContext memberContext, @PathVariable long id) {
@@ -59,7 +66,13 @@ public class OrderController {
 
         return "redirect:/order/%d?msg=%s".formatted(order.getId(), Util.url.encode("예치금으로 결제했습니다."));
     }
-
+    @ApiOperation(value = "주문 상세")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 주문 상세 조회에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 주문을 찾을 수 없습니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+    })
+    @ApiImplicitParam(name = "id", value = "주문 PK", example = "1", required = true)
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public String showDetail(@AuthenticationPrincipal MemberContext memberContext, @PathVariable long id, Model model) {
@@ -100,6 +113,18 @@ public class OrderController {
     @Value("${custom.tossPayments.secretKey}")
     private String SECRET_KEY;
 
+    @ApiOperation(value = "토스페이먼츠 결제")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - %d번 주문이 결제처리되었습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 예치금이 부족합니다.\n"),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "주문 PK", example = "1", required = true),
+            @ApiImplicitParam(name = "paymentKey", value = "페이지", example = "1", required = true),
+            @ApiImplicitParam(name = "orderId", value = "주문번호", example = "order__1__78893412342", required = true),
+            @ApiImplicitParam(name = "amount", value = "페이 사용금액", example = "1000", required = true)
+    })
     @RequestMapping("/{id}/success")
     public String confirmPayment(
             @PathVariable long id,
@@ -162,7 +187,13 @@ public class OrderController {
         model.addAttribute("code", code);
         return "order/fail";
     }
-
+    @ApiOperation(value = "주문 생성")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - %d번 주문이 생성되었습니다."),
+            @ApiResponse(code = 400, message = "GOO1 - 유효하지 않은 입력입니다.\n"
+                    + "G002 - 유효하지 않은 입력 타입 입니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+    })
     @PostMapping("/create")
     @PreAuthorize("isAuthenticated()")
     public String create(@AuthenticationPrincipal MemberContext memberContext) {
@@ -174,7 +205,12 @@ public class OrderController {
                 "%d번 주문이 생성되었습니다.".formatted(order.getId())
         );
     }
-
+    @ApiOperation(value = "주문 조회")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 주문 조회에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 주문 조회할 수 없습니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+    })
     @GetMapping("/list")
     @PreAuthorize("isAuthenticated()")
     public String showList(Model model) {
@@ -183,7 +219,15 @@ public class OrderController {
         model.addAttribute("orders", orders);
         return "order/list";
     }
-
+    @ApiOperation(value = "주문 취소")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 주문이 취소되었습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 이미 결제처리 되었습니다.\n"
+                    + "FOO2 - 이미 취소되었습니다.\n"
+                    + "FOO3 - 주문자만 취소할 수 있습니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+    })
+    @ApiImplicitParam(name = "orderId", value = "주문 PK", example = "1", required = true)
     @PostMapping("/{orderId}/cancel")
     @PreAuthorize("isAuthenticated()")
     public String cancel(@PathVariable Long orderId) {
@@ -195,7 +239,18 @@ public class OrderController {
 
         return Rq.redirectWithMsg("/order/%d".formatted(orderId), rsData);
     }
-
+    @ApiOperation(value = "환불")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - %d원 환불되었습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 결제 상품을 찾을 수 없습니다.\n"
+                    + "FOO2 - 이미 취소되었습니다.\n"
+                    + "FOO3 - 이미 환불되었습니다.\n"
+                    + "FOO4 - 결제가 되어야 환불이 가능합니다.\n"
+                    + "FOO5 - 주문자만 환불할 수 있습니다.\n"
+                    + "FOO6 - 결제 된지 10분이 지났으므로, 환불 할 수 없습니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+    })
+    @ApiImplicitParam(name = "orderId", value = "주문 PK", example = "1", required = true)
     @PostMapping("/{orderId}/refund")
     @PreAuthorize("isAuthenticated()")
     public String refund(@PathVariable Long orderId) {

@@ -9,10 +9,7 @@ import com.yejin.exam.wbook.domain.post.service.PostHashTagService;
 import com.yejin.exam.wbook.domain.post.service.PostKeywordService;
 import com.yejin.exam.wbook.domain.post.service.PostService;
 import com.yejin.exam.wbook.util.Util;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -71,6 +68,7 @@ public class PostController {
             @ApiResponse(code = 400, message = "FOO1 - 존재하지 않는 게시글 입니다."),
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
+    @ApiImplicitParam(name = "id", value = "게시글 PK", example = "1", required = true)
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public String showDetail(Model model, @PathVariable Long id) {
@@ -86,6 +84,7 @@ public class PostController {
             @ApiResponse(code = 400, message = "FOO1 - 존재하지 않는 게시글 입니다."),
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
+    @ApiImplicitParam(name = "id", value = "게시글 PK", example = "1", required = true)
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}/modify")
     public String showModify(Model model, @PathVariable Long id) {
@@ -103,6 +102,7 @@ public class PostController {
                     + "FOO1 - 존재하지 않는 게시글 입니다."),
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
+    @ApiImplicitParam(name = "id", value = "게시글 PK", example = "1", required = true)
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/modify")
     @ResponseBody // 임시
@@ -126,6 +126,7 @@ public class PostController {
                     + "M001 - 유효하지 않은 사용자 입니다."),
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
+    @ApiImplicitParam(name = "kw", value = "태그 키워드", example = "태그1", required = false)
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/list")
     public String list(Model model, Principal principal, @RequestParam(defaultValue = "all") String kwType, @RequestParam(defaultValue = "") String kw){

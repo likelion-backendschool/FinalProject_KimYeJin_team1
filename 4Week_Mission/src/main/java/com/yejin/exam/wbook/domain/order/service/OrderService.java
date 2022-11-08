@@ -96,7 +96,7 @@ public class OrderService {
 
         payDone(order);
 
-        return ResultResponse.of("PAY_OK", "결제가 완료되었습니다.");
+        return ResultResponse.of("S001", "결제가 완료되었습니다.");
     }
 
     @Transactional
@@ -113,7 +113,7 @@ public class OrderService {
 
         payDone(order);
 
-        return ResultResponse.of("PAY_OK", "결제가 완료되었습니다.");
+        return ResultResponse.of("S001", "%d원 예치금 결제가 완료되었습니다.".formatted(payPrice));
     }
 
     private void payDone(Order order) {
@@ -141,7 +141,7 @@ public class OrderService {
 
         myBookService.remove(order);
 
-        return ResultResponse.of("REFUND_OK", "환불되었습니다.");
+        return ResultResponse.of("S001", "%d원 환불되었습니다.".formatted(payPrice));
     }
 
     @Transactional
@@ -149,7 +149,7 @@ public class OrderService {
         Order order = findById(orderId).orElse(null);
 
         if (order == null) {
-            return ResultResponse.of("NOT_FOUND_REFUND_FAILED", "결제 상품을 찾을 수 없습니다.");
+            return ResultResponse.of("F001", "결제 상품을 찾을 수 없습니다.");
         }
         return refund(order, actor);
     }
@@ -157,28 +157,28 @@ public class OrderService {
     public ResultResponse actorCanRefund(Member actor, Order order) {
 
         if (order.isCanceled()) {
-            return ResultResponse.of("IS_CANCELED_REFUND_FAILED", "이미 취소되었습니다.");
+            return ResultResponse.of("F002", "이미 취소되었습니다.");
         }
 
         if ( order.isRefunded() ) {
-            return ResultResponse.of("IS_REFUNDED_REFUND_FAILED", "이미 환불되었습니다.");
+            return ResultResponse.of("F003", "이미 환불되었습니다.");
         }
 
         if ( order.isPaid() == false ) {
-            return ResultResponse.of("NO_PAID_REFUND_FAILED", "결제가 되어야 환불이 가능합니다.");
+            return ResultResponse.of("F004", "결제가 되어야 환불이 가능합니다.");
         }
 
         if (actor.getId().equals(order.getBuyer().getId()) == false) {
-            return ResultResponse.of("NO_AUTH_REFUND_FAILED", "권한이 없습니다.");
+            return ResultResponse.of("F005", "주문자만 환불할 수 있습니다.");
         }
 
         long between = ChronoUnit.MINUTES.between(order.getPayDate(), LocalDateTime.now());
 
         if (between > 10) {
-            return ResultResponse.of("TIME_OUT_REFUND_FAILED", "결제 된지 10분이 지났으므로, 환불 할 수 없습니다.");
+            return ResultResponse.of("F006", "결제 된지 10분이 지났으므로, 환불 할 수 없습니다.");
         }
 
-        return ResultResponse.of("REFUNDABLE_OK", "환불할 수 있습니다.");
+        return ResultResponse.of("S001", "환불할 수 있습니다.");
     }
 
     public Optional<Order> findForPrintById(long id) {
@@ -213,7 +213,7 @@ public class OrderService {
         log.debug("[order] order is canceled : "+ order.isCanceled());
         order.setCanceled(true);
         log.debug("[order] order set cancel : "+ order.isCanceled());
-        return ResultResponse.of("ORDER_CANCEL_OK", "취소되었습니다.");
+        return ResultResponse.of("S001", "주문이 취소되었습니다.");
     }
 
     @Transactional
@@ -224,18 +224,18 @@ public class OrderService {
 
     public ResultResponse actorCanCancel(Member actor, Order order) {
         if ( order.isPaid() ) {
-            return ResultResponse.of("IS_PAID_ORDER_CANCEL_FAIL", "이미 결제처리 되었습니다.");
+            return ResultResponse.of("F001", "이미 결제처리 되었습니다.");
         }
 
         if (order.isCanceled()) {
-            return ResultResponse.of("IS_CANCELED_ORDER_CANCEL_FAIL", "이미 취소되었습니다.");
+            return ResultResponse.of("F002", "이미 취소되었습니다.");
         }
 
         if (actor.getId().equals(order.getBuyer().getId()) == false) {
-            return ResultResponse.of("NO_AUTH_ORDER_CANCEL_FAIL", "권한이 없습니다.");
+            return ResultResponse.of("F003", "주문자만 취소할 수 있습니다.");
         }
 
-        return ResultResponse.of("ORDER_CANCEL_OK", "취소할 수 있습니다.");
+        return ResultResponse.of("S001", "취소할 수 있습니다.");
     }
 
     public List<OrderItem> findAllByPayDateBetweenOrderByIdAsc(LocalDateTime fromDate, LocalDateTime toDate) {
