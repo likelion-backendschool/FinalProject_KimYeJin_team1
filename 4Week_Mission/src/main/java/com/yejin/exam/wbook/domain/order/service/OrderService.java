@@ -241,4 +241,9 @@ public class OrderService {
     public List<OrderItem> findAllByPayDateBetweenOrderByIdAsc(LocalDateTime fromDate, LocalDateTime toDate) {
         return orderItemRepository.findAllByPayDateBetween(fromDate, toDate);
     }
+
+    public boolean existsByProduct(Long productId) {
+        log.debug("[orderitem] productId "+productId+" exists? " + orderItemRepository.existsByProductId(productId));
+        return orderItemRepository.existsByProductId(productId);
+    }
 }

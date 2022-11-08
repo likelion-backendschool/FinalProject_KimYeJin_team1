@@ -14,4 +14,5 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 
     List<OrderItem> findAllByPayDateBetween(LocalDateTime fromDate, LocalDateTime toDate);
 
+    boolean existsByProductId(Long productId);
 }
