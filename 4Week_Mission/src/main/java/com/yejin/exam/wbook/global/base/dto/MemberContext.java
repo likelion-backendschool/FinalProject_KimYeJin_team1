@@ -37,6 +37,7 @@ public class MemberContext extends User {
                 .createDate(createDate)
                 .modifyDate(modifyDate)
                 .username(username)
+                .password(getPassword())
                 .email(email)
                 .nickname(nickname)
                 .restCash(resetCash)
