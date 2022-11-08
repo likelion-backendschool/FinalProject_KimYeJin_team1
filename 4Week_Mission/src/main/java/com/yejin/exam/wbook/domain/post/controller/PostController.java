@@ -8,20 +8,18 @@ import com.yejin.exam.wbook.domain.post.entity.Post;
 import com.yejin.exam.wbook.domain.post.service.PostHashTagService;
 import com.yejin.exam.wbook.domain.post.service.PostKeywordService;
 import com.yejin.exam.wbook.domain.post.service.PostService;
+import com.yejin.exam.wbook.global.base.dto.MemberContext;
 import com.yejin.exam.wbook.util.Util;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 @Api(tags = "게시글 API")
@@ -40,7 +38,6 @@ public class PostController {
             @ApiResponse(code = 200, message = "S001 - 게시글 생성 폼 성공하였습니다."),
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/write")
     public String showWrite(PostDto postDto) {
         return "post/post_form";
@@ -52,10 +49,9 @@ public class PostController {
                     + "G002 - 유효하지 않은 입력 타입 입니다."),
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
-    @PreAuthorize("isAuthenticated()")
     @PostMapping("/write")
-    public String write(Principal principal, @Valid PostDto postDto) {
-        Member member = memberService.findByUsername(principal.getName()).orElseThrow();
+    public String write(@AuthenticationPrincipal MemberContext memberContext, @Valid PostDto postDto) {
+        Member member = memberContext.getMember();
         Post post = postService.write(member, postDto.getSubject(), postDto.getContent(),postDto.getContentHTML(),postDto.getHashTagsStr());
 
         String msg = "%d번 게시물이 작성되었습니다.".formatted(post.getId());
@@ -69,7 +65,6 @@ public class PostController {
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
     @ApiImplicitParam(name = "id", value = "게시글 PK", example = "1", required = true)
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public String showDetail(Model model, @PathVariable Long id) {
         Post post= postService.getForPrintPostById(id);
@@ -85,7 +80,6 @@ public class PostController {
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
     @ApiImplicitParam(name = "id", value = "게시글 PK", example = "1", required = true)
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}/modify")
     public String showModify(Model model, @PathVariable Long id) {
         Post post= postService.getForPrintPostById(id);
@@ -103,12 +97,11 @@ public class PostController {
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
     @ApiImplicitParam(name = "id", value = "게시글 PK", example = "1", required = true)
-    @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/modify")
-    @ResponseBody // 임시
+    @ResponseBody
     public String modify(
             Model model,
-            Principal principal,
+            @AuthenticationPrincipal MemberContext memberContext,
             @PathVariable Long id,
             @Valid PostDto postDto,
             @RequestParam Map<String, String> params) {
@@ -127,12 +120,12 @@ public class PostController {
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
     })
     @ApiImplicitParam(name = "kw", value = "태그 키워드", example = "태그1", required = false)
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/list")
-    public String list(Model model, Principal principal, @RequestParam(defaultValue = "all") String kwType, @RequestParam(defaultValue = "") String kw){
+    public String list(Model model, @AuthenticationPrincipal MemberContext memberContext, @RequestParam(defaultValue = "all") String kwType, @RequestParam(defaultValue = "") String kw){
+        String username = memberContext.getUsername();
         List<Post> posts = kwType.equals("all")
-                ? posts=postService.getForPrintPostsByUsername(principal.getName())
-                : postService.getForPrintPostsByKeyword(principal.getName(),kw);
+                ? posts=postService.getForPrintPostsByUsername(username)
+                : postService.getForPrintPostsByKeyword(username,kw);
 
         model.addAttribute("posts",posts);
         return "/post/list";
