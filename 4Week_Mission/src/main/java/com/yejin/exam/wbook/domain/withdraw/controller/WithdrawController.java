@@ -17,10 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
@@ -41,8 +38,8 @@ public class WithdrawController {
             @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다.."),
     })
     @PostMapping("/apply")
-    public ResponseEntity<ResultResponse> apply(@AuthenticationPrincipal MemberContext memberContext, @Valid WithdrawApplyDto withdrawApplydto, BindingResult bindingResult){
-        log.debug("[withdraw] post apply form");
+    public ResponseEntity<ResultResponse> apply(@AuthenticationPrincipal MemberContext memberContext, @Valid @RequestBody WithdrawApplyDto withdrawApplydto){
+        log.debug("[withdraw] post apply dto :  price : "+withdrawApplydto.getPrice());
 
         Member member = memberContext.getMember();
         WithdrawApply withdrawApply = withdrawService.apply(member, withdrawApplydto);

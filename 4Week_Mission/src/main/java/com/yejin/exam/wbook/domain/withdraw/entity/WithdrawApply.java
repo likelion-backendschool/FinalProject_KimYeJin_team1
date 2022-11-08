@@ -1,5 +1,6 @@
 package com.yejin.exam.wbook.domain.withdraw.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yejin.exam.wbook.domain.cash.entity.CashLog;
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.global.base.entity.BaseEntity;
@@ -26,6 +27,7 @@ import static javax.persistence.FetchType.LAZY;
 @Table(name = "withdraw")
 public class WithdrawApply extends BaseEntity {
     @ManyToOne(fetch = LAZY)
+    @JsonIgnore
     private Member member;
     private String bankName;
     private String backAccountNo;
