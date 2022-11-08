@@ -44,7 +44,7 @@ cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/ 
 
 ### [추가기능]
 - [x] REST API 로 구현
-- [ ] 엑세트 토큰 화이트리스트 구현
+- [x] 엑세트 토큰 화이트리스트 구현
 
 
 
@@ -487,6 +487,12 @@ order item에 존재하는 도서는 삭제하지 못하는 예외처리 추가
 
 <br>
 
+2. Oauth 추가
+
+3. 외부 블로그 글 가져오기 추가
+
+4. hashTag 파싱 부분 리팩토링  
+
 ### 궁금한 점
 
 <br>
@@ -494,6 +500,12 @@ order item에 존재하는 도서는 삭제하지 못하는 예외처리 추가
 #### 1. handler와 entrypoint로 예외처리 시 responseentiry의 형태로 예외처리 가능한지  
 
     -> REST API 에서의 예외처리 방식은 어떻게 되는가?
+
+#### 2. REST API로 구현하여 프론트 개발자와 협업 시 , form dto에 대한 명세는 어떻게? -> validation으로?  
+
+#### 3. `@JsonIgnore` 사용 vs 응답 dto 생성
+
+#### 4. 일반적으로 REST API 적용 시 토스트 UI 등을 이용한 마크다운 파싱은 어디서 처리? (프론트에서 HTML 값을 처리해서 보내주는지?)
 
 <br>
 
