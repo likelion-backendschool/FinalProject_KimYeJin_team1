@@ -22,7 +22,7 @@ import javax.validation.Valid;
 import javax.xml.transform.Result;
 
 @RestController
-@RequestMapping("/api/v1/member")
+@RequestMapping("/api/v2/member")
 @RequiredArgsConstructor
 @Slf4j
 public class JwtMemberController {
