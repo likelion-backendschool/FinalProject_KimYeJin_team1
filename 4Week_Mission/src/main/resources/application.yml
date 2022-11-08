@@ -1,4 +1,5 @@
 spring:
+
   profiles:
     active: dev
     include:
@@ -19,6 +20,9 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
+  mvc:
+    pathmatch:
+      matching-strategy: ant-path-matcher
 logging:
   level:
     com.yejin.exam.wbook: debug
@@ -31,4 +35,5 @@ custom:
   site:
     name: wbook
     baseUrl: "http://localhost:8080"
+
 

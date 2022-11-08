@@ -14,6 +14,7 @@ import com.yejin.exam.wbook.domain.product.service.ProductService;
 import com.yejin.exam.wbook.global.exception.ActorCanNotModifyException;
 import com.yejin.exam.wbook.global.exception.ActorCanNotRemoveException;
 import com.yejin.exam.wbook.global.request.Rq;
+import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
-
+@Api(tags = "도서 API")
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -49,7 +50,14 @@ public class ProductController {
         model.addAttribute("postKeywords", postKeywords);
         return "product/create";
     }
-
+    @ApiOperation(value = "도서 생성")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - %d번 도서가 생성되었습니다."),
+            @ApiResponse(code = 400, message = "GOO1 - 유효하지 않은 입력입니다.\n"
+                    + "G002 - 유효하지 않은 입력 타입 입니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+            @ApiResponse(code = 403, message = "M004 - 작가 권한이 필요한 화면입니다.")
+    })
     @PreAuthorize("isAuthenticated() and hasAuthority('AUTHOR')")
     @PostMapping("/create")
     public String create(Principal principal,@Valid ProductDto productDto) {
@@ -58,7 +66,14 @@ public class ProductController {
         Product product = productService.create(author, productDto.getSubject(), productDto.getPrice(), productDto.getPostKeywordId(), productDto.getProductTagContents());
         return "redirect:/product/" + product.getId();
     }
-
+    @ApiOperation(value = "도서 상세 조회")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 도서 상세 조회에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "GOO1 - 도서를 찾을 수 없습니다"),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+            @ApiResponse(code = 403, message = "M004 - 작가 권한이 필요한 화면입니다.")
+    })
+    @ApiImplicitParam(name = "id", value = "도서 PK", example = "1", required = true)
     @GetMapping("/{id}")
     public String detail(Principal principal, @PathVariable Long id, Model model) {
         Member author = memberService.findByUsername(principal.getName()).get();
@@ -72,7 +87,13 @@ public class ProductController {
 
         return "product/detail";
     }
-
+    @ApiOperation(value = "도서 조회")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 도서 조회에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "GOO1 - 도서 조회할 수 없습니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+            @ApiResponse(code = 403, message = "M004 - 작가 권한이 필요한 화면입니다.")
+    })
     @GetMapping("/list")
     public String list(Principal principal, Model model) {
         Member author = memberService.findByUsername(principal.getName()).get();
@@ -99,7 +120,15 @@ public class ProductController {
 
         return "product/modify";
     }
-
+    @ApiOperation(value = "도서 수정")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - %d번 도서가 수정되었습니다."),
+            @ApiResponse(code = 400, message = "GOO1 - 유효하지 않은 입력입니다.\n"
+                    + "G002 - 유효하지 않은 입력 타입 입니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+            @ApiResponse(code = 403, message = "M004 - 작가 권한이 필요한 화면입니다.")
+    })
+    @ApiImplicitParam(name = "id", value = "도서 PK", example = "1", required = true)
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/modify")
     public String modify(Principal principal, @Valid ProductModifyDto productModifyDto, @PathVariable long id) {
@@ -114,23 +143,37 @@ public class ProductController {
         productService.modify(product, productModifyDto.getSubject(), productModifyDto.getPrice(), productModifyDto.getProductTagContents());
         return Rq.redirectWithMsg("/product/" + product.getId(), "%d번 도서 상품이 수정되었습니다.".formatted(product.getId()));
     }
-
+    @ApiOperation(value = "도서 삭제")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - %d번 도서가 삭제되었습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 도서를 찾을 수 없습니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+            @ApiResponse(code = 403, message = "M004 - 작가 권한이 필요한 화면입니다.")
+    })
+    @ApiImplicitParam(name = "id", value = "도서 PK", example = "1", required = true)
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/{id}/remove")
     public String remove(Principal principal, @PathVariable long id) {
-        Product post = productService.findById(id).get();
+        Product product = productService.findById(id).get();
 //        Member actor = rq.getMember();
         Member actor = memberService.findByUsername(principal.getName()).get();
 
-        if (productService.actorCanRemove(actor, post) == false) {
+        if (productService.actorCanRemove(actor, product) == false) {
             throw new ActorCanNotRemoveException();
         }
 
-        productService.remove(post);
+        productService.remove(product);
 
-        return Rq.redirectWithMsg("/post/list", "%d번 글이 삭제되었습니다.".formatted(post.getId()));
+        return Rq.redirectWithMsg("/product/list", "%d번 도서가 삭제되었습니다.".formatted(product.getId()));
     }
-
+    @ApiOperation(value = "도서 태그 조회")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 도서 태그 조회에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "GOO1 - 도서 태그 조회할 수 없습니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+            @ApiResponse(code = 403, message = "M004 - 작가 권한이 필요한 화면입니다.")
+    })
+    @ApiImplicitParam(name = "tagContent", value = "태그", example = "#태그1", required = true)
     @GetMapping("/tag/{tagContent}")
     public String tagList(Principal principal, Model model, @PathVariable String tagContent) {
         Member author = memberService.findByUsername(principal.getName()).get();

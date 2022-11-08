@@ -48,6 +48,10 @@ public class SecurityConfig {
             "/sitemap.xml/**",
             "/robots.txt/**"
     }; // 정적 파일 인가 없이 모두 허용
+    private static final String[] AUTH_WHITELIST_SWAGGER = {
+            "/swagger/**",
+            "/swagger-ui/**"
+    };
     private static final String[] AUTH_ALL_LIST = {
             "/api/v1/member/login",
             "/member/join/**",
@@ -103,7 +107,7 @@ public class SecurityConfig {
     @Order(0)
     SecurityFilterChain resources(HttpSecurity http) throws Exception {
         http
-                .requestMatchers((matchers) -> matchers.antMatchers(AUTH_WHITELIST_STATIC))
+                .requestMatchers((matchers) -> matchers.antMatchers(AUTH_WHITELIST_STATIC).antMatchers(AUTH_WHITELIST_SWAGGER))
                 .authorizeHttpRequests((authorize) -> authorize.anyRequest().permitAll())
                 .requestCache().disable()
                 .securityContext().disable()

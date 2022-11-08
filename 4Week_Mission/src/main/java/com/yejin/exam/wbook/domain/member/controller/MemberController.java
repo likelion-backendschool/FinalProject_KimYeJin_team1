@@ -8,6 +8,7 @@ import com.yejin.exam.wbook.domain.member.request.LoginDto;
 import com.yejin.exam.wbook.domain.member.service.MemberService;
 import com.yejin.exam.wbook.global.result.ResultResponse;
 import com.yejin.exam.wbook.util.Util;
+import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.Banner;
@@ -25,7 +26,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.Optional;
-
+@Api(tags = "회원 API")
 @Slf4j
 @Controller
 @RequestMapping("/member")
@@ -40,7 +41,13 @@ public class MemberController {
     public String showJoin(MemberDto memberDto) {
         return "member/join_form";
     }
-
+    @ApiOperation(value = "회원가입")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 회원가입에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "GOO1 - 유효하지 않은 입력입니다.\n"
+                    + "G002 - 유효하지 않은 입력 타입 입니다.\n"
+                    + "F001 - 2개의 패스워드가 일치하지 않습니다."),
+    })
     @PostMapping(value = "/join")
     public ModelAndView join(@Valid MemberDto memberDto, ModelAndView mav, BindingResult bindingResult) {
         mav.setViewName("member/join_form");
@@ -110,7 +117,14 @@ public class MemberController {
         mav.setViewName("member/profilePassword_form");
         return mav;
     }
-
+    @ApiOperation(value = "비밀번호 변경")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 비밀번호 변경에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "GOO1 - 유효하지 않은 입력입니다.\n"
+                    + "G002 - 유효하지 않은 입력 타입 입니다.\n"
+                    + "F001 - 2개의 패스워드가 일치하지 않습니다.\n"
+                    + "F002 - 기존 패스워드와 동일한 패스워드로 바꿀 수 없습니다."),
+    })
     @PostMapping("/modifyPassword")
     public ModelAndView modifyPassword(Principal principal, ModelAndView mav, @Valid MemberModifyPasswordDto memberModifyPasswordDto, BindingResult bindingResult){
         mav.setViewName("member/profile_form");
@@ -136,31 +150,55 @@ public class MemberController {
     public String showFindUsername(){
         return "/member/findUsername_form";
     }
+    @ApiOperation(value = "아이디 찾기")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 아이디 찾기에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "GOO1 - 유효하지 않은 입력입니다.\n"
+                    + "G002 - 유효하지 않은 입력 타입 입니다.\n"
+                    + "F001 - 해당하는 아이디가 없습니다."),
+    })
+    @ApiImplicitParam(name = "email", value = "이메일", example = "kyj2212@gmail.com", required = true)
     @PostMapping("/findUsername")
     public ResponseEntity<ResultResponse> findUsername(ModelAndView mav, String email){
         Optional<Member> oMember = memberService.findByEmail(email);
         if(oMember.isPresent()){
-            return ResponseEntity.ok(ResultResponse.successOf("FIND_USERNAME_OK","해당하는 ID가 존재합니다." ,oMember.get().getUsername()));
+            return ResponseEntity.ok(ResultResponse.successOf("S001","아이디 찾기에 성공하였습니다." ,oMember.get().getUsername()));
         }
-        return ResponseEntity.ok(ResultResponse.failOf("FIND_USERNAME_FAIL","해당하는 ID가 없습니다.",false));
+        return ResponseEntity.ok(ResultResponse.failOf("F001","해당하는 아이디가 없습니다.",false));
     }
 
     @GetMapping("/findPassword")
     public String showFindPassword(){
         return "member/findPassword_form";
     }
+    @ApiOperation(value = "비밀번호 찾기")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - %s로 임시 비밀번호를 전송하였습니다."),
+            @ApiResponse(code = 400, message = "GOO1 - 유효하지 않은 입력입니다.\n"
+                    + "G002 - 유효하지 않은 입력 타입 입니다.\n"
+                    + "F001 - 해당하는 아이디가 없습니다."),
+    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "username", value = "아이디", example = "user1", required = true),
+            @ApiImplicitParam(name = "email", value = "이메일", example = "kyj2212@gmail.com", required = true)
+    })
     @PostMapping("/findPassword")
     public ResponseEntity<ResultResponse> findUsername(ModelAndView mav, String username, String email){
         Optional<Member> oMember = memberService.findByUsername(username);
         if(!oMember.isPresent()){
-            return ResponseEntity.ok(ResultResponse.of("FIND_PWD_FAIL","해당하는 ID가 없습니다.",username));
+            return ResponseEntity.ok(ResultResponse.of("F001","해당하는 아이디가 없습니다.",username));
         }
 //        memberService.setTempPassword(oMember.get());
-        return ResponseEntity.ok(ResultResponse.of("FIND_PWD_OK","%s로 임시 비밀번호를 전송하였습니다.".formatted(email),username));
+        return ResponseEntity.ok(ResultResponse.of("S001","%s로 임시 비밀번호를 전송하였습니다.".formatted(email),username));
 
     }
 
-
+    @ApiOperation(value = "탈퇴")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - 회원 탈퇴가 완료되었습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 해당하는 회원 정보가 없습니다."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+    })
     @GetMapping("/delete")
     public String delete(Principal principal){
         Member member = memberService.findByUsername(principal.getName()).orElseThrow(()->new RuntimeException());

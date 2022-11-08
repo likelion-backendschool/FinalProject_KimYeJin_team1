@@ -1,4 +1,4 @@
-## [3Week] 김예진
+## [4Week] 김예진
 
 ### 미션 요구사항 분석 & 체크리스트
 
@@ -20,7 +20,7 @@ global
 base/      config/    error/     exception/ request/   result/    security/ 
 
 domain
-cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/  
+cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/  withdraw/
 
 
 ```
@@ -28,11 +28,6 @@ cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/
 
 ### [도메인별 체크리스트]
 
-이번주 정산 도메인은 아래 참고 자료를 확인하여 작성하였습니다.  
-[https://techblog.woowahan.com/2711/](https://techblog.woowahan.com/2711/)  
-
-#### **<Rebate 도메인>**
-#### **<Withdraw 도메인>**
 
 
 ### [지난 주 필수 기능]
@@ -51,18 +46,20 @@ cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/
 - [ ] 
 
 
-<br>
+
 <br> 
 
-### 3주차 미션 요약
+### 4주차 미션 요약
 
 ---
 
 **[접근 방법]**
 
-### jwt
+### spring security + jwt
 
-1. PasswordEncoder 빈 생성 위치에 따른 cycle 에러 발생
+<br>
+
+### 1. PasswordEncoder 빈 생성 위치에 따른 cycle 에러 발생
 - 기존 위치 : SecurityConfig 내의 빈
 ```java
     @Bean
@@ -88,7 +85,9 @@ public class WbookApplication {
 }
 ```
 
-2. jwt 토큰 이용한 로그인, 회원정보 확인
+<br>
+
+### 2. jwt 토큰 이용한 로그인, 회원정보 확인
 
 Spring Security의 securityContext 를 사용하여 PreAuthorize() 등의 인증/인가 모듈을 사용하기 위하여
 JwtProvider에서 생성한 token으로 부터 Authentication을 가져와서 SecurityContextHolder에 해당 Authentication을 저장하는 방법을 사용하였다.  
@@ -171,7 +170,13 @@ UserDetail 객체를 직접 생성 (기존 UserDetailService를 상속받았던 
 하지만 postMan으로 테스트 시 정상. 테스크 코드를 추후 수정필요.
 ![img2](https://i.imgur.com/WpRXBdb.png)
 
-3. mybooks 의 ManyToOne 필드들의 무한 참조 이슈
+<br>
+
+### MyBook 도메인 REST API
+
+<br>
+
+### 3. mybooks 의 ManyToOne 필드들의 무한 참조 이슈
 오류 메세지
 ```text
 (through reference chain: com.yejin.exam.wbook.global.result.ResultResponse["data"]->java.util.ArrayList[0]->com.yejin.exam.wbook.domain.mybook.entity.MyBook["product"]->com.yejin.exam.wbook.domain.member.entity.Member$HibernateProxy$jBUFbZrX["hibernateLazyInitializer"])
@@ -197,7 +202,9 @@ Product, OrderItem 필드가 내부에 Member를 다시 참조하고 있기 때�
 api 요구사항의 날짜 json 형태와 조금 다른 형태로 표출됨. --> 추후 수정 필요
 ![img3](https://i.imgur.com/es3YK73.png)
 
-4. 유효하지 않은 자격 증명의 경우 예외처리
+<br>
+
+### 4. 유효하지 않은 자격 증명의 경우 예외처리
 기존의 AccessDeniedHandler는 403 authority 가 없는 경우만 예외처리 됨.  
 유효한 Authentication 없는 경우(token==null) 401 인 경우 예외처리 추가.
 
@@ -223,7 +230,9 @@ SecurityConfig에 JwtauthenticationEntryPoint 추가
                 ;
 ```
 
-5. Dto를 이용하여 원하는 데이터 추출
+<br>
+
+### 5. Dto를 이용하여 원하는 데이터 추출
 
 요구사항 json 데이터와 동일하게 출력하기 위하여  
 `MyBook, Product, Post(bookChapter)` 데이터의 필요부분만 추출하여 dto를 생성하였다.
@@ -321,14 +330,81 @@ public class BookChapterDto {
 
 ![img5](https://i.imgur.com/pg6gW69.png)
 
+
+### Swagger 적용
+
+<br>
+
+### 6. swagger2 적용 시 patchmatch 로 인한 patternsCondition = null 이슈
+```text
+springfox.documentation.spi.service.contexts.Orderings.patternsCondition is null 발생
+```
+
+application.yml 에 matching 전략을 ant path로 설정
+```yaml
+spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant-path-matcher
+```
+
+swaager 설정 파일에서 patchs가 잘 적용되는지 확인  
+PathSelector.any() 를 이용하여 모든 ant-path에 대하여 적용
+```java
+        return new Docket(DocumentationType.SWAGGER_2)
+                .useDefaultResponseMessages(false)
+                .globalResponseMessage(RequestMethod.POST, responseMessages)
+                .globalResponseMessage(RequestMethod.GET, responseMessages)
+                .globalResponseMessage(RequestMethod.DELETE, responseMessages)
+                .globalResponseMessage(RequestMethod.PUT, responseMessages)
+                .apiInfo(apiInfo())
+                .securityContexts(List.of(securityContext()))
+                .securitySchemes(List.of(apiKey()))
+                .select()
+                .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
+                .paths(PathSelectors.any())
+                .build();
+    }
+```
+
+<br>
+
+### 7. swagger2를 이용하여 api response code 정보 추가  
+
+`@ApiResponsees()` 어노테이션 이용하여 resultCode S는 성공 F 는 실패 M은 auth 관련 실패 로 나누었다.  
+처음에는 resultCode를 "GET_MYBOOK_OK" 짧은 단어형태의 코드로 구현하였는데, 이렇게 문서화하여 조작하기 위해서는 더 간결한 코드가 맞다고 판단되어 수정하였다.
+
+`@ApiImplicitParams` 어노테이션을 통해 특정 파라미터의 예시값, 
+```java
+    @ApiOperation(value = "토스페이먼츠 결제")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - %d번 주문이 결제처리되었습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 예치금이 부족합니다.\n"),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "주문 PK", example = "1", required = true),
+            @ApiImplicitParam(name = "paymentKey", value = "페이지", example = "1", required = true),
+            @ApiImplicitParam(name = "orderId", value = "주문번호", example = "order__1__78893412342", required = true),
+            @ApiImplicitParam(name = "amount", value = "페이 사용금액", example = "1000", required = true)
+})
+```
+doc 문서에 적용한 코드 잘 나오는 것 확인
+![img6](https://i.imgur.com/mH8C0mc.png)
+
+<br>
+
 ### Refcatoring 시 추가적으로 구현하고 싶은 부분  
 
+<br>
 
 ### 궁금한 점
-1. handler와 entrypoint로 예외처리 시 responseentiry의 형태로 예외처리 가능한지  
+
+<br>
+
+#### 1. handler와 entrypoint로 예외처리 시 responseentiry의 형태로 예외처리 가능한지  
 
     -> REST API 에서의 예외처리 방식은 어떻게 되는가?
 
 <br>
 
-3. 추가 기능 출금 구현
