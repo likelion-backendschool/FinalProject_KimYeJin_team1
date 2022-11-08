@@ -28,7 +28,7 @@ public class AdmWithdrawController {
     @ApiResponses({
             @ApiResponse(code = 200, message = "S001 - 관리자 출금 신청 조회에 성공하였습니다."),
             @ApiResponse(code = 400, message = "FOO1 - 관리자 출금 신청 조회 할 수 없습니다."),
-            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다.."),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
             @ApiResponse(code = 403, message = "M003 - 관리자 권한이 필요한 화면입니다."),
     })
     @GetMapping("/applyList")

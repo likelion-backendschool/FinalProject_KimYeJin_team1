@@ -1,5 +1,6 @@
 package com.yejin.exam.wbook.domain.order.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.global.base.entity.BaseEntity;
 import lombok.*;
@@ -29,6 +30,7 @@ public class Order extends BaseEntity {
     private LocalDateTime cancelDate;
 
     @ManyToOne(fetch = LAZY)
+    @JsonIgnore
     private Member buyer;
 
     private String name;
@@ -39,6 +41,7 @@ public class Order extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "order", cascade = ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public void addOrderItem(OrderItem orderItem) {

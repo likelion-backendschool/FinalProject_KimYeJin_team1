@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,7 +49,7 @@ public class RebateService {
         // 저장하기
         rebateOrderItems.forEach(this::makeRebateOrderItem);
 
-        return ResultResponse.of("S001", "정산데이터가 성공적으로 생성되었습니다.");
+        return ResultResponse.successOf("S001", "정산데이터가 성공적으로 생성되었습니다.",Util.mapOf("yearMonth",yearMonth,"data",rebateOrderItems));
     }
 
     @Transactional
@@ -88,7 +89,7 @@ public class RebateService {
         if (rebateOrderItem.isRebateAvailable() == false) {
             return ResultResponse.of("F002", "정산을 할 수 없는 상태입니다.");
         }
-
+        String yearMonth = rebateOrderItem.getPayDate().format(DateTimeFormatter.ofPattern("YYYY-MM"));
         int calculateRebatePrice = rebateOrderItem.calculateRebatePrice();
 
         CashLog cashLog = memberService.addCash(
@@ -103,7 +104,7 @@ public class RebateService {
                 "S001",
                 "주문품목번호 %d번에 대해서 판매자에게 %s원 정산을 완료하였습니다.".formatted(rebateOrderItem.getOrderItem().getId(), calculateRebatePrice),
                 Util.mapOf(
-                        "cashLogId", cashLog.getId()
+                        "cashLogId", cashLog.getId(),"yearMonth",yearMonth
                 )
         );
     }
