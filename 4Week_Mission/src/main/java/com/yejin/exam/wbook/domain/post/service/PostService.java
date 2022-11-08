@@ -51,12 +51,16 @@ public class PostService {
         log.debug("[post][write] hashtags : "+postHashTags);
         return post;
     }
-    public Post getPostById(Long id) {
-        return postRepository.findById(id).orElse(null);
+    public Optional<Post> getPostById(Long id) {
+        return postRepository.findById(id);
     }
 
     public Post getForPrintPostById(Long id) {
-        Post post = getPostById(id);
+        Optional<Post> oPost = getPostById(id);
+        if(!oPost.isPresent()){
+            return null;
+        }
+        Post post = oPost.get();
         List<PostHashTag> postHashTags = postHashTagService.getHashTags(post);
         log.debug("[post] hashtags : "+postHashTags);
         post.getExtra().put("age__name__33", 22);

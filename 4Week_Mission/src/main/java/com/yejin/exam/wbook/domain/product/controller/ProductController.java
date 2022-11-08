@@ -3,11 +3,7 @@ package com.yejin.exam.wbook.domain.product.controller;
 
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.member.service.MemberService;
-import com.yejin.exam.wbook.domain.mybook.dto.MyBookDto;
-import com.yejin.exam.wbook.domain.order.service.OrderService;
-import com.yejin.exam.wbook.domain.post.dto.BookChapterDto;
 import com.yejin.exam.wbook.domain.post.entity.Post;
-import com.yejin.exam.wbook.domain.post.entity.PostKeyword;
 import com.yejin.exam.wbook.domain.post.service.PostKeywordService;
 import com.yejin.exam.wbook.domain.product.dto.*;
 import com.yejin.exam.wbook.domain.product.entity.Product;
@@ -25,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
