@@ -39,11 +39,12 @@ cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/ 
 - [x] jwt 회원 정보 디테일 구현
 - [x] mybook 리스트 구현
 - [x] mybook 디테일 구현
-- [ ] spring doc 으로 API 문서화
+- [x] spring doc 으로 API 문서화
 
 
 ### [추가기능]
-- [ ] 
+- [x] REST API 로 구현
+- [ ] 엑세트 토큰 화이트리스트 구현
 
 
 
