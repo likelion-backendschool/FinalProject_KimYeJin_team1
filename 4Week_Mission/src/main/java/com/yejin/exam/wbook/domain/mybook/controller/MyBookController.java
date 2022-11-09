@@ -46,7 +46,8 @@ public class MyBookController {
             return Util.spring.responseEntityOf(ResultResponse.failOf("F001","구매 도서를 찾을 수 없습니다.",null));
         }
         List<MyBook> myBooks = oMyBooks.get();
-        return Util.spring.responseEntityOf(ResultResponse.successOf("S001","구매 도서 조회에 성공하였습니다.",myBooks));
+        return Util.spring.responseEntityOf(ResultResponse.successOf("S001","구매 도서 조회에 성공하였습니다.",
+                Util.mapOf("myBooks",myBooks)));
     }
     @ApiOperation(value = "My Book 상세")
     @ApiResponses({
@@ -65,7 +66,7 @@ public class MyBookController {
         List<Post> bookChapters = productService.findPostsByProduct(myBook.getProduct());
         MyBookDto myBookDto = new MyBookDto(myBook,myBook.getProduct(),bookChapters);
 
-        return Util.spring.responseEntityOf(ResultResponse.successOf("S001","구매 도서 상세 조회에 성공하였습니다.", myBookDto));
+        return Util.spring.responseEntityOf(ResultResponse.successOf("S001","구매 도서 상세 조회에 성공하였습니다.", Util.mapOf("myBook",myBookDto)));
 
     }
 }
