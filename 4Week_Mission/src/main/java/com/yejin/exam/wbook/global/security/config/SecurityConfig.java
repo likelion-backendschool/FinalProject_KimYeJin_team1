@@ -46,7 +46,8 @@ public class SecurityConfig {
             "/new/**",
             "/manuals/**",
             "/sitemap.xml/**",
-            "/robots.txt/**"
+            "/robots.txt/**",
+            "/actuator/**"
     }; // 정적 파일 인가 없이 모두 허용
     private static final String[] AUTH_WHITELIST_SWAGGER = {
             "/swagger/**",

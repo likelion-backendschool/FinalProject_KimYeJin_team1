@@ -73,6 +73,9 @@ dependencies {
 //	implementation 'org.springdoc:springdoc-openapi-ui:1.6.11'
 	implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
 	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
+
+	// actuator
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 tasks.named('test') {
@@ -97,4 +100,8 @@ configurations {
 
 compileQuerydsl {
 	options.annotationProcessorPath = configurations.querydsl
+}
+
+jar {
+	enabled=false
 }
