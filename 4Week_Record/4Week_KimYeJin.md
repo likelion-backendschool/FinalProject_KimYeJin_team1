@@ -500,7 +500,8 @@ order item에 존재하는 도서는 삭제하지 못하는 예외처리 추가
 아래와 같이 Array로 데이터가 들어가도록 변경
 ![img11](https://i.imgur.com/EwKjRB4.png)
 
-
+제공된 react 코드 적용 결과 (/api/v1/mybooks/1)
+![img12](https://i.imgur.com/TLiuXIf.png)
 
 ### **[ 인프라 : 쿠버네티스 배포 ]**
 
