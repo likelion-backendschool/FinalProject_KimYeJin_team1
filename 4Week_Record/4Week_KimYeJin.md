@@ -43,8 +43,10 @@ cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/ 
 
 
 ### [추가기능]
-- [x] REST API 로 구현
 - [x] 엑세트 토큰 화이트리스트 구현
+- [x] REST API 로 구현
+- [x] react 적용
+- [ ] 쿠버네티스 배포
 
 
 
@@ -54,9 +56,10 @@ cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/ 
 
 ---
 
-**[접근 방법]**
+## **[접근 방법]**
 
-### spring security + jwt
+
+### **[spring security + jwt]**
 
 <br>
 
@@ -173,7 +176,7 @@ UserDetail 객체를 직접 생성 (기존 UserDetailService를 상속받았던 
 
 <br>
 
-### MyBook 도메인 REST API
+### **[MyBook 도메인 REST API]**
 
 <br>
 
@@ -331,8 +334,9 @@ public class BookChapterDto {
 
 ![img5](https://i.imgur.com/pg6gW69.png)
 
+<br>
 
-### Swagger 적용
+### **[Spring Doc]**
 
 <br>
 
@@ -392,6 +396,10 @@ PathSelector.any() 를 이용하여 모든 ant-path에 대하여 적용
 ```
 doc 문서에 적용한 코드 잘 나오는 것 확인
 ![img6](https://i.imgur.com/mH8C0mc.png)
+
+<br>
+
+### **[REST API]**
 
 <br>
 
@@ -479,13 +487,37 @@ order item에 존재하는 도서는 삭제하지 못하는 예외처리 추가
 
 <br>
 
+### **[프론트 React 적용]**
 
-### Refcatoring 시 추가적으로 구현하고 싶은 부분  
+11. DateTime 포맷 요구사항과 일치
+기존 DateTime Json 응답 포맷
+```json
+            "createDate": "2022-11-09T12:46:45.193248",
+            "modifyDate": "2022-11-09T12:46:45.193248",
+```
+
+`@EnableWebMvc` 적용
+아래와 같이 Array로 데이터가 들어가도록 변경
+![img11](https://i.imgur.com/EwKjRB4.png)
+
+제공된 react 코드 적용 결과 (/api/v1/mybooks/1)
+![img12](https://i.imgur.com/TLiuXIf.png)
+
+### **[ 인프라 : 쿠버네티스 배포 ]**
+
+12. 쿠버네티스 + spring + github action 설정
+
+
+<br>
+
+### 리팩토링 & 아쉬운점 & 궁금한점
+
+---
+
+### [ Refcatoring 시 추가적으로 구현하고 싶은 부분 ]  
 
 1. 정산 data에 대한 json 응답 dto 로 변경  
 현재는 `@JsonIgnore`을 이용하여 중복되는 엔티티의 항목은 제외하는 형태로 출력하였으나, 리팩토링시 Mybook에서와 같이 json 응답 dto로 구현해 볼 예정.
-
-<br>
 
 2. Oauth 추가
 
@@ -493,19 +525,17 @@ order item에 존재하는 도서는 삭제하지 못하는 예외처리 추가
 
 4. hashTag 파싱 부분 리팩토링  
 
-### 궁금한 점
+### [궁금한 점]
 
-<br>
-
-#### 1. handler와 entrypoint로 예외처리 시 responseentiry의 형태로 예외처리 가능한지  
+1. handler와 entrypoint로 예외처리 시 responseentiry의 형태로 예외처리 가능한지  
 
     -> REST API 에서의 예외처리 방식은 어떻게 되는가?
 
-#### 2. REST API로 구현하여 프론트 개발자와 협업 시 , form dto에 대한 명세는 어떻게? -> validation으로?  
+2. REST API로 구현하여 프론트 개발자와 협업 시 , form dto에 대한 명세는 어떻게? -> validation으로?  
 
-#### 3. `@JsonIgnore` 사용 vs 응답 dto 생성
+3. `@JsonIgnore` 사용 vs 응답 dto 생성
 
-#### 4. 일반적으로 REST API 적용 시 토스트 UI 등을 이용한 마크다운 파싱은 어디서 처리? (프론트에서 HTML 값을 처리해서 보내주는지?)
+4. 일반적으로 REST API 적용 시 토스트 UI 등을 이용한 마크다운 파싱은 어디서 처리? (프론트에서 HTML 값을 처리해서 보내주는지?)
 
 <br>
 
