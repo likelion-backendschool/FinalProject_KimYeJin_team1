@@ -17,13 +17,13 @@ public class BookChapterDto {
     @Column(nullable = false)
     private String content;
 
-    private String contentHTML;
+    private String contentHtml;
 
     @QueryProjection
     public BookChapterDto(Post post){
         this.id=post.getId();
         this.subject=post.getSubject();
         this.content=post.getContent();
-        this.contentHTML=post.getContentHTML();
+        this.contentHtml=post.getContentHTML();
     }
 }
