@@ -48,6 +48,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
+          file: ./Dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.actor }}/nginx-image-1:${{ needs.makeTagAndRelease.outputs.tag_name }},
