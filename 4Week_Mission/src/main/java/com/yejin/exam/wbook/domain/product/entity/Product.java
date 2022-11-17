@@ -1,5 +1,6 @@
 package com.yejin.exam.wbook.domain.product.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yejin.exam.wbook.domain.cart.entity.CartItem;
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.post.entity.PostKeyword;
@@ -37,8 +38,10 @@ import static javax.persistence.FetchType.LAZY;
 @ToString(callSuper = true)
 public class Product extends BaseEntity {
     @ManyToOne(fetch = LAZY)
+    @JsonIgnore
     private Member author;
     @ManyToOne(fetch = LAZY)
+    @JsonIgnore
     private PostKeyword postKeyword;
     private String subject;
     private int price;

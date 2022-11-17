@@ -1,5 +1,6 @@
 package com.yejin.exam.wbook.global.base.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,9 +30,11 @@ public class BaseEntity {
     private Long id;
 
     @CreatedDate
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createDate;
 
     @LastModifiedDate
+//    @JsonFormat(pattern = "yyyy,MM,dd,HH,mm,ss")
     private LocalDateTime modifyDate;
 
     @Transient

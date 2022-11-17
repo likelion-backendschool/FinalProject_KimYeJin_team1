@@ -1,4 +1,4 @@
-## [3Week] 김예진
+## [4Week] 김예진
 
 ### 미션 요구사항 분석 & 체크리스트
 
@@ -20,7 +20,7 @@ global
 base/      config/    error/     exception/ request/   result/    security/ 
 
 domain
-cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/  
+cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/  withdraw/
 
 
 ```
@@ -28,496 +28,514 @@ cart/    cash/    home/    member/  mybook/  order/   post/    product/ rebate/
 
 ### [도메인별 체크리스트]
 
-이번주 정산 도메인은 아래 참고 자료를 확인하여 작성하였습니다.  
-[https://techblog.woowahan.com/2711/](https://techblog.woowahan.com/2711/)  
-
-#### **<Rebate 도메인>**
-#### **<Withdraw 도메인>**
 
 
 ### [지난 주 필수 기능]
-- [x] 장바구니 내의 상품 주문
-- [x] 기존 회원이 가지고 있는 cash를 이용한 결제
-- [x] 토스페이를 이용한 결제
-- [x] 결제 이후 환불 가능
+- [x] 출금 기능 
 
 
 ### [필수기능]
-- [x] 관리자 회원, 관리자 페이지
-- [x] 정산데이터 생성
-- [x] 건별, 전체(선택) 정산 처리
+- [x] jwt 회원 로그인 구현
+- [x] jwt 회원 정보 디테일 구현
+- [x] mybook 리스트 구현
+- [x] mybook 디테일 구현
+- [x] spring doc 으로 API 문서화
+
 
 ### [추가기능]
-- [x] 정산데이터 배치로 생성
-- [ ] 출금 기능 // 구현 중
+- [x] 엑세트 토큰 화이트리스트 구현
+- [x] REST API 로 구현
+- [x] react 적용
+- [ ] 쿠버네티스 배포
 
-<br>
+
+
 <br> 
 
-### 3주차 미션 요약
+### 4주차 미션 요약
 
 ---
 
-**[접근 방법]**
+## **[접근 방법]**
 
-### 지난주 보강
-1. rq 클래스 도입  
 
-url == null 인 상황 발생, RequestURI로 받도록 추가
-```java
-    public String redirectToBackWithMsg(String msg) {
-        String url = req.getHeader("Referer");
-        log.debug("[Rq] url : "+url);
-        if(url==null){
-            url=req.getRequestURI();
-            log.debug("[Rq] requestURI : "+url);
-        }
-        return redirectWithMsg(url, msg);
-    }
-```
-
-2. ResultCode 규칙  
-
-코드의 끝이 OK 인 경우 Success로 나타내고, FAILED 등 일경우 fail로 판단
-```java
-    public boolean isSuccess() {
-        return resultCode.endsWith("OK");
-    }
-
-    public boolean isFail() {
-        return isSuccess() == false;
-    }
-```
-
-결제 취소 시 ResultCode
-```java
-    public ResultResponse actorCanCancel(Member actor, Order order) {
-        if ( order.isPaid() ) {
-            return ResultResponse.of("IS_PAID_ORDER_CANCEL_FAIL", "이미 결제처리 되었습니다.");
-        }
-
-        if (order.isCanceled()) {
-            return ResultResponse.of("IS_CANCELED_ORDER_CANCEL_FAIL", "이미 취소되었습니다.");
-        }
-
-        if (actor.getId().equals(order.getBuyer().getId()) == false) {
-            return ResultResponse.of("NO_AUTH_ORDER_CANCEL_FAIL", "권한이 없습니다.");
-        }
-
-        return ResultResponse.of("ORDER_CANCEL_OK", "취소할 수 있습니다.");
-    }
-
-```
-
-### 정산 도메인
-
-    '정산'도 도메인인가? -> 도메인이다.  
-[참고링크 : https://runa-nam.tistory.com/m/120](https://runa-nam.tistory.com/m/120)
+### **[spring security + jwt]**
 
 <br>
 
-
-1. 정산 서비스 테스트 -> OrderItem 이 없는 케이스가 들어간 경우
-
-RebateService 의 rebate 메소드 에서 Optional 예외처리 추가
-```java
-        Optional<RebateOrderItem> oRebateOrderItem = rebateOrderItemRepository.findByOrderItemId(orderItemId);
-        if(!oRebateOrderItem.isPresent()){
-            return ResultResponse.of("REBATE_NO_ITEM_FAILED", "정산가능한 주문 품목이 없습니다.");
-        }
-        RebateOrderItem rebateOrderItem = oRebateOrderItem.get();
-
-```
-
-테스트 코드로 Oder Item이 없는 경우 체크
-```java
-    @Test
-    @DisplayName("주문 item 모두 정산하기 ")
-    void t4() {
-        String ids = "1,2,3,4,7,8";
-        String[] idsArr = ids.split(",");
-        Arrays.stream(idsArr)
-                .mapToLong(Long::parseLong)
-                .forEach(id -> {
-                    ResultResponse rebateResultResponse = rebateService.rebate(id);
-                    System.out.println(rebateResultResponse.getResultCode() + " "+ rebateResultResponse.getMessage()+" "+rebateResultResponse.getData());
-                    assertThat(rebateResultResponse.isSuccess()).isTrue();
-                });
-
-        ids = "5,6";
-        idsArr = ids.split(",");
-        Arrays.stream(idsArr)
-                .mapToLong(Long::parseLong)
-                .forEach(id -> {
-                    ResultResponse rebateResultResponse = rebateService.rebate(id);
-                    System.out.println(rebateResultResponse.getResultCode() + " "+ rebateResultResponse.getMessage()+" "+rebateResultResponse.getData());
-                    assertThat(rebateResultResponse.isFail()).isTrue();
-                });
-    }
-```
-
-
-<br>
-
-2. 정산 컨트롤러 테스트
-
-컨트롤러에서 Referer를 통해 가져오는 url 쿼리 파라미터 값을 직접 지정하여 테스트코드를 작성하였다.
-
-```java
-    @Test
-    @DisplayName("선택한 주문 아이템건에 대한 정산")
-    @WithUserDetails("admin")
-    void t5() throws Exception {
-        // GIVEN
-        String ids = "1,2,3,4,7,8";
-        // WHEN
-        ResultActions resultActions = mvc
-                .perform(post("/adm/rebate/rebate")
-                        .param("ids",ids)
-                        .header("Referer","?yearMonth=2022-11"))
-                .andDo(print());
-
-        // THEN
-        resultActions
-                .andExpect(status().is3xxRedirection())
-                .andExpect(handler().handlerType(RebateController.class))
-                .andExpect(handler().methodName("rebate"))
-                .andExpect(redirectedUrlPattern("/adm/rebate/rebateOrderItemList?yearMonth=**&msg=**"));
-    }
-```
-<br>
-
-3. AccessDenied 예외처리  
-
-관리자가 아닌 경우, 403 AccessDenied 가 발생 -> 예외처리를 AccessDeniedException 을 AccessDeniedHandler 를 통해 앞단에서 먼저 처리하도록 하였다.
-
-먼저 아래와 같이 AccessDeniedHandler 인터페이스를 상속하는 AccessDeniedHandlerImpl 클래스를 작성한다.
-`response.sendRedirect()` 를 이용하여 원하는 errorPage로 리디렉션 하였다.  
-에러메세지를 함께 넘기기 위하여 Rq 클래스의 url에 ErrorMsg를 쿼리 파라미터에 넣는 메소드를 이용하였다.  
-초반에는 query 파라미터를 직접 입력하여 "exception"과 "message" 를 모두 넘겼으나, exception은 불필요하다 생각되어 다시 msg만 넘기는 것으로 수정하였다.  
-  
-```java
-@Component
-@Slf4j
-public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
-    private String errorPage;
-
-    public void setErrorPage(String errorPage) {
-        this.errorPage = errorPage;
-    }
-
-    @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        log.error("[accessDeniedHandler] AccessDeniedException", accessDeniedException);
-        String msg = "권한이 없습니다.";
-        //response.sendError(HttpServletResponse.SC_FORBIDDEN, msg);
-        log.debug("[accessDeniedHandler] error : "+accessDeniedException.getMessage());
-        response.sendRedirect(Rq.urlWithErrorMsg(errorPage,accessDeniedException.getMessage()));
-    }
-}
-```
-
-errorPage 요청이 들어오는 컨트롤러 작성  
-
-error 처리는 글로벌 범위에 속한다고 판단하여 global.error 에 컨트롤러 패키징을 추가하였다.  
-일반적으로 에러페이지를 위한 컨트롤러는 어디에 배치하는지 궁금해졌다.
-
-`global.error.controller.ErrorController` 는 아래와 같다.
-
-```java
-    @GetMapping("/denied")
-    @ResponseBody
-    public ResultResponse accessDenied(String errorMsg){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.debug("[denied] auth username : "+ authentication.getName() + " authority : "+authentication.getAuthorities());
-        log.debug("[denied] exception : "+ errorMsg);
-
-        return ResultResponse.of("ACCESS_DENIED",errorMsg);
-    }
-```
-
-Spring Security 내부에도 exception 처리에 대한 부분을 수정한다.  
-
-SecurityConfig 는 아래와 같다.
+### 1. PasswordEncoder 빈 생성 위치에 따른 cycle 에러 발생
+- 기존 위치 : SecurityConfig 내의 빈
 ```java
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
-        // ... 생략 ..
-        http
-        .exceptionHandling()
-        .accessDeniedHandler(accessDeniedHandler())
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
-    // hander 빈으로 생성 -> 생성자 주입으로 하여도 될것 같다.
-    @Bean
-    public AccessDeniedHandler accessDeniedHandler(){
-        AccessDeniedHandlerImpl accessDeniedHandler = new AccessDeniedHandlerImpl();
-        accessDeniedHandler.setErrorPage("/denied");
-        return accessDeniedHandler;
-    }
+```
+
+SecurityConfig에 passwordEncoder 빈을 생성 시 빈 생성에 cycle이 발생한다.
+
+JwtFilter 내의 MemberService가 실행되고, MemberService 내의 passwordEncdoer가 실행되고, 다시 SecurityConfig의 passwordEncoder가 실행되면서 JwtFilter클래스의 빈이 다시 호출되는 형태로 보인다.
+따라서 전혀 생성자 주입으로 연관되지 않은 Application 클래스에 공통적으로 상용되는 빈을 생성시, 해당 이슈를 피해갈 수 있었다.
+
+- 변경된 위치 : Application 내의 빈
+```java
+public class WbookApplication {
     
-```
-
-
-참고 자료  
-[https://anjoliena.tistory.com/108](https://anjoliena.tistory.com/108)  
-[https://velog.io/@rudwnd33/Spring-Security-AccessDeniedException](https://velog.io/@rudwnd33/Spring-Security-AccessDeniedException)  
-[https://escapefromcoding.tistory.com/489](https://escapefromcoding.tistory.com/489)  
-
-
-<br>
-
-### batch
-
-1. 정산 Job 
-
-`@Scheduled (cron=)` 을 이용하여 매월 15일 4시에 실행되도록 설정  
-`incrementer(new RunIdIncrementer())` 를 이용하여 run_id 라는 파라미터로 job 이 서로 다른 스케쥴로 인식되어 실행될 수 있도록 한다.
-
-```java
-    @Bean(JOB_NAME+"Job")
-    @Scheduled(cron= "0 0 4 15 * ?"  )
-    public Job makeRebateOrderItemJob(Step makeRebateOrderItemStep1, CommandLineRunner initData) throws Exception {
-            initData.run();
-            log.debug("[rebateJob] start");
-            return jobBuilderFactory.get(JOB_NAME+"Job")
-            .start(makeRebateOrderItemStep1)
-            .incrementer(new RunIdIncrementer())
-            .build();
-    }
-```
-![img1](https://i.imgur.com/ufK5UPM.png)  
-
-
-2. Job 파라미터  
-
-job 파라미터를 확인 하면 아래와 같다.
-java 실행 시 입력한 parameter 인 month = 2022-11 값을 기준으로 데이터를 정렬한다.
-단, month 값이 들어오지 않을 시 default로 2022-11로 실행되도록 하였다.
-```java
-    @StepScope
-    @Bean("orderItemReader")
-    public JpaPagingItemReader<OrderItem> orderItemReader(@Value("#{jobParameters['month']}") String yearMonth) throws Exception{
-
-        log.debug("[rebateJob] reader start");
-        if(yearMonth==null){
-            yearMonth="2022-11";
-        }
-        // .. 생략 ...
-    }
-```
-![img3](https://i.imgur.com/Uu8PifK.png)
-
-<br>
-run configuration 에 아래와 같이 parameter를 지정하였다.  
-(처음에 environment variable에 값을 넣고 parameter가 계속 null 이 나와 엄청난 삽질을 하였다...)  
-
-![img4](https://i.imgur.com/fQ94KRV.png)
-
-3. ItemReader : RepositoryItemReader -> JpaPagingItemReader  
-
-처음에는 RepositoryItemReader로 OrderItemRespsitory의 `findAllByPayDateBetween` 메소드를 이용하였으나,
-Reader 값이 반복적으로 null 이 나와 Processor(), writer()가 정상적으로 실행되지 못하였다.  
-
-따라서 일반적으로 ItemReader 구현 클래스로 많이 사용하는 JpaPagingItemReader 클래스를 사용해 보았다.  
-
-참고자료 : [https://renuevo.github.io/spring/batch/spring-batch-chapter-3/](https://renuevo.github.io/spring/batch/spring-batch-chapter-3/)  
--> `JdbcPagingItemReader`, `JpaPagingItemReader`, `RepositoryItemReader` 세가지 클래스를 모두 잘 설명하고 있어 많은 참고가 되었다.
-
-```java
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("fromDate", fromDate);
-        parameters.put("toDate", toDate);
-
-        return new JpaPagingItemReaderBuilder<OrderItem>()
-                .name("orderItemReader")
-                .entityManagerFactory(emf)
-                .pageSize(5)
-                .queryString("SELECT o FROM OrderItem as o where o.payDate between :fromDate and :toDate ORDER BY o.id ASC")
-                .parameterValues(parameters)
-                .build();
-```
-
-JpaPaging 은 Paging ItemReader의 한가지로 속도가 느리다는 단점이 있지만 메모리 이슈가 없고 성능상 유리하기 때문에 많이 사용한다고 한다.    
-여기서 pageSize 는 chunksize과 동일하게 맞추는 것이 좋다고 하여 chunksize로 설정한 '5' 를 동일하게 설정하였다.  
-
-<br>
-queryString에 파라미터를 넣기 위하여 `parameterValues` 를 사용하였다.  
-
-파라미터를 모은 map 를 parameterValues()로 세팅 후 아래와 같이 파라미터의 key값을 기준으로 `:key값` 의 형태로 query문에 값을 사용할 수 있다.
-```java
-SELECT o FROM OrderItem as o where o.payDate between :fromDate and :toDate ORDER BY o.id ASC"
-
-```
-
-참고자료 : [https://sadcode.tistory.com/47](https://sadcode.tistory.com/47)
--> 단순히 parameter를 사용하는 부분만 참고하였으나, 포스팅 내용은 영속성과 관련된 내용  
-
-<br>
-
-
-4. 정산 데이터 배치로 생성 부분 확인  
-
-정산데이터 리스트 접근시 데이터가 정상적으로 생성된 것을 확인  
-![img2](https://i.imgur.com/wBIdmJi.png)  
-
-
-
-<br>
-
-### 출금 도메인
-
-<br>
-
-1. mvc 구성
-
-```java
-withdraw
-    entity/WithdrawApply // 출금신청
-    dto/WithdrawApplyDto // 출금신청 작성 폼
-    controller/AdmWithddrawController // 관리자 출금 처리
-              /WithdrawController // 사용자 출금 신청 
-    service/WithdrawService // 출금 비지니스 로직 
-    repository/WithdrawApplyRepository // 출금신청 repository
-```
-
-WithdraApply entity 구성은 아래와 같다.
-
-출금 신청서 작성자 Member와, 은행 계좌정보, 출금 가격 정보를 필드로 가지며,
-
-신청서가 작성이 되었는지, 취소하였는지, 출금처리가 완료되었는지 여부를 확인하는 boolean 필드 세가지를 추가로 구성하였다.
-
-```java
-public class WithdrawApply extends BaseEntity {
-    @ManyToOne(fetch = LAZY)
-    private Member member;
-    private String bankName;
-    private String backAccountNo;
-    private int price;
-    private boolean isApplied; // 신청여부
-    private boolean isCanceled; // 취소여부
-    private boolean isPaid; // 출금처리여부(지급여부)
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }
 ```
 
-2. 출금 테스트 작성
-
-## **[특이사항]**
-
-
-### 아쉬운점/ 궁금한점
-
 <br>
-1. Admin Role 처리 ->   MemberContext.genAuthorities()
 
-처음 1주차에서 나는 MEMBER 권한, ADMIN 권한, AUTHOR 권한을 개별적으로 구현하였으나,  
-요구사항을 다시 보니 AUTHOR 권한은 중복적으로 가질 수 있는 권한으로 확인되어 아래와 같이 authorities 를 구성하도록 수정하였다.
+### 2. jwt 토큰 이용한 로그인, 회원정보 확인
 
-AUTHOR 권한은 추가적으로 가지는 authorities.  기본적으로 MEMBER 또는 ADMIN
+Spring Security의 securityContext 를 사용하여 PreAuthorize() 등의 인증/인가 모듈을 사용하기 위하여
+JwtProvider에서 생성한 token으로 부터 Authentication을 가져와서 SecurityContextHolder에 해당 Authentication을 저장하는 방법을 사용하였다.  
+
+JwtAuthorizationFilter - 신규 로그인 정보 생성 로직
 ```java
-    public List<GrantedAuthority> genAuthorities() {
+        MemberContext memberContext = new MemberContext(member,member.genAuthorities());
+        log.debug("[jwtFilter] context : " + memberContext.getName());
+        UsernamePasswordAuthenticationToken authentication =
+                UsernamePasswordAuthenticationToken.authenticated(
+                        memberContext,
+                        null,
+                        memberContext.getAuthorities()
+                );
 
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(authLevel.name()));
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
+```
 
-        if (StringUtils.hasText(nickname)) {
-            authorities.add(new SimpleGrantedAuthority("AUTHOR"));
+JwtAuthorizationFilter - 헤더의 토큰으로부터 로그인 정보 판단 로직
+```java
+
+        // 1. Request Header 에서 토큰을 꺼냄
+        String token = resolveToken(req);
+        log.debug("[jwtFilter] token : " + token);
+        // 2. validateToken 으로 토큰 유효성 검사
+        // 정상 토큰이면 해당 토큰으로 Authentication 을 가져와서 MemberContext 에 저장
+        if (token!=null && jwtProvider.verify(token)) {
+            log.debug("[jwtFilter] provider verify ok : " + jwtProvider.verify(token));
+
+            Authentication authentication = jwtProvider.getAuthentication(token);
+            log.debug("[jwtFilter] authentication: " + authentication.getName());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.debug("[jwtFilter] securifycontext: " + SecurityContextHolder.getContext().getAuthentication().getName());
+            Map<String, Object> claims = jwtProvider.getClaims(token);
+            String username = (String) claims.get("username");
+            Member member = memberService.findByUsername(username).orElseThrow(
+                    () -> new UsernameNotFoundException("'%s' Username not found.".formatted(username))
+            );
+
+            forceAuthentication(member);
         }
-        System.out.println("[member] authority : "+authorities);
-        return authorities;
+
+```
+Jwt provider의 token으로부터 authentication 가져오는 로직
+UserDetail 객체를 직접 생성 (기존 UserDetailService를 상속받았던 것과 유사)
+```java
+    public Authentication getAuthentication(String token) {
+
+        Map<String,Object> claims = getClaims(token);
+        log.debug("claims : "+ claims);
+        Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("authorities").toString().split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+        // UserDetails 객체를 만들어서 Authentication 리턴
+
+        User principal = new User(claims.get("username").toString(),"",authorities);
+
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+
     }
 ```
-[https://escapefromcoding.tistory.com/m/526](https://escapefromcoding.tistory.com/m/526)  
 
-<br>
+![img1](https://i.imgur.com/sjN7v59.png)
 
-2. 정산 비율 5:5  
-
-rebatePrice를 계산하는 회계적인 이론을 잘 모르겠어서 도매가를 기준으로  
-`도매가 -pgFee = 100` 이라면, 작가가 받을 수 있는 정산 비용은 `(도매가-pgFee)/2` 라고 판단하여 구현하였다.  
 
 ```java
-    public int calculateRebatePrice() {
-        if (refundPrice > 0) {
-            return 0;
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ResultResponse> me(@AuthenticationPrincipal MemberContext memberContext) {
+        if (memberContext == null) {
+            return Util.spring.responseEntityOf(ResultResponse.failOf("GET_PROFILE_FAILED","로그인이 필요합니다.",null));
         }
 
-        return (wholesalePrice - pgFee)/2;
-    }
-
-```
-<br>
-
-3. RepositoryItemReader 클래스로 null이 발생한 원인 분석
-
--> 아직 어느 부분에서 null이 발생하는지 원인을 찾지 못했다. paging을 하는 과정에서 아래 메소드가 잘못된 것인지 리팩토링 수 확인해 봐야겠다.
-`Page<OrderItem> findAllByPayDateBetween(LocalDateTime fromDate, LocalDateTime toDate, Pageable pageable)`
-
-<br>
-
-4. reader() 의 리턴은 인터페이스가 아닌 클래스로 리턴해야 한다.  
-batch 구현 중 아래와 같은 에러 발생
-```java
-Method threw 'java.lang.IllegalArgumentException' exception. Cannot evaluate com.sun.proxy....
-```
-디버깅 하며 확인해보니, ItemReader의 값이 null이 발생하여 proxy를 구현할 수 없는 상황으로 확인 하여 ItemReader 수정  
-
-reader() 의 리턴값은 ItemReadear의 구현체인 JpaPaginItemReader나 JdbcPagingItemReader와 같이 클래스로 리턴해야 함을 알게됨  
-
-참고자료 : [https://jojoldu.tistory.com/132](https://jojoldu.tistory.com/132)
-
-5. batch 구현하며 만난 에러
-
-- [ ] 여러개의 batch를 동일하게 세팅하였을 때 발생 -> 한개의 jpa로 수정
-```text
-JPA does not support custom isolation levels, so locks may not be taken when launching Jobs. To silence this warning, set 'spring.batch.jdbc.isolation-level-for-create' to 'default'.
-
-```
-- [ ] initialize always 설정 -> batch 테이블이 이미 있다는 경고 메세지
-```java
-error: 1050-42s01: table 'batch_job_instance' already exists
-```
--> 해당 메세지로 인하여 batch가 실패하지는 않으나 지속적으로 발생
-
-- [ ] processor와 wirter에 intellij 경고 메세지 
-```text
-unchecked call to 'processor(itemprocessor<? super i, ? extends o>)' as a member of raw type 'org.springframework.batch.core.step.builder.simplestepbuilder' 
-
-```
--> 에러메세지는 아니나, intelliJ에서 수정할 것을 권고한다.. 정확한 원인은 나중에 리팩토링시 확인해봐야겠다.
-
-
-- [ ] batch의 job, step, reader, processor, write의 메소드 명과 bean 으로 생성된 클래스명이 일치하지 않아 필요한 bean을 식별하지 못하여 발생 -> 이름을 모두 동일 하게 수정
-
-```text
-spring batch required a single bean but 2 were found
-```
-`JOB_NAME` 이라는 static final 변수를 지정하여 해당 변수에 jon, step을 붙이는 규칙성있는 네이밍을 지정
-```java
-    public static final String JOB_NAME = "makeRebateOrderItem";
-
-    @Bean(JOB_NAME+"Job")
-    @Scheduled(cron= "0 0 4 15 * ?"  )
-    public Job makeRebateOrderItemJob(Step makeRebateOrderItemStep1, CommandLineRunner initData) throws Exception{
-        initData.run();
-        log.debug("[rebateJob] start");
-        return jobBuilderFactory.get(JOB_NAME+"Job")
-        // ... 생략 ...
+        return Util.spring.responseEntityOf(ResultResponse.successOf("GET_PROFILE_OK","사용자 프로필",memberContext));
     }
 ```
-  
+회원정보 테스트 확인 시 accessToken=null 발생.   
+하지만 postMan으로 테스트 시 정상. 테스크 코드를 추후 수정필요.
+![img2](https://i.imgur.com/WpRXBdb.png)
+
 <br>
 
-### Refcatoring 시 추가적으로 구현하고 싶은 부분  
+### **[MyBook 도메인 REST API]**
 
-1. yearMonth를 선택하지 않은 url에서는 정산을 할 시, Refer에서 url을 가져오는 과정에서 yearMonth가 없기 때문에 500 에러 발생
---> default month정보를 입력하는 방식으로 수정   
+<br>
+
+### 3. mybooks 의 ManyToOne 필드들의 무한 참조 이슈
+오류 메세지
+```text
+(through reference chain: com.yejin.exam.wbook.global.result.ResultResponse["data"]->java.util.ArrayList[0]->com.yejin.exam.wbook.domain.mybook.entity.MyBook["product"]->com.yejin.exam.wbook.domain.member.entity.Member$HibernateProxy$jBUFbZrX["hibernateLazyInitializer"])
+```
+Product, OrderItem 필드가 내부에 Member를 다시 참조하고 있기 때문에 무한 참조 에러가 발생.  
+따라서 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) 어노테이션을 추가.
+
+추가로 기존의 Member 타입의 필드를 api 요구사항에 맞추어 Long타입의 ownerId로 변경
+```java
+
+    private Long ownerId;
+
+    @ManyToOne(fetch = LAZY)
+    @ToString.Exclude
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Product product;
+
+    @ManyToOne(fetch = LAZY)
+    @ToString.Exclude
+    @JsonIgnore
+    private OrderItem orderItem;
+```
+api 요구사항의 날짜 json 형태와 조금 다른 형태로 표출됨. --> 추후 수정 필요
+![img3](https://i.imgur.com/es3YK73.png)
+
+<br>
+
+### 4. 유효하지 않은 자격 증명의 경우 예외처리
+기존의 AccessDeniedHandler는 403 authority 가 없는 경우만 예외처리 됨.  
+유효한 Authentication 없는 경우(token==null) 401 인 경우 예외처리 추가.
+
+AuthenticationEntryPoint 클래스를 상속받은 JwtAuthenticationEntryPoint 클래스를 적용.
+
+```java
+    @Override
+    public void commence(HttpServletRequest request,
+                         HttpServletResponse response,
+                         AuthenticationException authException) throws IOException {
+        // 유효한 자격증명을 제공하지 않고 접근하려 할때
+        log.debug("[accessDeniedHandler] error : "+authException.getMessage());
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED,authException.getMessage());
+    }
+```
+SecurityConfig에 JwtauthenticationEntryPoint 추가
+```java
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+        http
+                .exceptionHandling()
+                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler())
+                ;
+```
+
+<br>
+
+### 5. Dto를 이용하여 원하는 데이터 추출
+
+요구사항 json 데이터와 동일하게 출력하기 위하여  
+`MyBook, Product, Post(bookChapter)` 데이터의 필요부분만 추출하여 dto를 생성하였다.
+`builder`를 두지않고 간단히 생성자를 이용하였으나, refactoring 해본다면 builder 등을 이용하여 좀더 통일성을 줄 수 있을 것 같다. 
+
+기존의 MyBook 엔티티와 다르게 `Product`가 아닌 `ProductBookChaptersDto`를 가진 Dto.  
+
+```java
+@Getter
+@NoArgsConstructor
+public class MyBookDto {
+
+    private Long id;
+    private LocalDateTime createDate;
+    private LocalDateTime modifyDate;
+    private Long ownerId;
+    private ProductBookChaptersDto product;
+
+    @QueryProjection
+    public MyBookDto(MyBook myBook, Product product, List<Post> bookChapters) {
+        this.id=myBook.getId();
+        this.createDate=myBook.getCreateDate();
+        this.modifyDate=myBook.getModifyDate();
+        this.ownerId = myBook.getOwnerId();
+        this.product = new ProductBookChaptersDto(product,bookChapters);
+    }
+}
+```
+
+기존의 Product 엔티니에서 `List<Post>` 에 해당하는 `List<BookChapterDto>` 를 포함하는 dto.  
+`getBookChapters(List<Post>)` 메소드를 통해 스트림을 이용하여 `BookChapterDto`를 얻도록 하였다.  
+```java
+@Getter
+@NoArgsConstructor
+public class ProductBookChaptersDto{
+
+    private Long id;
+    private LocalDateTime createDate;
+    private LocalDateTime modifyDate;
+    private Long authorId;
+    private String authorName;
+    private String subject;
+    @ManyToOne(fetch = LAZY)
+    @ToString.Exclude
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private List<BookChapterDto> bookChapters;
+    private int price;
+
+    @QueryProjection
+    public ProductBookChaptersDto(Product product,List<Post> posts){
+        this.id=product.getId();
+        this.createDate=product.getCreateDate();
+        this.modifyDate=product.getModifyDate();
+        this.authorId=product.getAuthor().getId();
+        this.authorName=product.getAuthor().getName();
+        this.subject=product.getSubject();
+        this.bookChapters=getBookChapters(posts);
+        this.price=product.getPrice();
+    }
+
+    private List<BookChapterDto> getBookChapters(List<Post> posts){
+        List<BookChapterDto> bookChaptersDtos = new ArrayList<>();
+        posts.stream()
+                .map(post -> new BookChapterDto(post)
+                        )
+                .forEach(bookChaptersDto -> bookChaptersDtos.add(bookChaptersDto));
+        return bookChaptersDtos;
+    }
+}
+```
+
+마지막으로 createDate, modifyDate, Author를 뺀 BookChapterDto.
+```java
+@Getter
+@NoArgsConstructor
+public class BookChapterDto {
+    private Long id;
+    @Column(nullable = false)
+    private String subject;
+
+    @Column(nullable = false)
+    private String content;
+
+    private String contentHTML;
+
+    @QueryProjection
+    public BookChapterDto(Post post){
+        this.id=post.getId();
+        this.subject=post.getSubject();
+        this.content=post.getContent();
+        this.contentHTML=post.getContentHTML();
+    }
+}
+```
+
+![img5](https://i.imgur.com/pg6gW69.png)
+
+<br>
+
+### **[Spring Doc]**
+
+<br>
+
+### 6. swagger2 적용 시 patchmatch 로 인한 patternsCondition = null 이슈
+```text
+springfox.documentation.spi.service.contexts.Orderings.patternsCondition is null 발생
+```
+
+application.yml 에 matching 전략을 ant path로 설정
+```yaml
+spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant-path-matcher
+```
+
+swaager 설정 파일에서 patchs가 잘 적용되는지 확인  
+PathSelector.any() 를 이용하여 모든 ant-path에 대하여 적용
+```java
+        return new Docket(DocumentationType.SWAGGER_2)
+                .useDefaultResponseMessages(false)
+                .globalResponseMessage(RequestMethod.POST, responseMessages)
+                .globalResponseMessage(RequestMethod.GET, responseMessages)
+                .globalResponseMessage(RequestMethod.DELETE, responseMessages)
+                .globalResponseMessage(RequestMethod.PUT, responseMessages)
+                .apiInfo(apiInfo())
+                .securityContexts(List.of(securityContext()))
+                .securitySchemes(List.of(apiKey()))
+                .select()
+                .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
+                .paths(PathSelectors.any())
+                .build();
+    }
+```
+
+<br>
+
+### 7. swagger2를 이용하여 api response code 정보 추가  
+
+`@ApiResponsees()` 어노테이션 이용하여 resultCode S는 성공 F 는 실패 M은 auth 관련 실패 로 나누었다.  
+처음에는 resultCode를 "GET_MYBOOK_OK" 짧은 단어형태의 코드로 구현하였는데, 이렇게 문서화하여 조작하기 위해서는 더 간결한 코드가 맞다고 판단되어 수정하였다.
+
+`@ApiImplicitParams` 어노테이션을 통해 특정 파라미터의 예시값, 
+```java
+    @ApiOperation(value = "토스페이먼츠 결제")
+    @ApiResponses({
+            @ApiResponse(code = 200, message = "S001 - %d번 주문이 결제처리되었습니다."),
+            @ApiResponse(code = 400, message = "FOO1 - 예치금이 부족합니다.\n"),
+            @ApiResponse(code = 401, message = "M003 - 로그인이 필요한 화면입니다."),
+    })
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "주문 PK", example = "1", required = true),
+            @ApiImplicitParam(name = "paymentKey", value = "페이지", example = "1", required = true),
+            @ApiImplicitParam(name = "orderId", value = "주문번호", example = "order__1__78893412342", required = true),
+            @ApiImplicitParam(name = "amount", value = "페이 사용금액", example = "1000", required = true)
+})
+```
+doc 문서에 적용한 코드 잘 나오는 것 확인
+![img6](https://i.imgur.com/mH8C0mc.png)
+
+<br>
+
+### **[REST API]**
+
+<br>
+
+### 8. referer에서 가져오던 yearMonth -> orderItem의 payData에서 파싱으로 변경 
+
+기존의 헤더에서 referer의 param에서 가져오던 yearMonth를 정산 아이템의 paydate 값에서 가져오는 로직으로 변경하였다.    
+```java
+        String yearMonth = rebateOrderItem.getPayDate().format(DateTimeFormatter.ofPattern("YYYY-MM"));
+
+        return ResultResponse.of(
+        "S001",
+        "주문품목번호 %d번에 대해서 판매자에게 %s원 정산을 완료하였습니다.".formatted(rebateOrderItem.getOrderItem().getId(), calculateRebatePrice),
+        Util.mapOf(
+        "cashLogId", cashLog.getId(),"yearMonth",yearMonth
+        )
+        );
+```
+파싱한 yearMonth 값을 응답 data에 추가하였다.  
+![img7](https://i.imgur.com/tPXLv8N.png)
+
+단점은 여러건의 rebate를 할때 yearMonth를 가져오는 로직이 중첩된다.  
+이를 위해 controller에서 request param으로 받는 방법도 고려해 봐야햘 것 같다.
+
+
 <br>
 
 
-2. ItemReader에 QueryDSL 도입
-ItemReader 에 queryDsl을 도입한 예시를 찾아서 이부분으로 구현해보고 refactoring 해보고 싶다.
-참고자료 : [https://techblog.woowahan.com/2662/](https://techblog.woowahan.com/2662/)  
+### 9. 도서 상세조회, tag 조회를 위한 dto 추가 생성
+
+mybook과 동일하게 tag에 대한 중복 이슈로 인하여 출력 dto 따로 작성
+```java
+// 도서 상세 조회를 위한 postTagsDto
+@Getter
+@NoArgsConstructor
+public class ProductTagsDto {
+    private Long authorId;
+    private String authorName;
+    private String subject;
+    private int price;
+
+    private List<String> productKeywords=new ArrayList<>();
+
+    @QueryProjection
+    public ProductTagsDto(Product product){
+        this.authorId=product.getAuthor().getId();
+        this.authorName=product.getAuthor().getName();
+        this.subject=product.getSubject();
+        this.price=product.getPrice();
+        this.productKeywords.add(product.getPostKeyword().getContent());
+    }
+}
+
+// 출력 data에 해당 productTagasDto로 변환하여 전달
+    List<Product> products = productService.findAllForPrintByOrderByIdDesc(author);
+    List<ProductTagsDto> productTagsDtos = new ArrayList<>();
+    products.stream()
+            .map(product -> new ProductTagsDto(product))
+            .forEach(productTagsDto -> productTagsDtos.add(productTagsDto));
+    return Util.spring.responseEntityOf(ResultResponse.successOf("S001","도서 조회에 성공하였습니다.",productTagsDtos));
+```
+
 <br>
 
-3. 추가 기능 출금 구현
+### 10. 주문 목록에 포함된 도서 상품은 삭제하지 못하도록 수정  
+
+order item에 존재하는 도서는 삭제하지 못하는 예외처리 추가  
+
+```java
+// 서비스
+        if(orderService.existsByProduct(product.getId())){
+            return false;
+        }
+        productRepository.delete(product);
+        return true;
+
+// 컨트롤러
+        if(!productService.remove(product)){
+            return Util.spring.responseEntityOf(ResultResponse.successOf("F002","주문 목록에 포함되어 있는 상품입니다.",null));
+        }
+        return Util.spring.responseEntityOf(ResultResponse.successOf("S001","%d번 도서가 삭제되었습니다.",id));
+```
+
+주문목록에 존재하는 도서를 삭제할 경우 fail 메세지로 응답
+![img10](https://i.imgur.com/pPAXcU5.png)
+
+<br>
+
+### **[프론트 React 적용]**
+
+11. DateTime 포맷 요구사항과 일치
+기존 DateTime Json 응답 포맷
+```json
+            "createDate": "2022-11-09T12:46:45.193248",
+            "modifyDate": "2022-11-09T12:46:45.193248",
+```
+
+`@EnableWebMvc` 적용
+아래와 같이 Array로 데이터가 들어가도록 변경
+![img11](https://i.imgur.com/EwKjRB4.png)
+
+제공된 react 코드 적용 결과 (/api/v1/mybooks/1)
+![img12](https://i.imgur.com/TLiuXIf.png)
+
+### **[ 인프라 : 쿠버네티스 배포 ]**
+
+12. 쿠버네티스 + spring + github action 설정
+
+
+<br>
+
+### 리팩토링 & 아쉬운점 & 궁금한점
+
+---
+
+### [ Refcatoring 시 추가적으로 구현하고 싶은 부분 ]  
+
+1. 정산 data에 대한 json 응답 dto 로 변경  
+현재는 `@JsonIgnore`을 이용하여 중복되는 엔티티의 항목은 제외하는 형태로 출력하였으나, 리팩토링시 Mybook에서와 같이 json 응답 dto로 구현해 볼 예정.
+
+2. Oauth 추가
+
+3. 외부 블로그 글 가져오기 추가
+
+4. hashTag 파싱 부분 리팩토링  
+
+### [궁금한 점]
+
+1. handler와 entrypoint로 예외처리 시 responseentiry의 형태로 예외처리 가능한지  
+
+    -> REST API 에서의 예외처리 방식은 어떻게 되는가?
+
+2. REST API로 구현하여 프론트 개발자와 협업 시 , form dto에 대한 명세는 어떻게? -> validation으로?  
+
+3. `@JsonIgnore` 사용 vs 응답 dto 생성
+
+4. 일반적으로 REST API 적용 시 토스트 UI 등을 이용한 마크다운 파싱은 어디서 처리? (프론트에서 HTML 값을 처리해서 보내주는지?)
+
+<br>
+

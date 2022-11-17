@@ -1,6 +1,7 @@
 package com.yejin.exam.wbook.domain.product.service;
 
 import com.yejin.exam.wbook.domain.member.entity.Member;
+import com.yejin.exam.wbook.domain.order.service.OrderService;
 import com.yejin.exam.wbook.domain.post.entity.Post;
 import com.yejin.exam.wbook.domain.post.entity.PostHashTag;
 import com.yejin.exam.wbook.domain.post.entity.PostKeyword;
@@ -29,6 +30,7 @@ public class ProductService {
     private final PostKeywordService postKeywordService;
     private final ProductTagService productTagService;
     private final PostHashTagService postTagService;
+    private final OrderService orderService;
 
     @Transactional
     public Product create(Member author, String subject, int price, long postKeywordId, String productTagContents) {
@@ -74,7 +76,6 @@ public class ProductService {
     public void modify(Product product, String subject, int price, String productTagContents) {
         product.setSubject(subject);
         product.setPrice(price);
-
         applyProductTags(product, productTagContents);
     }
 
@@ -159,8 +160,12 @@ public class ProductService {
     }
 
     @Transactional
-    public void remove(Product product) {
+    public boolean remove(Product product) {
+        if(orderService.existsByProduct(product.getId())){
+            return false;
+        }
         productRepository.delete(product);
+        return true;
     }
 
     public List<Product> findAllForPrintByOrderByIdDesc(Member actor) {

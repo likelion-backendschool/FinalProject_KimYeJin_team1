@@ -1,4 +1,18 @@
+server:
+  shutdown: graceful
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
 spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 1m
   profiles:
     active: dev
     include:
@@ -11,8 +25,17 @@ spring:
       initialize-schema: ALWAYS
   jpa:
     show-sql: true
+#  cache:
+#    type: redis
+#  redis:
+#    host: 127.0.0.1
+#    port: 6379
   output:
-    ansi-enabled: always
+    ansi:
+      enabled: ALWAYS
+  mvc:
+    pathmatch:
+      matching-strategy: ant-path-matcher
 logging:
   level:
     com.yejin.exam.wbook: debug
@@ -25,4 +48,5 @@ custom:
   site:
     name: wbook
     baseUrl: "http://localhost:8080"
+
 

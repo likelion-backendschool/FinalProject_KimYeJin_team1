@@ -26,9 +26,10 @@ public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         log.error("[accessDeniedHandler] AccessDeniedException", accessDeniedException);
-        String msg = "권한이 없습니다.";
-        //response.sendError(HttpServletResponse.SC_FORBIDDEN, msg);
-        log.debug("[accessDeniedHandler] error : "+accessDeniedException.getMessage());
-        response.sendRedirect(Rq.urlWithErrorMsg(errorPage,accessDeniedException.getMessage()));
+//        log.error("[accessDeniedHandler] error : "+accessDeniedException.getMessage());
+//        response.sendRedirect(Rq.urlWithErrorMsg(errorPage,accessDeniedException.getMessage()));
+//        response.sendRedirect((Util.spring.responseEntityOf(ResultResponse.failOf("Auth_FAILED","접근 권한이 없습니다.",null))).toString());
+//        response.sendRedirect(Rq.redirectWithErrorMsg("/denied",ResultResponse.failOf("Auth_FAILED","접근 권한이 없습니다.",null)));
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, accessDeniedException.getMessage());
     }
 }

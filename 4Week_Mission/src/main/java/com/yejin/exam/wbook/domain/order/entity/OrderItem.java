@@ -1,5 +1,6 @@
 package com.yejin.exam.wbook.domain.order.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yejin.exam.wbook.domain.product.entity.Product;
 import com.yejin.exam.wbook.global.base.entity.BaseEntity;
 import lombok.Getter;
@@ -23,11 +24,13 @@ import static javax.persistence.FetchType.LAZY;
 public class OrderItem extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     @ToString.Exclude
+    @JsonIgnore
     private Order order;
 
     private LocalDateTime payDate;
 
     @ManyToOne(fetch = LAZY)
+    @JsonIgnore
     private Product product;
 
     // 가격

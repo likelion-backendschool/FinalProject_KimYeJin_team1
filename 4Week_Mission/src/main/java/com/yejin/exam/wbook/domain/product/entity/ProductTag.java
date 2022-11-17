@@ -1,5 +1,6 @@
 package com.yejin.exam.wbook.domain.product.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.global.base.entity.BaseEntity;
 import lombok.*;
@@ -21,13 +22,16 @@ public class ProductTag extends BaseEntity {
     @ManyToOne
     @ToString.Exclude
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
     private Product product;
 
     @ManyToOne
     @ToString.Exclude
+    @JsonIgnore
     private Member member;
 
     @ManyToOne
     @ToString.Exclude
+    @JsonIgnore
     private ProductKeyword productKeyword;
 }

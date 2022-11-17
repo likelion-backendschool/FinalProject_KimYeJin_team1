@@ -1,5 +1,6 @@
 package com.yejin.exam.wbook.domain.rebate.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.yejin.exam.wbook.domain.cash.entity.CashLog;
 import com.yejin.exam.wbook.domain.member.entity.Member;
 import com.yejin.exam.wbook.domain.order.entity.Order;
@@ -27,15 +28,18 @@ public class RebateOrderItem extends BaseEntity {
     @OneToOne(fetch = LAZY)
     @ToString.Exclude
     @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private OrderItem orderItem;
 
     @ManyToOne(fetch = LAZY)
     @ToString.Exclude
     @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Order order;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Product product;
 
     // 가격
@@ -51,6 +55,7 @@ public class RebateOrderItem extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     @ToString.Exclude
     @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private CashLog rebateCashLog; // 정산에 관련된 환급지급내역
     private LocalDateTime rebateDate;
 
@@ -64,6 +69,7 @@ public class RebateOrderItem extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     @ToString.Exclude
     @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Member buyer;
     private String buyerName;
 
@@ -71,6 +77,7 @@ public class RebateOrderItem extends BaseEntity {
     @ManyToOne(fetch = LAZY)
     @ToString.Exclude
     @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Member seller;
     private String sellerName;
 
